@@ -1,0 +1,33 @@
+{
+  "name": "nodeapi",
+  "version": "0.0.0",
+  "description": "node api for COINS",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "boom": "^2.6.1",
+    "good": "^5.1.2",
+    "hapi": "^8.2.0",
+    "hapi-auth-basic": "^2.0.0",
+    "hapi-auth-hawk": "^2.0.0"
+  },
+  "devDependencies": {
+    "code": "^1.3.0",
+    "lab": "^5.2.1"
+  },
+  "scripts": {
+    "test": "lab test/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MRN-Code/nodeapi.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MRN-Code/nodeapi/issues"
+  },
+  "homepage": "https://github.com/MRN-Code/nodeapi"
+}

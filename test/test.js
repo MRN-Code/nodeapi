@@ -12,7 +12,7 @@ var HOST = DOMAIN + ':' + PORT;
 
 var config = {
     testUserBase64: (new Buffer('john:secrtet')).toString('base64')
-}
+};
 
 lab.experiment('write test as example', function() {
     lab.test('GET request to / returns Hello World', function (done) {
@@ -54,7 +54,7 @@ lab.experiment('login system', function() {
         done();
       });
     });
-    lab.test('GET request to /login over https with invalid auth header fails')
+    lab.test('GET request to /login over https with invalid auth header fails');
     lab.test('GET request to /login over https with valid auth header succeeds', function (done) {
       var options = {
         method: 'GET',

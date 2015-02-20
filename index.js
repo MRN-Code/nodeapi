@@ -34,7 +34,7 @@ var hawkDB = {};
 
 // Set up Server
 var server = new hapi.Server();
-server.connection({ host: 'localhost', port: 3000 });
+server.connection({ port: 3000 });
 
 // Helper functions
 /**

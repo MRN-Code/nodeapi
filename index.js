@@ -1,3 +1,4 @@
+'use strict';
 var fs = require('fs');
 var bcrypt = require('bcrypt');
 var uuid = require('uuid');
@@ -10,7 +11,7 @@ var boom = require('boom');
 // Config:
 var config = {
     hawkKeyLifespan: 30 * 60 * 1000, // 30 minutes
-	algorithm: 'sha256',
+    algorithm: 'sha256',
     defaultUser: {
         username: 'john',
         password: '$2a$10$iqJSHD.BGr0E2IxQwYgJmeP3NvhPrXAeLSaGCj6IR/XU5QtjVu5Tm',   // 'secret'
@@ -28,7 +29,7 @@ var goodOptions = {
 };
 
 // Set up DB
-var userDB = {john: config.defaultUser};
+var userDB = { john: config.defaultUser };
 var hawkDB = {};
 
 // Set up Server
@@ -47,7 +48,7 @@ var validateUser = function (username, password, callback) {
     if (!user) {
         return callback(null, false);
     }
-	
+
     bcrypt.compare(password, user.password, function (err, isValid) {
         callback(err, isValid, { id: user.id, name: user.username });
     });
@@ -71,7 +72,7 @@ var generateHawkCredentials = function(username, callback) {
             expireTime: +new Date() + config.hawkKeyLifespan
         };
     }
-    catch(err) {
+    catch (err) {
         callback(err, null);
         return;
     }
@@ -95,36 +96,36 @@ var getHawkCredentials = function(id, callback) {
 };
 
 server.register([
-    basic,
-   	hawk,
+        basic,
+        hawk,
         {
             register: good,
-            options: goodOptions
+    options: goodOptions
         }
-    ], function (err) {
-        server.auth.strategy('pwd', 'basic', { validateFunc: validateUser }); // see hapijs.com for more info
-        server.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
-        server.auth.default('default');
-        // Public route: no authorization required
-        // This is where the client will be served from
-        server.route({
-            method: 'GET',
-            path: '/{user}',
-            config: {
-                auth: false,
-                handler: function (request, reply){
-					reply('Hello ' + request.params.user);
+        ], function (err) {
+            server.auth.strategy('pwd', 'basic', { validateFunc: validateUser }); // see hapijs.com for more info
+            server.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
+            server.auth.default('default');
+            // Public route: no authorization required
+            // This is where the client will be served from
+            server.route({
+                method: 'GET',
+                path: '/{user}',
+                config: {
+                    auth: false,
+                handler: function (request, reply) {
+                    reply('Hello ' + request.params.user);
                 }
-            }
-        });
+                }
+            });
 
-        // Private route to get new hawk credentials
-        // Requests must authenticate with a username and password
-        server.route({
-            method: 'GET',
-            path: '/login',
-            config: {
-                auth: 'pwd',
+            // Private route to get new hawk credentials
+            // Requests must authenticate with a username and password
+            server.route({
+                method: 'GET',
+                path: '/login',
+                config: {
+                    auth: 'pwd',
                 handler: function (request, reply) {
                     var username = request.auth.credentials.username;
                     var serveHawkCredentials = function(err, credentials) {
@@ -138,25 +139,25 @@ server.register([
                     // Generate new key pair and serve back to user
                     generateHawkCredentials(username, serveHawkCredentials);
                 }
-            }
-        });
-        
-        // Hawk protected route:
-        // Requests must provide valid hawk signature
-        server.route({
-            method: 'GET',
-            path: '/restricted',
-            config: {
-                handler: function (request, reply) {
-                    console.log('request received');
-                    reply('top secret');
                 }
-            }
+            });
+
+            // Hawk protected route:
+            // Requests must provide valid hawk signature
+            server.route({
+                method: 'GET',
+                path: '/restricted',
+                config: {
+                    handler: function (request, reply) {
+                        console.log('request received');
+                        reply('top secret');
+                    }
+                }
+            });
+
+            server.start(function () {
+                console.log('server running at: ' + server.info.uri);
+            });
         });
 
-        server.start(function () {
-            console.log('server running at: ' + server.info.uri);
-        });
-});
-
-module.exports=server;
+module.exports = server;

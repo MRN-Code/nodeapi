@@ -4,21 +4,21 @@ var should = require('should');
 var server = require('../');
 var credentials;
 
-describe('Authentication Test', function(){
-    it('should greeting', function(done){
+describe('Authentication Test', function() {
+    it('should greeting', function(done) {
         var request = {
             method: 'GET',
         url: 'http://localhost/John'
         };
 
-        server.inject(request, function (response) {
+        server.inject(request, function(response) {
             response.statusCode.should.equal(200);
             response.result.should.equal('Hello John');
             done();
         });
     });
 
-    it('should log in successfully', function (done){
+    it('should log in successfully', function(done) {
         var request = {
             method: 'GET',
         url: 'http://localhost/login',
@@ -28,7 +28,7 @@ describe('Authentication Test', function(){
         }
         };
 
-        server.inject(request, function (response) {
+        server.inject(request, function(response) {
             console.dir(response.result);
             response.statusCode.should.equal(200);
             response.payload.should.equal();

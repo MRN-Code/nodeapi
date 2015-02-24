@@ -6,6 +6,7 @@ var Basic = require('hapi-auth-basic');
 var Hawk = require('hapi-auth-hawk');
 var Good = require('good');
 var Boom = require('boom');
+var redis = require('redis');
 
 // Config:
 var config = {
@@ -28,7 +29,13 @@ var goodOptions = {
 
 // Set up DB
 var userDB = {john: config.defaultUser};
-var hawkDB = {};
+
+var client = redis.createClient(); //add (port, host) for remote redis server
+client.on('error', function(){
+	console.log('Failed to connect to redis server.');
+}).on('connect', function(){
+	console.log('Connected to redis server successfully.');
+});
 
 // Set up Server
 var server = new Hapi.Server();
@@ -85,12 +92,13 @@ var generateHawkCredentials = function(username, callback) {
  *   `function(error, credentials){ ... }`
  */
 var getHawkCredentials = function(id, callback) {
-    var credentials = hawkDB[id];
-    if (!credentials) {
-        callback(null, false);
-    } else {
-        callback(null, credentials);
-    }
+    client.hgetall(id, function(err, credentials){
+    	if (!credentials) {
+       	 	callback(null, false);
+    	} else {
+        	callback(null, credentials);
+    	}
+	});
 };
 
 server.register([
@@ -132,7 +140,7 @@ server.register([
                         if (err) {
                             reply(Boom.wrap(err, 500));
                         } else {
-                            hawkDB[credentials.id] = credentials;
+                            client.hmset(credentials.id, credentials);
                             reply(credentials);
                         }
                     };

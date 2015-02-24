@@ -15,6 +15,7 @@
     "hapi": "^8.2.0",
     "hapi-auth-basic": "^2.0.0",
     "hapi-auth-hawk": "^2.0.0",
+    "redis": "^0.12.1",
     "uuid": "^2.0.1"
   },
   "devDependencies": {

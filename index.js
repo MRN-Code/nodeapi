@@ -100,9 +100,13 @@ server.register([
         hawk,
         {
             register: good,
-    options: goodOptions
+    		options: goodOptions
         }
         ], function (err) {
+			if (err) {
+				console.log('Failed loading plugin');
+				//exit?
+			}
             server.auth.strategy('pwd', 'basic', { validateFunc: validateUser }); // see hapijs.com for more info
             server.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
             server.auth.default('default');
@@ -113,9 +117,9 @@ server.register([
                 path: '/{user}',
                 config: {
                     auth: false,
-                handler: function (request, reply) {
-                    reply('Hello ' + request.params.user);
-                }
+                	handler: function (request, reply) {
+                    	reply('Hello ' + request.params.user);
+                	}
                 }
             });
 
@@ -126,19 +130,19 @@ server.register([
                 path: '/login',
                 config: {
                     auth: 'pwd',
-                handler: function (request, reply) {
-                    var username = request.auth.credentials.username;
-                    var serveHawkCredentials = function(err, credentials) {
-                        if (err) {
-                            reply(boom.wrap(err, 500));
-                        } else {
-                            hawkDB[credentials.id] = credentials;
-                            reply(credentials);
-                        }
-                    };
-                    // Generate new key pair and serve back to user
-                    generateHawkCredentials(username, serveHawkCredentials);
-                }
+                	handler: function (request, reply) {
+                    	var username = request.auth.credentials.username;
+                    	var serveHawkCredentials = function(err, credentials) {
+                        	if (err) {
+                            	reply(boom.wrap(err, 500));
+                        	} else {
+                            	hawkDB[credentials.id] = credentials;
+                            	reply(credentials);
+                        	}
+                    	};
+                    	// Generate new key pair and serve back to user
+                    	generateHawkCredentials(username, serveHawkCredentials);
+                	}
                 }
             });
 

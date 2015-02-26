@@ -7,18 +7,7 @@ var basic = require('hapi-auth-basic');
 var hawk = require('hapi-auth-hawk');
 var good = require('good');
 var boom = require('boom');
-
-// Config:
-var config = {
-    hawkKeyLifespan: 30 * 60 * 1000, // 30 minutes
-    algorithm: 'sha256',
-    defaultUser: {
-        username: 'john',
-        password: '$2a$10$iqJSHD.BGr0E2IxQwYgJmeP3NvhPrXAeLSaGCj6IR/XU5QtjVu5Tm',   // 'secret'
-        name: 'John Doe',
-        id: '2133d32a'
-    }
-};
+var config = require('config');
 
 var goodOptions = {
     opsInterval: 1000,
@@ -34,7 +23,14 @@ var hawkDB = {};
 
 // Set up Server
 var server = new hapi.Server();
-server.connection({ port: 3000 });
+var options = {
+    port: config.get('port')
+};
+
+if (config.has('sslCertPath')) {
+    options.tls = require('./utils/sslCredentials.js');
+}
+server.connection(options);
 
 // Helper functions
 /**

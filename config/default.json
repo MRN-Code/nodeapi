@@ -1,5 +1,6 @@
 {
-    "port": 3000,
+    "httpsPort": 443,
+    "httpPort": 80,
     "sslCertPath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/STAR_mrn_org.crt",
     "sslKeyPath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/mrn_wildcard.key",
     "sslBundlePath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/STAR_mrn_org.ca-bundle",
@@ -10,5 +11,9 @@
         "password": "$2a$10$iqJSHD.BGr0E2IxQwYgJmeP3NvhPrXAeLSaGCj6IR/XU5QtjVu5Tm",
         "name": "John Doe",
         "id": "2133d32a"
+    },
+    "redis": {
+        "host": "localhost",
+        "port": 6379
     }
 }

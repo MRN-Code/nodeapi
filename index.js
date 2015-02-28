@@ -8,6 +8,7 @@ var hawk = require('hapi-auth-hawk');
 var good = require('good');
 var boom = require('boom');
 var config = require('config');
+var redis = require('redis');
 
 var goodOptions = {
     opsInterval: 1000,
@@ -19,19 +20,31 @@ var goodOptions = {
 
 // Set up DB
 var userDB = { john: config.defaultUser };
-var hawkDB = {};
+
+var client = redis.createClient(config.get('redis').port, config.get('redis').host);
+client.on('error', function() {
+    console.log('Failed to connect to redis server.');
+}).on('connect', function() {
+    console.log('Connected to redis server successfully.');
+});
 
 // Set up Server
 var server = new hapi.Server();
-var options = {
-    port: config.get('port')
+var httpsOptions = {
+    labels: ['https'],
+    port: config.get('httpsPort')
 };
-
+var httpOption = {
+    labels: ['http'],
+    port: config.get('httpPort')
+};
 if (config.has('sslCertPath')) {
-    options.tls = require('./utils/sslCredentials.js');
+    httpsOptions.tls = require('./utils/sslCredentials.js');
 }
-server.connection(options);
+var https = server.connection(httpsOptions);
+var http = server.connection(httpOption);
 
+//var https = server.select('https');
 // Helper functions
 /**
  * Validate user credentials against records in the mock-db
@@ -83,12 +96,13 @@ var generateHawkCredentials = function(username, callback) {
  *   `function(error, credentials){ ... }`
  */
 var getHawkCredentials = function(id, callback) {
-    var credentials = hawkDB[id];
-    if (!credentials) {
-        callback(null, false);
-    } else {
-        callback(null, credentials);
-    }
+    client.hgetall(id, function(err, credentials) {
+        if (!credentials) {
+            callback(null, false);
+        } else {
+            callback(null, credentials);
+        }
+    });
 };
 
 server.register([
@@ -103,12 +117,20 @@ server.register([
                 console.log('Failed loading plugin');
                 //exit?
             }
-            server.auth.strategy('pwd', 'basic', { validateFunc: validateUser }); // see hapijs.com for more info
-            server.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
-            server.auth.default('default');
+            https.auth.strategy('pwd', 'basic', { validateFunc: validateUser }); // see hapijs.com for more info
+            https.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
+            https.auth.default('default');
+            http.route({
+                method: '*',
+                path: '/{path*}',
+                handler: function(request, reply) {
+                    //reply('Please use https instead of http.');
+                    reply.redirect('https://' + request.info.hostname + ':' + config.httpsPort + request.url.path);
+                }
+            });
             // Public route: no authorization required
             // This is where the client will be served from
-            server.route({
+            https.route({
                 method: 'GET',
                 path: '/{user}',
                 config: {
@@ -121,7 +143,7 @@ server.register([
 
             // Private route to get new hawk credentials
             // Requests must authenticate with a username and password
-            server.route({
+            https.route({
                 method: 'GET',
                 path: '/login',
                 config: {
@@ -132,7 +154,7 @@ server.register([
                             if (err) {
                                 reply(boom.wrap(err, 500));
                             } else {
-                                hawkDB[credentials.id] = credentials;
+                                client.hmset(credentials.id, credentials);
                                 reply(credentials);
                             }
                         };
@@ -144,7 +166,7 @@ server.register([
 
             // Hawk protected route:
             // Requests must provide valid hawk signature
-            server.route({
+            https.route({
                 method: 'GET',
                 path: '/restricted',
                 config: {

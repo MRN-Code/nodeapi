@@ -44,7 +44,6 @@ if (config.has('sslCertPath')) {
 var https = server.connection(httpsOptions);
 var http = server.connection(httpOption);
 
-//var https = server.select('https');
 // Helper functions
 /**
  * Validate user credentials against records in the mock-db
@@ -132,11 +131,13 @@ server.register([
             // This is where the client will be served from
             https.route({
                 method: 'GET',
-                path: '/{user}',
+                path: '/{path*}',
                 config: {
                     auth: false,
-                    handler: function (request, reply) {
-                        reply('Hello ' + request.params.user);
+                    handler: {
+                        directory: {
+                            path: 'public'
+                        }
                     }
                 }
             });
@@ -149,11 +150,12 @@ server.register([
                 config: {
                     auth: 'pwd',
                     handler: function (request, reply) {
-                        var username = request.auth.credentials.username;
+                        var username = request.auth.credentials.name;
                         var serveHawkCredentials = function(err, credentials) {
                             if (err) {
                                 reply(boom.wrap(err, 500));
                             } else {
+                                client.sadd(username, credentials.id);
                                 client.hmset(credentials.id, credentials);
                                 reply(credentials);
                             }
@@ -173,6 +175,52 @@ server.register([
                     handler: function (request, reply) {
                         console.log('request received');
                         reply('top secret');
+                    }
+                }
+            });
+            // get key(s)
+            https.route({
+                method: 'GET',
+                path: '/profile/keys',
+                config: {
+                    auth: false,
+                    handler: function (request, reply) {
+                        var username = 'john';
+                        var keys = [];
+                        client.smembers(username, function (err, members) {
+                            var count = 0;
+                            members.forEach(function(id) {
+                                client.hget(id, 'key', function (err, key) {
+                                    keys.push(key);
+                                    count++;
+                                    if (count === members.length) {
+                                        reply(keys);
+                                    }
+                                });
+                            });
+                        });
+                    }
+                }
+            });
+
+            // get specific key
+            https.route({
+                method: 'GET',
+                path: '/profile/key/{id}',
+                config: {
+                    //auth: false,
+                    handler: function (request, reply) {
+                        var username = 'john';
+                        var id = request.params.id;
+                        client.sismember(username, id, function (err, valid) {
+                            if (valid) {
+                                client.hget(id, 'key', function (err, key) {
+                                    reply(key);
+                                });
+                            } else {
+                                reply('Invalid id provided');
+                            }
+                        });
                     }
                 }
             });

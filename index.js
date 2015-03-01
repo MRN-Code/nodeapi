@@ -183,7 +183,7 @@ server.register([
                 method: 'GET',
                 path: '/profile/keys',
                 config: {
-                    auth: false,
+                    //auth: false,
                     handler: function (request, reply) {
                         var username = 'john';
                         var keys = [];

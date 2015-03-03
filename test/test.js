@@ -93,4 +93,22 @@ describe('Authentication Test', function() {
             });
         });
     });
+
+    it('should log out', function(done) {
+        var url = 'http://localhost/logout';
+        var header = generateHawkHeader(url, 'GET');
+        request = {
+            method: 'GET',
+            url: url,
+            headers: {
+                authorization: header.field
+            }
+        };
+        server.inject(request, function(response) {
+//console.log(response);
+            response.statusCode.should.equal(200);
+            response.payload.should.equal('You are logged out.');
+            done();
+        });
+    });
 });

@@ -1,6 +1,6 @@
 {
-    "httpsPort": 443,
-    "httpPort": 80,
+    "httpsPort": 3000,
+    "httpPort": 3001,
     "sslCertPath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/STAR_mrn_org.crt",
     "sslKeyPath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/mrn_wildcard.key",
     "sslBundlePath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/STAR_mrn_org.ca-bundle",

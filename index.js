@@ -11,10 +11,13 @@ var config = require('config');
 var redis = require('redis');
 
 var goodOptions = {
-    opsInterval: 1000,
+    //opsInterval: 1000,
     reporters: [{
         reporter: require('good-console'),
         args:[{ log: '*', response: '*' }]
+    }, {
+        reporter: require('good-file'),
+        args: [{ path: config.get('logPath'), prefix: 'node', rotate: 'daily' }, { log: '*', response: '*' }]
     }]
 };
 

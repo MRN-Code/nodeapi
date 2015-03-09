@@ -105,9 +105,47 @@ describe('Authentication Test', function() {
             }
         };
         server.inject(request, function(response) {
-//console.log(response);
             response.statusCode.should.equal(200);
             response.payload.should.equal('You are logged out.');
+            done();
+        });
+    });
+
+    it('should get one study info', function(done) {
+        var url = 'http://localhost/study/367';
+        var header = generateHawkHeader(url, 'GET');
+        request = {
+            method: 'GET',
+            url: url,
+            headers: {
+                authorization: header.field
+            }
+        };
+        server.inject(request, function(response) {
+            response.statusCode.should.equal(200);
+            var result = JSON.parse(response.payload);
+            result.should.be.an.instanceOf(Object);
+            result.should.have.property('study_id');
+            done();
+        });
+    });
+
+    it('should get all studies', function(done) {
+        var url = 'http://localhost/study';
+        var header = generateHawkHeader(url, 'GET');
+        request = {
+            method: 'GET',
+            url: url,
+            headers: {
+                authorization: header.field
+            }
+        };
+        server.inject(request, function(response) {
+            response.statusCode.should.equal(200);
+            var result = JSON.parse(response.payload);
+            result.should.be.an.instanceOf(Array);
+            result[0].should.be.an.instanceOf(Object);
+            result[0].should.have.property('study_id');
             done();
         });
     });

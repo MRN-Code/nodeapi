@@ -16,5 +16,20 @@
         "host": "localhost",
         "port": 6379
     },
+    "dbconfig": {
+        "debug": true,
+        "client": "pg",
+        "connection": {
+            "host": "10.0.102.113",
+            "port": 5432,
+            "user": "ni_developers",
+            "password": "asdf",
+            "database": "rwang_db"
+        },
+        "pool": {
+            "min": 1,
+            "max": 10
+        }
+    },        
     "logPath": "./logs"
 }

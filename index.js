@@ -52,7 +52,7 @@ var https = server.connection(httpsOptions);
 var http = server.connection(httpOption);
 
 process.stderr.on('data', function(data) {
-  console.log(data);
+    console.log(data);
 });
 
 // Helper functions

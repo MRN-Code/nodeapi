@@ -12,7 +12,6 @@ var redis = require('redis');
 
 var knex = require('knex')(config.get('dbconfig'));
 var bookshelf = require('bookshelf')(knex);
-var Study = require('./bookshelf_ORM/Study')(bookshelf);
 
 var goodOptions = {
     //opsInterval: 1000,
@@ -121,6 +120,14 @@ server.register([
         {
             register: good,
             options: goodOptions
+        },
+        {
+            register: require('./app_routes/getAllStudies'),
+            options: { bookshelf: bookshelf }
+        },
+        {
+            register: require('./app_routes/getOneStudy'),
+            options: { bookshelf: bookshelf }
         }
         ], function (err) {
             if (err) {
@@ -255,33 +262,6 @@ server.register([
                             }
                         });
                         reply('You are logged out.').code(200);
-                    }
-                }
-            });
-
-            https.route({
-                method: 'GET',
-                path: '/study',
-                config: {
-                    //auth: false,
-                    handler: function (request, reply) {
-                        new Study().fetchAll().then(function (studies) {
-                            reply(studies);
-                        });
-                    }
-                }
-            });
-
-            https.route({
-                method: 'GET',
-                path: '/study/{id}',
-                config: {
-                    //auth: false,
-                    handler: function (request, reply) {
-                        var studyId = request.params.id;
-                        new Study({ study_id: studyId }).fetch().then(function (rec) {
-                            reply(rec);
-                        });
                     }
                 }
             });

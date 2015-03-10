@@ -11,6 +11,12 @@ exports.register = function(server, options, next) {
                 new Study({ study_id: request.params.id }).fetch().then(function (study) {
                     reply(study);
                 });
+            /* Generator for future use.
+                co(function *oneStudyGen() {
+                    var study = yield new Study({ study_id: request.params.id }).fetch();
+                    reply(study);
+                });
+            */
             }
         }
     });

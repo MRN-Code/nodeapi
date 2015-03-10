@@ -46,7 +46,7 @@ var httpOption = {
     port: config.get('httpPort')
 };
 if (config.has('sslCertPath')) {
-    httpsOptions.tls = require('./utils/sslCredentials.js');
+    httpsOptions.tls = require('./lib/utils/sslCredentials.js');
 }
 var https = server.connection(httpsOptions);
 var http = server.connection(httpOption);
@@ -123,11 +123,11 @@ server.register([
             options: goodOptions
         },
         {
-            register: require('./app_routes/getAllStudies'),
+            register: require('./lib/app_routes/getAllStudies'),
             options: { bookshelf: bookshelf }
         },
         {
-            register: require('./app_routes/getOneStudy'),
+            register: require('./lib/app_routes/getOneStudy'),
             options: { bookshelf: bookshelf }
         }
         ], function (err) {

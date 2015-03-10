@@ -9,6 +9,7 @@ var good = require('good');
 var boom = require('boom');
 var config = require('config');
 var redis = require('redis');
+var babel = require('babel/register');
 
 var knex = require('knex')(config.get('dbconfig'));
 var bookshelf = require('bookshelf')(knex);

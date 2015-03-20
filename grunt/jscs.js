@@ -7,10 +7,10 @@ module.exports = function(grunt) {
             },
             files: {
                 src: [
-                    'test/**.js',
-                    'grunt/**.js',
+                    'test/**/*.js',
+                    'grunt/**/*.js',
                     '*.js',
-                    'lib/**.js'
+                    'lib/**/*.js'
                 ],
             }
         }

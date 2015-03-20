@@ -2,10 +2,10 @@
 module.exports = function(grunt) {
     return {
         all: [
-            'test/**.js',
-            'grunt/**.js',
+            'test/**/*.js',
+            'grunt/**/*.js',
             '*.js',
-            'lib/**.js'
+            'lib/**/*.js'
         ],
         options: {
             jshintrc: '.jshintrc',

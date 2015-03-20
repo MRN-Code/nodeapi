@@ -132,7 +132,10 @@ var setPlugins = function () {
     glob.sync('./lib/app_routes/*.js').forEach (function (file) {
         newRoute = {
             register: require(file),
-            options: { bookshelf: bookshelf }
+            options: {
+                bookshelf: bookshelf,
+                redisClient: client
+            }
         };
         plugins.push(newRoute);
     });
@@ -155,22 +158,6 @@ server.register(
             handler: function(request, reply) {
                 //reply('Please use https instead of http.');
                 reply.redirect('https://' + request.info.hostname + ':' + config.httpsPort + request.url.path);
-            }
-        });
-        // Public route: no authorization required
-        // This is where the client will be served from
-        https.route({
-            method: 'GET',
-            path: '/{path*}',
-            config: {
-                auth: false,
-                handler: {
-                    directory: {
-                        path: 'public',
-                        index: true,
-                        defaultExtension: 'html'
-                    }
-                }
             }
         });
 
@@ -207,73 +194,6 @@ server.register(
                 handler: function (request, reply) {
                     console.log('request received');
                     reply('top secret');
-                }
-            }
-        });
-        // get key(s)
-        https.route({
-            method: 'GET',
-            path: '/profile/keys',
-            config: {
-                //auth: false,
-                handler: function (request, reply) {
-                    var username = 'john';
-                    var keys = [];
-                    client.smembers(username, function (err, members) {
-                        var count = 0;
-                        members.forEach(function(id) {
-                            client.hget(id, 'key', function (err, key) {
-                                keys.push(key);
-                                count++;
-                                if (count === members.length) {
-                                    reply(keys);
-                                }
-                            });
-                        });
-                    });
-                }
-            }
-        });
-
-        // get specific key
-        https.route({
-            method: 'GET',
-            path: '/profile/key/{id}',
-            config: {
-                //auth: false,
-                handler: function (request, reply) {
-                    var username = 'john';
-                    var id = request.params.id;
-                    client.sismember(username, id, function (err, valid) {
-                        if (valid) {
-                            client.hget(id, 'key', function (err, key) {
-                                reply(key);
-                            });
-                        } else {
-                            reply('Invalid id provided');
-                        }
-                    });
-                }
-            }
-        });
-
-        // logout
-        https.route({
-            method: 'GET',
-            path: '/logout',
-            config: {
-                handler: function (request, reply) {
-                    var username = 'john';
-                    var id = '7c1ef832-e872-4607-b682-18262d30961f';//request.auth.credentials.id;
-                    //remove id-key upon logging out
-                    client.exists(id, function(err, exist) {
-                        if (exist) {
-                            client.del(id, function(err, success) {
-                                client.srem(username, id);
-                            });
-                        }
-                    });
-                    reply('You are logged out.').code(200);
                 }
             }
         });

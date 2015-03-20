@@ -1,12 +1,9 @@
 'use strict';
-var fs = require('fs');
-var bcrypt = require('bcrypt');
-var uuid = require('uuid');
+
 var hapi = require('hapi');
 var basic = require('hapi-auth-basic');
 var hawk = require('hapi-auth-hawk');
 var good = require('good');
-var boom = require('boom');
 var config = require('config');
 var redis = require('redis');
 var babel = require('babel/register');
@@ -27,7 +24,7 @@ var goodOptions = {
 };
 
 // Set up DB
-var userDB = { john: config.defaultUser };
+//var userDB = { john: config.defaultUser };
 
 var client = redis.createClient(config.get('redis').port, config.get('redis').host);
 client.on('error', function() {
@@ -57,49 +54,6 @@ process.stderr.on('data', function(data) {
 });
 
 // Helper functions
-/**
- * Validate user credentials against records in the mock-db
- * @param {string} username - unencrypted username
- * @param {string} password - unencrypted password
- * @param {function} callback - callback function with signature `function(err, isValid) {...}`
- */
-var validateUser = function (username, password, callback) {
-    var user = userDB[username];
-    if (!user) {
-        return callback(null, false);
-    }
-
-    bcrypt.compare(password, user.password, function (err, isValid) {
-        callback(err, isValid, { id: user.id, name: user.username });
-    });
-};
-
-/**
- * Generate a new key pair for a user
- * @param {string} username - unencrypted username
- * @param {function} callback - callback function with signature `function(err, credentials) {...}`
- *   where credentials is an object with the following properties:
- *   `id, key, algorithm, issueTime, expireTime`
- */
-var generateHawkCredentials = function(username, callback) {
-    var credentials;
-    try {
-        credentials = {
-            id: uuid.v4(),
-            key: uuid.v4(),
-            algorithm: config.algorithm,
-            issueTime: +new Date(),
-            expireTime: +new Date() + config.hawkKeyLifespan
-        };
-    }
-    catch (err) {
-        callback(err, null);
-        return;
-    }
-    callback(null, credentials);
-    return;
-};
-
 /**
  * get stored hawk credentials from db
  * @param {string} id - the id (public key)
@@ -149,39 +103,15 @@ server.register(
             console.log('Failed loading plugin');
             //exit?
         }
-        https.auth.strategy('pwd', 'basic', { validateFunc: validateUser }); // see hapijs.com for more info
         https.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
         https.auth.default('default');
+
         http.route({
             method: '*',
             path: '/{path*}',
             handler: function(request, reply) {
                 //reply('Please use https instead of http.');
                 reply.redirect('https://' + request.info.hostname + ':' + config.httpsPort + request.url.path);
-            }
-        });
-
-        // Private route to get new hawk credentials
-        // Requests must authenticate with a username and password
-        https.route({
-            method: 'GET',
-            path: '/login',
-            config: {
-                auth: 'pwd',
-                handler: function (request, reply) {
-                    var username = request.auth.credentials.name;
-                    var serveHawkCredentials = function(err, credentials) {
-                        if (err) {
-                            reply(boom.wrap(err, 500));
-                        } else {
-                            client.sadd(username, credentials.id);
-                            client.hmset(credentials.id, credentials);
-                            reply(credentials);
-                        }
-                    };
-                    // Generate new key pair and serve back to user
-                    generateHawkCredentials(username, serveHawkCredentials);
-                }
             }
         });
 

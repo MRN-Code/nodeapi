@@ -10,6 +10,7 @@ var boom = require('boom');
 var config = require('config');
 var redis = require('redis');
 var babel = require('babel/register');
+var glob = require('glob');
 
 var knex = require('knex')(config.get('dbconfig'));
 var bookshelf = require('bookshelf')(knex);
@@ -115,161 +116,171 @@ var getHawkCredentials = function(id, callback) {
     });
 };
 
-server.register([
-        basic,
-        hawk,
-        {
+/**
+ * Generate a plugin array, including all route plugins under lib/app_routes
+ * @return {array}
+ */
+var setPlugins = function () {
+    var gd = {
             register: good,
             options: goodOptions
-        },
-        {
-            register: require('./lib/app_routes/getAllStudies'),
+        };
+    var plugins = [ basic, hawk, gd ];
+
+    // add route plugins
+    var newRoute;
+    glob.sync('./lib/app_routes/*.js').forEach (function (file) {
+        newRoute = {
+            register: require(file),
             options: { bookshelf: bookshelf }
-        },
-        {
-            register: require('./lib/app_routes/getOneStudy'),
-            options: { bookshelf: bookshelf }
+        };
+        plugins.push(newRoute);
+    });
+    return plugins;
+};
+
+server.register(
+    setPlugins(),
+    function (err) {
+        if (err) {
+            console.log('Failed loading plugin');
+            //exit?
         }
-        ], function (err) {
-            if (err) {
-                console.log('Failed loading plugin');
-                //exit?
+        https.auth.strategy('pwd', 'basic', { validateFunc: validateUser }); // see hapijs.com for more info
+        https.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
+        https.auth.default('default');
+        http.route({
+            method: '*',
+            path: '/{path*}',
+            handler: function(request, reply) {
+                //reply('Please use https instead of http.');
+                reply.redirect('https://' + request.info.hostname + ':' + config.httpsPort + request.url.path);
             }
-            https.auth.strategy('pwd', 'basic', { validateFunc: validateUser }); // see hapijs.com for more info
-            https.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
-            https.auth.default('default');
-            http.route({
-                method: '*',
-                path: '/{path*}',
-                handler: function(request, reply) {
-                    //reply('Please use https instead of http.');
-                    reply.redirect('https://' + request.info.hostname + ':' + config.httpsPort + request.url.path);
+        });
+        // Public route: no authorization required
+        // This is where the client will be served from
+        https.route({
+            method: 'GET',
+            path: '/{path*}',
+            config: {
+                auth: false,
+                handler: {
+                    directory: {
+                        path: 'public',
+                        index: true,
+                        defaultExtension: 'html'
+                    }
                 }
-            });
-            // Public route: no authorization required
-            // This is where the client will be served from
-            https.route({
-                method: 'GET',
-                path: '/{path*}',
-                config: {
-                    auth: false,
-                    handler: {
-                        directory: {
-                            path: 'public',
-                            index: true,
-                            defaultExtension: 'html'
+            }
+        });
+
+        // Private route to get new hawk credentials
+        // Requests must authenticate with a username and password
+        https.route({
+            method: 'GET',
+            path: '/login',
+            config: {
+                auth: 'pwd',
+                handler: function (request, reply) {
+                    var username = request.auth.credentials.name;
+                    var serveHawkCredentials = function(err, credentials) {
+                        if (err) {
+                            reply(boom.wrap(err, 500));
+                        } else {
+                            client.sadd(username, credentials.id);
+                            client.hmset(credentials.id, credentials);
+                            reply(credentials);
                         }
-                    }
+                    };
+                    // Generate new key pair and serve back to user
+                    generateHawkCredentials(username, serveHawkCredentials);
                 }
-            });
+            }
+        });
 
-            // Private route to get new hawk credentials
-            // Requests must authenticate with a username and password
-            https.route({
-                method: 'GET',
-                path: '/login',
-                config: {
-                    auth: 'pwd',
-                    handler: function (request, reply) {
-                        var username = request.auth.credentials.name;
-                        var serveHawkCredentials = function(err, credentials) {
-                            if (err) {
-                                reply(boom.wrap(err, 500));
-                            } else {
-                                client.sadd(username, credentials.id);
-                                client.hmset(credentials.id, credentials);
-                                reply(credentials);
-                            }
-                        };
-                        // Generate new key pair and serve back to user
-                        generateHawkCredentials(username, serveHawkCredentials);
-                    }
+        // Hawk protected route:
+        // Requests must provide valid hawk signature
+        https.route({
+            method: 'GET',
+            path: '/restricted',
+            config: {
+                handler: function (request, reply) {
+                    console.log('request received');
+                    reply('top secret');
                 }
-            });
-
-            // Hawk protected route:
-            // Requests must provide valid hawk signature
-            https.route({
-                method: 'GET',
-                path: '/restricted',
-                config: {
-                    handler: function (request, reply) {
-                        console.log('request received');
-                        reply('top secret');
-                    }
-                }
-            });
-            // get key(s)
-            https.route({
-                method: 'GET',
-                path: '/profile/keys',
-                config: {
-                    //auth: false,
-                    handler: function (request, reply) {
-                        var username = 'john';
-                        var keys = [];
-                        client.smembers(username, function (err, members) {
-                            var count = 0;
-                            members.forEach(function(id) {
-                                client.hget(id, 'key', function (err, key) {
-                                    keys.push(key);
-                                    count++;
-                                    if (count === members.length) {
-                                        reply(keys);
-                                    }
-                                });
+            }
+        });
+        // get key(s)
+        https.route({
+            method: 'GET',
+            path: '/profile/keys',
+            config: {
+                //auth: false,
+                handler: function (request, reply) {
+                    var username = 'john';
+                    var keys = [];
+                    client.smembers(username, function (err, members) {
+                        var count = 0;
+                        members.forEach(function(id) {
+                            client.hget(id, 'key', function (err, key) {
+                                keys.push(key);
+                                count++;
+                                if (count === members.length) {
+                                    reply(keys);
+                                }
                             });
                         });
-                    }
+                    });
                 }
-            });
-
-            // get specific key
-            https.route({
-                method: 'GET',
-                path: '/profile/key/{id}',
-                config: {
-                    //auth: false,
-                    handler: function (request, reply) {
-                        var username = 'john';
-                        var id = request.params.id;
-                        client.sismember(username, id, function (err, valid) {
-                            if (valid) {
-                                client.hget(id, 'key', function (err, key) {
-                                    reply(key);
-                                });
-                            } else {
-                                reply('Invalid id provided');
-                            }
-                        });
-                    }
-                }
-            });
-
-            // logout
-            https.route({
-                method: 'GET',
-                path: '/logout',
-                config: {
-                    handler: function (request, reply) {
-                        var username = 'john';
-                        var id = '7c1ef832-e872-4607-b682-18262d30961f';//request.auth.credentials.id;
-                        //remove id-key upon logging out
-                        client.exists(id, function(err, exist) {
-                            if (exist) {
-                                client.del(id, function(err, success) {
-                                    client.srem(username, id);
-                                });
-                            }
-                        });
-                        reply('You are logged out.').code(200);
-                    }
-                }
-            });
-
-            server.start(function () {
-                console.log('server running at: ' + server.info.uri);
-            });
+            }
         });
+
+        // get specific key
+        https.route({
+            method: 'GET',
+            path: '/profile/key/{id}',
+            config: {
+                //auth: false,
+                handler: function (request, reply) {
+                    var username = 'john';
+                    var id = request.params.id;
+                    client.sismember(username, id, function (err, valid) {
+                        if (valid) {
+                            client.hget(id, 'key', function (err, key) {
+                                reply(key);
+                            });
+                        } else {
+                            reply('Invalid id provided');
+                        }
+                    });
+                }
+            }
+        });
+
+        // logout
+        https.route({
+            method: 'GET',
+            path: '/logout',
+            config: {
+                handler: function (request, reply) {
+                    var username = 'john';
+                    var id = '7c1ef832-e872-4607-b682-18262d30961f';//request.auth.credentials.id;
+                    //remove id-key upon logging out
+                    client.exists(id, function(err, exist) {
+                        if (exist) {
+                            client.del(id, function(err, success) {
+                                client.srem(username, id);
+                            });
+                        }
+                    });
+                    reply('You are logged out.').code(200);
+                }
+            }
+        });
+
+        server.start(function () {
+            console.log('server running at: ' + server.info.uri);
+        });
+    });
 
 module.exports = server;

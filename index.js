@@ -11,10 +11,10 @@ var client = redis.createClient(config.get('redis').port, config.get('redis').ho
 var babel = require('babel/register');
 var glob = require('glob');
 var relations = require('relations');
-    relations.use(relations.stores.redis, {
-        client: client,
-        prefix: 'USER_PERM'
-    });
+relations.use(relations.stores.redis, {
+    client: client,
+    prefix: 'USER_PERM'
+});
 
 var permScheme = require('./lib/permission/permScheme')(relations);
 var knex = require('knex')(config.get('dbconfig'));

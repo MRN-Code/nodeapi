@@ -6,9 +6,17 @@ var hawk = require('hapi-auth-hawk');
 var good = require('good');
 var config = require('config');
 var redis = require('redis');
+var client = redis.createClient(config.get('redis').port, config.get('redis').host);
+
 var babel = require('babel/register');
 var glob = require('glob');
+var relations = require('relations');
+    relations.use(relations.stores.redis, {
+        client: client,
+        prefix: 'USER_PERM'
+    });
 
+var permScheme = require('./lib/permission/permScheme')(relations);
 var knex = require('knex')(config.get('dbconfig'));
 var bookshelf = require('bookshelf')(knex);
 
@@ -26,7 +34,6 @@ var goodOptions = {
 // Set up DB
 //var userDB = { john: config.defaultUser };
 
-var client = redis.createClient(config.get('redis').port, config.get('redis').host);
 client.on('error', function() {
     console.log('Failed to connect to redis server.');
 }).on('connect', function() {
@@ -88,13 +95,50 @@ var setPlugins = function () {
             register: require(file),
             options: {
                 bookshelf: bookshelf,
-                redisClient: client
+                redisClient: client,
+                relations: permScheme
             }
         };
         plugins.push(newRoute);
     });
     return plugins;
 };
+
+/**
+ * Check user permission on request
+ * @param {object} request - request object sent from browser
+ * @param {function} callback - callback function with signature (boolean)
+ * return
+ */
+var checkPermission = function (request, callback) {
+    var allowed = true;
+    if (request.url.path.indexOf('/study/') === 0) {
+        var method = request.method.toUpperCase();
+        var study_id = request.url.path.split('/')[2];
+        var username = 'gr6jwhvO3hIrWRhK0LTfXA==';
+        // Doing permission check
+        permScheme.micis('Can %s GET_STUDY from %s', username, study_id, function (err, can) {
+            if (!can) {
+                //console.log('not allowed');
+                allowed = false;
+            }
+            return callback(allowed);
+        });
+    } else {
+        return callback(allowed);
+    }
+};
+
+server.ext('onRequest', function(request, reply) {
+    var result = function (allowed) {
+        if (!allowed) {
+            return reply('You have no permission on this action.');
+        } else {
+            return reply.continue();
+        }
+    };
+    checkPermission(request, result);
+});
 
 server.register(
     setPlugins(),

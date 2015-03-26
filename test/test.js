@@ -112,7 +112,7 @@ describe('Authentication Test', function() {
     });
 
     it('should get one study info', function(done) {
-        var url = 'http://localhost/study/367';
+        var url = 'http://localhost/study/7720';
         var header = generateHawkHeader(url, 'GET');
         request = {
             method: 'GET',

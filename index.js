@@ -117,7 +117,7 @@ var checkPermission = function (request, callback) {
         var study_id = request.url.path.split('/')[2];
         var username = 'gr6jwhvO3hIrWRhK0LTfXA==';
         // Doing permission check
-        permScheme.micis('Can %s GET_STUDY from %s', username, study_id, function (err, can) {
+        permScheme.coins('Can %s GET_STUDY from %s', username, study_id, function (err, can) {
             if (!can) {
                 //console.log('not allowed');
                 allowed = false;

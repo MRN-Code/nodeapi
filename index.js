@@ -4,6 +4,7 @@ var hapi = require('hapi');
 var basic = require('hapi-auth-basic');
 var hawk = require('hapi-auth-hawk');
 var good = require('good');
+var boom = require('boom');
 var config = require('config');
 var redis = require('redis');
 var client = redis.createClient(config.get('redis').port, config.get('redis').host);
@@ -105,34 +106,61 @@ var setPlugins = function () {
 };
 
 /**
+ * Check user permission on subject operation
+ * @param {object} request - request object sent from browser
+ * @param {function} callback - callback function with signature (object)
+ * return
+ */
+var checkSubjectPermission = function (request, callback) {
+    var allowed = true;
+    var method = request.method.toUpperCase();
+    var study_id = request.url.path.split('/')[2];
+    var username = 'gr6jwhvO3hIrWRhK0LTfXA==';
+    permScheme.coins('Can %s %s from %s', username, method + '_SUBJECT', study_id,
+        function (err, can) {
+            if (!can) {
+                allowed = false;
+            }
+            return callback({ allowed: allowed });
+        }
+    );
+};
+
+/**
  * Check user permission on request
  * @param {object} request - request object sent from browser
- * @param {function} callback - callback function with signature (boolean)
+ * @param {function} callback - callback function with signature (object)
  * return
  */
 var checkPermission = function (request, callback) {
-    var allowed = true;
-    if (request.url.path.indexOf('/study/') === 0) {
+    var url = request.url.path.toLowerCase();
+    if (url.indexOf('/study/') === 0) {
         var method = request.method.toUpperCase();
-        var study_id = request.url.path.split('/')[2];
+        var temp = url.split('/');
+        var study_id = temp[2];
         var username = 'gr6jwhvO3hIrWRhK0LTfXA==';
         // Doing permission check
-        permScheme.coins('Can %s GET_STUDY from %s', username, study_id, function (err, can) {
-            if (!can) {
-                //console.log('not allowed');
-                allowed = false;
+        permScheme.coins('Can %s %s from %s', username, method + '_STUDY', study_id,
+            function (err, can) {
+                if (!can) {
+                    //console.log('not allowed');
+                    return callback({ allowed: false });
+                } else if (temp.indexOf('subject') > 0) {
+                    checkSubjectPermission(request, callback);
+                } else {
+                    return callback({ allowed: true });
+                }
             }
-            return callback(allowed);
-        });
+        );
     } else {
-        return callback(allowed);
+        return callback({ allowed: true });
     }
 };
 
 server.ext('onRequest', function(request, reply) {
-    var result = function (allowed) {
-        if (!allowed) {
-            return reply('You have no permission on this action.');
+    var result = function (obj) {
+        if (!obj.allowed) {
+            return reply(boom.unauthorized('Insufficient Privileges'));
         } else {
             return reply.continue();
         }

@@ -12,6 +12,18 @@
         "name": "John Doe",
         "id": "2133d32a"
     },
+    "redisMaster": {
+        "host": "devrediscoin1.mrn.org",
+        "port": 6379
+    },
+    "redisSlave1": {
+        "host": "devrediscoin2.mrn.org",
+        "port": 6379
+    },
+    "redisSlave2": {
+        "host": "devrediscoin3.mrn.org",
+        "port": 6379
+    },
     "redis": {
         "host": "localhost",
         "port": 6379

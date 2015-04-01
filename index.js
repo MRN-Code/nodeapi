@@ -157,7 +157,7 @@ var checkPermission = function (request, callback) {
     }
 };
 
-server.ext('onRequest', function(request, reply) {
+server.ext('onPostAuth', function(request, reply) {
     var result = function (obj) {
         if (!obj.allowed) {
             return reply(boom.unauthorized('Insufficient Privileges'));

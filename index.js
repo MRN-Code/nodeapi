@@ -115,7 +115,7 @@ var checkSubjectPermission = function (request, callback) {
     var allowed = true;
     var method = request.method.toUpperCase();
     var study_id = request.url.path.split('/')[2];
-    var username = 'gr6jwhvO3hIrWRhK0LTfXA==';
+    var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.app.username;
     permScheme.coins('Can %s %s from %s', username, method + '_SUBJECT', study_id,
         function (err, can) {
             if (!can) {
@@ -138,7 +138,10 @@ var checkPermission = function (request, callback) {
         var method = request.method.toUpperCase();
         var temp = url.split('/');
         var study_id = temp[2];
-        var username = 'gr6jwhvO3hIrWRhK0LTfXA==';
+        // NOTE: request.app.username was defined in node_modules/hapi-auth-hawk/lib/index.js
+        //       after hapi-auth-hawk was installed. Upgrading or re-installation of this module
+        //       may make this variable undefined
+        var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.app.username;
         // Doing permission check
         permScheme.coins('Can %s %s from %s', username, method + '_STUDY', study_id,
             function (err, can) {

@@ -43,5 +43,27 @@
             "max": 10
         }
     },        
-    "logPath": "./logs"
+    "logPath": "./logs",
+    "acl": {
+        "contexts": [
+            {
+                "name": "studies",
+                "resources": [
+                    "studies",
+                    "subjects",
+                    "assessments",
+                    "scans"
+                ]
+            },
+            {
+                "name": "sites",
+                "resources": [
+                    "users",
+                    "roles",
+                    "scanners"
+                ]
+            }
+        ],
+        "actions": [ "GET", "PUT", "POST", "DELETE" ]
+    }
 }

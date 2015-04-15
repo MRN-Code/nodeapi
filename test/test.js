@@ -41,7 +41,7 @@ describe('Authentication Test', function() {
         };
 
         server.inject(request, function(response) {
-            //console.dir(response.result);
+            console.dir(response.result);
             response.statusCode.should.equal(200);
             credentials = JSON.parse(response.payload);
             credentials.should.be.an.instanceOf(Object);

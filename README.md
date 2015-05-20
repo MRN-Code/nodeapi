@@ -4,12 +4,12 @@ node based API for COINS
 # Design Specifications
 
 ## Endpoints
+
 ### [GET] /users 
-* Shall reply with a JSON array of all usernames that match the query parameters
-* If no query parameters are provided, the results shall automatically be restricted to users that the requesting user has access to.
+
+
 ### [GET, PUT, POST, DELETE] /users/{username}
-* Shall reply to GET with metadata for the user with username = `username`
-* 
+
 ### [GET, POST] /authKeys
 * GET
   * Shall reject with a 400 Bad Request if a query parameter `username` is not supplied
@@ -21,6 +21,7 @@ node based API for COINS
   * Shall attempt generate a new auth key and store it in the auth key store, and reply with the Auth Key that was generated.
   * The default key generated should be a short-term key with an expiration date 30 minutes from current time.
   * The default
+
 ### [GET, DELETE]/authKeys/{keyId}
   * GET
     * Shall reject with a 403 Forbidden if the request was made using a *long term key*

@@ -18,17 +18,18 @@ relations.use(relations.stores.redis, {
 });
 
 var permScheme = require('./lib/permission/permScheme')(relations);
-var knex = require('knex')(config.get('dbconfig'));
-var bookshelf = require('bookshelf')(knex);
+//var knex = require('knex')(config.get('dbconfig'));
+//var bookshelf = require('bookshelf')(knex);
 
 var goodOptions = {
     //opsInterval: 1000,
     reporters: [{
         reporter: require('good-console'),
-        args:[{ log: '*', response: '*' }]
+        events:{ log: '*', response: '*' }
     }, {
         reporter: require('good-file'),
-        args: [{ path: config.get('logPath'), prefix: 'node', rotate: 'daily' }, { log: '*', response: '*' }]
+        config: { path: config.get('logPath'), prefix: 'node', rotate: 'daily' },
+        events: { log: '*', response: '*' }
     }]
 };
 
@@ -87,7 +88,16 @@ var setPlugins = function () {
             register: good,
             options: goodOptions
         };
-    var plugins = [ basic, hawk, gd ];
+    var hbm = {
+        register: require('hapi-bookshelf-models'),
+        options: {
+            knex: config.get('dbconfig'),
+        },
+        plugins: ['registry'],
+        models: './lib/models/bookshelf'
+    };
+
+    var plugins = [ basic, hawk, gd, hbm ];
 
     // add route plugins
     var newRoute;
@@ -95,7 +105,6 @@ var setPlugins = function () {
         newRoute = {
             register: require(file),
             options: {
-                bookshelf: bookshelf,
                 redisClient: client,
                 relations: permScheme
             }
@@ -173,7 +182,9 @@ server.register(
     function (err) {
         if (err) {
             console.log('Failed loading plugin');
-            //exit?
+            console.dir(err);
+            server.log('error', err.toString());
+            throw(err);
         }
         https.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
         https.auth.default('default');

@@ -32,10 +32,10 @@
         "debug": true,
         "client": "pg",
         "connection": {
-            "host": "10.0.102.113",
+            "host": "devdbcoin.mind.unm.edu",
             "port": 5432,
             "user": "ni_developers",
-            "password": "asdf",
+            "password": "43377447259Y9u9749482^D4",
             "database": "rwang_db"
         },
         "pool": {

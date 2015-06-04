@@ -18,8 +18,6 @@ relations.use(relations.stores.redis, {
 });
 
 var permScheme = require('./lib/permission/permScheme')(relations);
-var knex = require('knex')(config.get('dbconfig'));
-var bookshelf = require('bookshelf')(knex);
 
 var goodOptions = {
     //opsInterval: 1000,
@@ -56,6 +54,20 @@ if (config.has('sslCertPath')) {
 }
 var https = server.connection(httpsOptions);
 var http = server.connection(httpOption);
+
+var knex = config.get('dbconfig');
+server.register([
+  {
+    register: require('hapi-bookshelf-models'),
+    options: {
+      knex: knex,
+      plugins: ['registry'],
+      models: './lib/models/',
+    }
+  }
+], function(err) {
+    if (err) console.log('Error registering bookshelf: ' + err);
+});
 
 process.stderr.on('data', function(data) {
     console.log(data);
@@ -95,7 +107,6 @@ var setPlugins = function () {
         newRoute = {
             register: require(file),
             options: {
-                bookshelf: bookshelf,
                 redisClient: client,
                 relations: permScheme
             }

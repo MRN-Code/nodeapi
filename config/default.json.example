@@ -6,6 +6,7 @@
     "sslBundlePath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/STAR_mrn_org.ca-bundle",
     "hawkKeyLifespan": 1800000, 
     "algorithm": "sha256",
+    "userMcryptKey": "USER_MCRYPT_KEY",
     "defaultUser": {
         "username": "john",
         "password": "$2a$10$iqJSHD.BGr0E2IxQwYgJmeP3NvhPrXAeLSaGCj6IR/XU5QtjVu5Tm",
@@ -32,11 +33,11 @@
         "debug": true,
         "client": "pg",
         "connection": {
-            "host": "10.0.102.113",
+            "host": "devdbcoin.mind.unm.edu",
             "port": 5432,
             "user": "ni_developers",
-            "password": "asdf",
-            "database": "rwang_db"
+            "password": "DATABASE_PASSWORD",
+            "database": "rdb"
         },
         "pool": {
             "min": 1,

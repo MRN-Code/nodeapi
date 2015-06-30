@@ -11,13 +11,6 @@ var client = redis.createClient(config.get('redis').port, config.get('redis').ho
 
 var babel = require('babel/register');
 var glob = require('glob');
-var relations = require('relations');
-relations.use(relations.stores.redis, {
-    client: client,
-    prefix: 'USER_PERM'
-});
-
-var permScheme = require('./lib/permission/permScheme')(relations);
 
 var goodOptions = {
     //opsInterval: 1000,
@@ -64,9 +57,16 @@ server.register([
       plugins: ['registry'],
       models: './lib/models/',
     }
+  },
+  {
+    register: require('../hapi-relations'),
+    options: {
+        template: config.get('templateLocation'),
+        client: client,
+    }
   }
 ], function(err) {
-    if (err) console.log('Error registering bookshelf: ' + err);
+    if (err) console.log('Error registering plugin: ' + err);
 });
 
 process.stderr.on('data', function(data) {
@@ -95,6 +95,7 @@ var getHawkCredentials = function(id, callback) {
  * @return {array}
  */
 var setPlugins = function () {
+    console.dir(server.plugins);
     var gd = {
             register: good,
             options: goodOptions
@@ -108,7 +109,7 @@ var setPlugins = function () {
             register: require(file),
             options: {
                 redisClient: client,
-                relations: permScheme
+                relations: server.plugins.hapi_relations
             }
         };
         plugins.push(newRoute);
@@ -127,7 +128,7 @@ var checkSubjectPermission = function (request, callback) {
     var method = request.method.toUpperCase();
     var study_id = request.url.path.split('/')[2];
     var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.auth.credentials.username;
-    permScheme.coins('Can %s %s from %s', username, method + '_SUBJECT', study_id,
+    server.plugins.hapi_relations.coins('Can %s %s from %s', username, method + '_SUBJECT', study_id,
         function (err, can) {
             if (!can) {
                 allowed = false;
@@ -151,7 +152,7 @@ var checkPermission = function (request, callback) {
         var study_id = temp[2];
         var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.auth.credentials.username;
         // Doing permission check
-        permScheme.coins('Can %s %s from %s', username, method + '_STUDY', study_id,
+        server.plugins.hapi_relations.coins('Can %s %s from %s', username, method + '_STUDY', study_id,
             function (err, can) {
                 if (!can) {
                     //console.log('not allowed');

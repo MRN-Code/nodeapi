@@ -4,7 +4,7 @@
     "sslCertPath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/STAR_mrn_org.crt",
     "sslKeyPath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/mrn_wildcard.key",
     "sslBundlePath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/STAR_mrn_org.ca-bundle",
-    "hawkKeyLifespan": 1800000, 
+    "hawkKeyLifespan": 1800000,
     "algorithm": "sha256",
     "userMcryptKey": "USER_MCRYPT_KEY",
     "defaultUser": {
@@ -43,6 +43,7 @@
             "min": 1,
             "max": 10
         }
-    },        
-    "logPath": "./logs"
+    },
+    "logPath": "./logs",
+    "templateLocation": "./lib/permissions/role_perm_template.json"
 }

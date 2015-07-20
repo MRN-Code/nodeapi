@@ -37,7 +37,7 @@
             "port": 5432,
             "user": "ni_developers",
             "password": "DATABASE_PASSWORD",
-            "database": "rdb"
+            "database": "DATABASE_NAME"
         },
         "pool": {
             "min": 1,

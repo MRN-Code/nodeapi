@@ -4,8 +4,9 @@
     "sslCertPath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/STAR_mrn_org.crt",
     "sslKeyPath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/mrn_wildcard.key",
     "sslBundlePath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/STAR_mrn_org.ca-bundle",
-    "hawkKeyLifespan": 1800000, 
+    "hawkKeyLifespan": 1800000,
     "algorithm": "sha256",
+    "userMcryptKey": "USER_MCRYPT_KEY",
     "defaultUser": {
         "username": "john",
         "password": "$2a$10$iqJSHD.BGr0E2IxQwYgJmeP3NvhPrXAeLSaGCj6IR/XU5QtjVu5Tm",
@@ -28,5 +29,6 @@
         "host": "localhost",
         "port": 6379
     },
-    "logPath": "./logs"
+    "logPath": "./logs",
+    "templateLocation": "./lib/permission/role_perm_template.json"
 }

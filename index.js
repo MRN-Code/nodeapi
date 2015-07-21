@@ -14,11 +14,16 @@ var glob = require('glob');
 
 var dbmap = require('/coins/coins_auth/conn/dbmap.json');
 var dbconfig;
-if (process.env === 'production') {
+if (process.env.NODE_ENV === 'production') {
     dbconfig =  dbmap.prd.node_api;
-} else {
+} else if(process.env.NODE_ENV === 'development') {
     dbconfig =  dbmap.dev.node_api;
+} else if(process.env.NODE_ENV === 'staging') {
+    dbconfig =  dbmap.training.node_api;
+} else {
+    console.log('incorrect database environment');
 }
+
 var knexConfig = {
     debug: true,
     client: 'pg',

@@ -45,5 +45,5 @@
         }
     },
     "logPath": "./logs",
-    "templateLocation": "./lib/permissions/role_perm_template.json"
+    "templateLocation": "./lib/permission/role_perm_template.json"
 }

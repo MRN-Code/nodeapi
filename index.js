@@ -11,9 +11,9 @@ var client = redis.createClient(config.get('redis').port, config.get('redis').ho
 
 var babel = require('babel/register');
 var glob = require('glob');
+var knex = config.get('dbconfig');
 
 var goodOptions = {
-    //opsInterval: 1000,
     reporters: [{
         reporter: require('good-console'),
         events:{ log: '*', response: '*' }
@@ -49,27 +49,6 @@ if (config.has('sslCertPath')) {
 var https = server.connection(httpsOptions);
 var http = server.connection(httpOption);
 
-var knex = config.get('dbconfig');
-server.register([
-  {
-    register: require('hapi-bookshelf-models'),
-    options: {
-      knex: knex,
-      plugins: ['registry'],
-      models: './lib/models/',
-    }
-  },
-  {
-    register: require('../hapi-relations'),
-    options: {
-        template: config.get('templateLocation'),
-        client: client,
-    }
-  }
-], function(err) {
-    if (err) console.log('Error registering plugin: ' + err);
-});
-
 process.stderr.on('data', function(data) {
     console.log(data);
 });
@@ -96,12 +75,29 @@ var getHawkCredentials = function(id, callback) {
  * @return {array}
  */
 var setPlugins = function () {
-    console.dir(server.plugins);
-    var gd = {
+    var plugins = [
+        basic,
+        hawk,
+        {
             register: good,
             options: goodOptions
-        };
-    var plugins = [ basic, hawk, gd ];
+        },
+        {
+            register: require('hapi-bookshelf-models'),
+            options: {
+                knex: knex,
+                plugins: ['registry'],
+                models: './lib/models/',
+            }
+        },
+        {
+            register: require('../hapi-relations'),
+            options: {
+                template: config.get('templateLocation'),
+                client: client,
+            }
+        }
+    ];
 
     // add route plugins
     var newRoute;
@@ -183,10 +179,9 @@ server.ext('onPostAuth', function(request, reply) {
 
 server.register(
     setPlugins(),
-    function (err) {
+    function pluginError(err) {
         if (err) {
             console.log('Failed loading plugin');
-            //exit?
         }
         https.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
         https.auth.default('default');

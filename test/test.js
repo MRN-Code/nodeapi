@@ -36,7 +36,7 @@ describe('Authentication Test', function() {
             method: 'GET',
             url: 'http://localhost/login',
             headers: {
-                Authorization: 'Basic ' + (new Buffer('rkelly:test33')).toString('base64')
+                Authorization: 'Basic ' + (new Buffer('mochatest:mocha')).toString('base64')
             }
         };
 

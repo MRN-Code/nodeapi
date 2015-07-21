@@ -28,20 +28,5 @@
         "host": "localhost",
         "port": 6379
     },
-    "dbconfig": {
-        "debug": true,
-        "client": "pg",
-        "connection": {
-            "host": "devdbcoin.mind.unm.edu",
-            "port": 5432,
-            "user": "ni_developers",
-            "password": "43377447259Y9u9749482^D4",
-            "database": "rwang_db"
-        },
-        "pool": {
-            "min": 1,
-            "max": 10
-        }
-    },        
     "logPath": "./logs"
 }

@@ -1,5 +1,6 @@
 'use strict';
 
+var fs = require('fs');
 var hapi = require('hapi');
 var basic = require('hapi-auth-basic');
 var hawk = require('hapi-auth-hawk');
@@ -18,7 +19,8 @@ relations.use(relations.stores.redis, {
 });
 
 var permScheme = require('./lib/permission/permScheme')(relations);
-var knex = require('knex')(config.get('dbconfig'));
+var dbconfig = JSON.parse(fs.readFileSync('./config/local.json', 'utf8')).dbconfig;
+var knex = require('knex')(dbconfig);
 var bookshelf = require('bookshelf')(knex);
 
 var goodOptions = {

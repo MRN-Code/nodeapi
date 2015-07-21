@@ -1,5 +1,6 @@
 'use strict';
 
+var fs = require('fs');
 var hapi = require('hapi');
 var basic = require('hapi-auth-basic');
 var hawk = require('hapi-auth-hawk');
@@ -8,11 +9,31 @@ var boom = require('boom');
 var config = require('config');
 var redis = require('redis');
 var client = redis.createClient(config.get('redis').port, config.get('redis').host);
-
 var babel = require('babel/register');
 var glob = require('glob');
-var knex = config.get('dbconfig');
 
+var dbmap = require('/coins/coins_auth/conn/dbmap.json');
+var dbconfig;
+if (process.env === 'production') {
+    dbconfig =  dbmap.prd.node_api;
+} else {
+    dbconfig =  dbmap.dev.node_api;
+}
+var knexConfig = {
+    debug: true,
+    client: 'pg',
+    connection: {
+        host: dbconfig.host,
+        port: 5432,
+        user: dbconfig.username,
+        password: dbconfig.password,
+        database: dbconfig.db
+    },
+    pool: {
+        min: 1,
+        max: 10
+    }
+};
 var goodOptions = {
     reporters: [{
         reporter: require('good-console'),
@@ -85,7 +106,7 @@ var setPlugins = function () {
         {
             register: require('hapi-bookshelf-models'),
             options: {
-                knex: knex,
+                knex: knexConfig,
                 plugins: ['registry'],
                 models: './lib/models/',
             }
@@ -181,7 +202,7 @@ server.register(
     setPlugins(),
     function pluginError(err) {
         if (err) {
-            console.log('Failed loading plugin');
+            console.log('Failed loading plugin: ' + err);
         }
         https.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
         https.auth.default('default');

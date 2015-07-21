@@ -9,22 +9,32 @@ var boom = require('boom');
 var config = require('config');
 var redis = require('redis');
 var client = redis.createClient(config.get('redis').port, config.get('redis').host);
-
 var babel = require('babel/register');
 var glob = require('glob');
-var relations = require('relations');
-relations.use(relations.stores.redis, {
-    client: client,
-    prefix: 'USER_PERM'
-});
 
-var permScheme = require('./lib/permission/permScheme')(relations);
-var dbconfig = JSON.parse(fs.readFileSync('./config/local.json', 'utf8')).dbconfig;
-var knex = require('knex')(dbconfig);
-var bookshelf = require('bookshelf')(knex);
-
+var dbmap = require('/coins/coins_auth/conn/dbmap.json');
+var dbconfig;
+if (process.env === 'production') {
+    dbconfig =  dbmap.prd.node_api;
+} else {
+    dbconfig =  dbmap.dev.node_api;
+}
+var knexConfig = {
+    debug: true,
+    client: 'pg',
+    connection: {
+        host: dbconfig.host,
+        port: 5432,
+        user: dbconfig.username,
+        password: dbconfig.password,
+        database: dbconfig.db
+    },
+    pool: {
+        min: 1,
+        max: 10
+    }
+};
 var goodOptions = {
-    //opsInterval: 1000,
     reporters: [{
         reporter: require('good-console'),
         events:{ log: '*', response: '*' }
@@ -86,11 +96,29 @@ var getHawkCredentials = function(id, callback) {
  * @return {array}
  */
 var setPlugins = function () {
-    var gd = {
+    var plugins = [
+        basic,
+        hawk,
+        {
             register: good,
             options: goodOptions
-        };
-    var plugins = [ basic, hawk, gd ];
+        },
+        {
+            register: require('hapi-bookshelf-models'),
+            options: {
+                knex: knexConfig,
+                plugins: ['registry'],
+                models: './lib/models/',
+            }
+        },
+        {
+            register: require('../hapi-relations'),
+            options: {
+                template: config.get('templateLocation'),
+                client: client,
+            }
+        }
+    ];
 
     // add route plugins
     var newRoute;
@@ -98,9 +126,8 @@ var setPlugins = function () {
         newRoute = {
             register: require(file),
             options: {
-                bookshelf: bookshelf,
                 redisClient: client,
-                relations: permScheme
+                relations: server.plugins.hapi_relations
             }
         };
         plugins.push(newRoute);
@@ -119,7 +146,7 @@ var checkSubjectPermission = function (request, callback) {
     var method = request.method.toUpperCase();
     var study_id = request.url.path.split('/')[2];
     var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.auth.credentials.username;
-    permScheme.coins('Can %s %s from %s', username, method + '_SUBJECT', study_id,
+    server.plugins.hapi_relations.coins('Can %s %s from %s', username, method + '_SUBJECT', study_id,
         function (err, can) {
             if (!can) {
                 allowed = false;
@@ -143,7 +170,7 @@ var checkPermission = function (request, callback) {
         var study_id = temp[2];
         var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.auth.credentials.username;
         // Doing permission check
-        permScheme.coins('Can %s %s from %s', username, method + '_STUDY', study_id,
+        server.plugins.hapi_relations.coins('Can %s %s from %s', username, method + '_STUDY', study_id,
             function (err, can) {
                 if (!can) {
                     //console.log('not allowed');
@@ -173,10 +200,9 @@ server.ext('onPostAuth', function(request, reply) {
 
 server.register(
     setPlugins(),
-    function (err) {
+    function pluginError(err) {
         if (err) {
-            console.log('Failed loading plugin');
-            //exit?
+            console.log('Failed loading plugin: ' + err);
         }
         https.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
         https.auth.default('default');

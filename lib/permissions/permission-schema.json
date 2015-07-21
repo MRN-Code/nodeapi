@@ -1,0 +1,21 @@
+{
+    study: {
+        PI: [
+            'read_Study',
+            'update_Study'
+        ],
+        Coordinator: [
+            'read_Study'
+        ],
+        DataEntry: [
+            'read_Study'
+        ]
+    },
+    site: {
+        SiteAdmin: [
+            'create_Study',
+            'read_Study',
+            'update_Study'
+        ]
+    }
+}

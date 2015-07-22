@@ -75,6 +75,9 @@ if (config.has('sslCertPath')) {
 var https = server.connection(httpsOptions);
 var http = server.connection(httpOption);
 
+// load mcrypt auth key
+server.app.authKey = fs.readFileSync('/coins/keys/mcrypt_auth_key').toString().trim();
+
 process.stderr.on('data', function(data) {
     console.log(data);
 });

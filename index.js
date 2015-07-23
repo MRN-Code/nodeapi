@@ -1,5 +1,6 @@
 'use strict';
 
+var Study = require('./lib/models/Study');
 var fs = require('fs');
 var hapi = require('hapi');
 var basic = require('hapi-auth-basic');
@@ -9,8 +10,9 @@ var boom = require('boom');
 var config = require('config');
 var redis = require('redis');
 var client = redis.createClient(config.get('redis').port, config.get('redis').host);
-var babel = require('babel/register');
+//var babel = require('babel/register');
 var glob = require('glob');
+var shield = require('../bookshelf-shield');
 
 var dbmap = require('/coins/coins_auth/conn/dbmap.json');
 var dbconfig;
@@ -171,15 +173,40 @@ var checkSubjectPermission = function (request, callback) {
  * return
  */
 var checkPermission = function (request, callback) {
+
+var studyConfig = [
+    {
+        defaults: {
+            modelName: 'Study',
+            authKey: 'study_id',
+            aclContextName: 'coins'
+        }
+    }
+];
+
+//console.log(server.plugins);
+/*
+shield({
+    config: studyConfig,
+    models: {Study: server.plugins.bookshelf.model('Study')},
+    acl: server.plugins.hapiRelations
+});
+*/
     var url = request.url.path.toLowerCase();
     if (url.indexOf('/study/') === 0) {
         var method = request.method.toUpperCase();
         var temp = url.split('/');
         var study_id = temp[2];
         var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.auth.credentials.username;
+var user = {username: username};
+console.log(server.plugins.bookshelf.model('Study'));
+var newStudy = new server.plugins.bookshelf.model('Study')({study_id: study_id});
+//console.log('======method: ' + method);
+console.log(newStudy);
+//newStudy.read(user).then (
         // Doing permission check
         server.plugins.hapiRelations.coins('Can %s %s from %s', username, method + '_STUDY', study_id,
-            function (err, can) {
+        /*    function (err, can) {
                 if (!can) {
                     //console.log('not allowed');
                     return callback({ allowed: false });
@@ -188,7 +215,8 @@ var checkPermission = function (request, callback) {
                 } else {
                     return callback({ allowed: true });
                 }
-            }
+            } */
+console.log
         );
     } else {
         return callback({ allowed: true });

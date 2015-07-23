@@ -105,6 +105,7 @@ var getHawkCredentials = function(id, callback) {
  */
 var setPlugins = function () {
     var plugins = [
+        require('inject-then'),
         basic,
         hawk,
         {
@@ -201,12 +202,22 @@ server.ext('onPostAuth', function(request, reply) {
 });
 */
 
+server.app.pluginsRegistered = new Promise(function(res, rej) {
+    server.app.resolvePluginsRegistered = res;
+    server.app.rejectPluginsRegistered= rej;
+}).then(function() {console.log('registered!')});
+
 server.register(
     setPlugins(),
     function pluginError(err) {
         if (err) {
             console.log('Failed loading plugin: ' + err);
+            server.app.rejectPluginsRegistered(err);
         }
+        console.log('testing bookshelf-plugs');
+        var Study = server.plugins.bookshelf.model('Study');
+        console.log(typeof Study);
+        console.log(new Study({study_id: 347}));
         https.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
         https.auth.default('default');
 
@@ -215,6 +226,9 @@ server.register(
         var relationsSchema = require(config.get('permissionsSchemaPath'));
         require('./lib/permissions/load-schema.js')(server.plugins.relations, relationsSchema);
         server.plugins.relations.study('mochatest is PI of 7720');
+        server.plugins.relations.study('can mochatest read_Study from 7720',
+            server.app.resolvePluginsRegistered
+        );
 
         // Wrap models with Shield
         var shield = require('bookshelf-shield');

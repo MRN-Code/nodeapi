@@ -18,6 +18,10 @@ var generateHawkHeader = function(url, method) {
 };
 
 describe('Authentication Test', function() {
+    before('wait for server to be ready', function(){
+        return server.app.pluginsRegistered;
+    });
+    
     it('should get public file', function(done) {
         request = {
             method: 'GET',

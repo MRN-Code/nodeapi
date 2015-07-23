@@ -135,7 +135,7 @@ var setPlugins = function () {
             register: require(file),
             options: {
                 redisClient: client,
-                relations: server.plugins.hapi_relations
+                relations: server.plugins.hapiRelations
             }
         };
         plugins.push(newRoute);
@@ -154,7 +154,7 @@ var checkSubjectPermission = function (request, callback) {
     var method = request.method.toUpperCase();
     var study_id = request.url.path.split('/')[2];
     var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.auth.credentials.username;
-    server.plugins.hapi_relations.coins('Can %s %s from %s', username, method + '_SUBJECT', study_id,
+    server.plugins.hapiRelations.coins('Can %s %s from %s', username, method + '_SUBJECT', study_id,
         function (err, can) {
             if (!can) {
                 allowed = false;
@@ -178,7 +178,7 @@ var checkPermission = function (request, callback) {
         var study_id = temp[2];
         var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.auth.credentials.username;
         // Doing permission check
-        server.plugins.hapi_relations.coins('Can %s %s from %s', username, method + '_STUDY', study_id,
+        server.plugins.hapiRelations.coins('Can %s %s from %s', username, method + '_STUDY', study_id,
             function (err, can) {
                 if (!can) {
                     //console.log('not allowed');

@@ -186,13 +186,13 @@ var studyConfig = [
 ];
 
 //console.log(server.plugins);
-/*
+
 shield({
     config: studyConfig,
     models: {Study: server.plugins.bookshelf.model('Study')},
     acl: server.plugins.hapiRelations
 });
-*/
+
     var url = request.url.path.toLowerCase();
     if (url.indexOf('/study/') === 0) {
         var method = request.method.toUpperCase();
@@ -200,15 +200,22 @@ shield({
         var study_id = temp[2];
         var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.auth.credentials.username;
 var user = {username: username};
-console.log(server.plugins.bookshelf.model('Study'));
 var Study = server.plugins.bookshelf.model('Study');
+//console.log(server.plugins.hapiRelations);
 var newStudy = new Study({study_id: study_id});
 //console.log('======method: ' + method);
-console.log(newStudy);
+if(newStudy === undefined) console.log ('newStudy is undefined');
+else {
+    console.log('==============');
+    console.log(newStudy);
+    console.log('=============');
+}
+server.plugins.hapiRelations.coins('gr6jwhvO3hIrWRhK0LTfXA== is PI of 7720');
+//console.log(newStudy.read(user));
 //newStudy.read(user).then (
         // Doing permission check
-        server.plugins.hapiRelations.coins('Can %s %s from %s', username, method + '_STUDY', study_id,
-        /*    function (err, can) {
+        server.plugins.hapiRelations.coins('Can %s %s from %s', username, 'read_Study', study_id,
+            function (err, can) {
                 if (!can) {
                     //console.log('not allowed');
                     return callback({ allowed: false });
@@ -217,8 +224,8 @@ console.log(newStudy);
                 } else {
                     return callback({ allowed: true });
                 }
-            } */
-console.log
+            } 
+//console.log
         );
     } else {
         return callback({ allowed: true });
@@ -249,10 +256,6 @@ server.register(
             server.app.rejectPluginsRegistered(err);
         }
         server.app.resolvePluginsRegistered();
-        console.log('testing bookshelf-plugs');
-        var Study = server.plugins.bookshelf.model('Study');
-        console.log(typeof Study);
-        console.log(new Study({study_id: 347}));
         https.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
         https.auth.default('default');
 

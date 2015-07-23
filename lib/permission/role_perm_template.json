@@ -1,15 +1,15 @@
 {
     "_comment": "This is the template for all studies, if some study has particular permission sets, it can override this template",
     "PI": {
-        "STUDY": ["GET","POST","PUT","DELETE"],
-        "SUBJECT": ["GET","POST","PUT","DELETE"]
+        "STUDY": ["read","create","update","delete"],
+        "SUBJECT": ["read","create","update","delete"]
     },
     "COORDINATOR": {
-        "STUDY": ["GET","POST"],
-        "SUBJECT": ["GET","POST"]
+        "STUDY": ["read","create"],
+        "SUBJECT": ["read","create"]
     },
     "RATER": {
-        "STUDY": ["GET"],
-        "SUBJECT": ["GET"]
+        "STUDY": ["read"],
+        "SUBJECT": ["read"]
     }
 }

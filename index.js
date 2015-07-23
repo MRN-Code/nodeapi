@@ -107,6 +107,7 @@ var getHawkCredentials = function(id, callback) {
  */
 var setPlugins = function () {
     var plugins = [
+        require('inject-then'),
         basic,
         hawk,
         {
@@ -200,7 +201,8 @@ shield({
         var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.auth.credentials.username;
 var user = {username: username};
 console.log(server.plugins.bookshelf.model('Study'));
-var newStudy = new server.plugins.bookshelf.model('Study')({study_id: study_id});
+var Study = server.plugins.bookshelf.model('Study');
+var newStudy = new Study({study_id: study_id});
 //console.log('======method: ' + method);
 console.log(newStudy);
 //newStudy.read(user).then (
@@ -234,12 +236,23 @@ server.ext('onPostAuth', function(request, reply) {
     checkPermission(request, result);
 });
 
+server.app.pluginsRegistered = new Promise(function(res, rej) {
+    server.app.resolvePluginsRegistered = res;
+    server.app.rejectPluginsRegistered= rej;
+}).then(function() {console.log('registered!')});
+
 server.register(
     setPlugins(),
     function pluginError(err) {
         if (err) {
             console.log('Failed loading plugin: ' + err);
+            server.app.rejectPluginsRegistered(err);
         }
+        server.app.resolvePluginsRegistered();
+        console.log('testing bookshelf-plugs');
+        var Study = server.plugins.bookshelf.model('Study');
+        console.log(typeof Study);
+        console.log(new Study({study_id: 347}));
         https.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
         https.auth.default('default');
 

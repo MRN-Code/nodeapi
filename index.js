@@ -12,7 +12,7 @@ var client = redis.createClient(config.get('redis').port, config.get('redis').ho
 var babel = require('babel/register');
 var glob = require('glob');
 
-var dbmap = require('/coins/coins_auth/conn/dbmap.json');
+var dbmap = require(config.get('dbMapPath'));
 var dbconfig;
 if (process.env.NODE_ENV === 'production') {
     dbconfig =  dbmap.prd.node_api;
@@ -21,7 +21,7 @@ if (process.env.NODE_ENV === 'production') {
 } else if(process.env.NODE_ENV === 'staging') {
     dbconfig =  dbmap.training.node_api;
 } else {
-    console.log('incorrect database environment');
+    throw new Error ('unrecognised database environment: `' + process.env.NODE_ENV + '`');
 }
 
 var knexConfig = {
@@ -76,7 +76,7 @@ var https = server.connection(httpsOptions);
 var http = server.connection(httpOption);
 
 // load mcrypt auth key
-server.app.authKey = fs.readFileSync('/coins/keys/mcrypt_auth_key').toString().trim();
+server.app.authKey = fs.readFileSync(config.get('dbEncryptionKeyPath')).toString().trim();
 
 process.stderr.on('data', function(data) {
     console.log(data);

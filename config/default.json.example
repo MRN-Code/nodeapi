@@ -6,7 +6,8 @@
     "sslBundlePath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/STAR_mrn_org.ca-bundle",
     "hawkKeyLifespan": 1800000,
     "algorithm": "sha256",
-    "userMcryptKey": "USER_MCRYPT_KEY",
+    "dbMapPath": "/coins/coins_auth/conn/dbmap.json",
+    "dbEncryptionKeyPath": "/coins/coins_auth/conn/mcrypt_auth_key",
     "defaultUser": {
         "username": "john",
         "password": "$2a$10$iqJSHD.BGr0E2IxQwYgJmeP3NvhPrXAeLSaGCj6IR/XU5QtjVu5Tm",

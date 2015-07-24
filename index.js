@@ -12,13 +12,18 @@ var client = redis.createClient(config.get('redis').port, config.get('redis').ho
 var babel = require('babel/register');
 var glob = require('glob');
 
-var dbmap = require('/coins/coins_auth/conn/dbmap.json');
+var dbmap = require(config.get('dbMapPath'));
 var dbconfig;
-if (process.env === 'production') {
+if (process.env.NODE_ENV === 'production') {
     dbconfig =  dbmap.prd.node_api;
-} else {
+} else if(process.env.NODE_ENV === 'development') {
     dbconfig =  dbmap.dev.node_api;
+} else if(process.env.NODE_ENV === 'staging') {
+    dbconfig =  dbmap.training.node_api;
+} else {
+    throw new Error ('unrecognised database environment: `' + process.env.NODE_ENV + '`');
 }
+
 var knexConfig = {
     debug: true,
     client: 'pg',
@@ -69,6 +74,9 @@ if (config.has('sslCertPath')) {
 }
 var https = server.connection(httpsOptions);
 var http = server.connection(httpOption);
+
+// load mcrypt auth key
+server.app.authKey = fs.readFileSync(config.get('dbEncryptionKeyPath')).toString().trim();
 
 process.stderr.on('data', function(data) {
     console.log(data);
@@ -127,7 +135,7 @@ var setPlugins = function () {
             register: require(file),
             options: {
                 redisClient: client,
-                relations: server.plugins.hapi_relations
+                relations: server.plugins.hapiRelations
             }
         };
         plugins.push(newRoute);
@@ -146,7 +154,7 @@ var checkSubjectPermission = function (request, callback) {
     var method = request.method.toUpperCase();
     var study_id = request.url.path.split('/')[2];
     var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.auth.credentials.username;
-    server.plugins.hapi_relations.coins('Can %s %s from %s', username, method + '_SUBJECT', study_id,
+    server.plugins.hapiRelations.coins('Can %s %s from %s', username, method + '_SUBJECT', study_id,
         function (err, can) {
             if (!can) {
                 allowed = false;
@@ -170,7 +178,7 @@ var checkPermission = function (request, callback) {
         var study_id = temp[2];
         var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.auth.credentials.username;
         // Doing permission check
-        server.plugins.hapi_relations.coins('Can %s %s from %s', username, method + '_STUDY', study_id,
+        server.plugins.hapiRelations.coins('Can %s %s from %s', username, method + '_STUDY', study_id,
             function (err, can) {
                 if (!can) {
                     //console.log('not allowed');

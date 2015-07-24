@@ -31,5 +31,14 @@
         "port": 6379
     },
     "logPath": "./logs",
-    "templateLocation": "./lib/permission/role_perm_template.json"
+    "permissionsSchemaPath": "./lib/permissions/permission-schema.json",
+    "shieldConfig": [
+        {
+            "defaults": {
+                "modelName": "Study",
+                "authKey": "study_id",
+                "aclContextName": "study"
+            }
+        }
+    ]
 }

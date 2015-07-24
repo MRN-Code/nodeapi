@@ -225,17 +225,13 @@ server.register(
         server.plugins.relations = require('relations');
         var relationsSchema = require(config.get('permissionsSchemaPath'));
         require('./lib/permissions/load-schema.js')(server.plugins.relations, relationsSchema);
-        server.plugins.relations.study('mochatest is PI of 7720');
-        server.plugins.relations.study('can mochatest read_Study from 7720',
-            server.app.resolvePluginsRegistered
-        );
+        console.dir(server.plugins.bookshelf);
 
         // Wrap models with Shield
         var shield = require('bookshelf-shield');
         var shieldConfig = config.get('shieldConfig');
-        var models = {
-            Study: server.plugins.bookshelf.model('Study')
-        }
+        var models = server.plugins.bookshelf._models;
+
         shield({
             models: models,
             config: shieldConfig,
@@ -269,6 +265,7 @@ server.register(
                 console.log('server running at: ' + server.info.uri);
             });
         }
+        server.app.resolvePluginsRegistered();
     });
 
 module.exports = server;

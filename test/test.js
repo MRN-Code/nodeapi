@@ -21,7 +21,7 @@ describe('Authentication Test', function() {
     before('wait for server to be ready', function(){
         return server.app.pluginsRegistered;
     });
-    
+
     it('should get public file', function(done) {
         request = {
             method: 'GET',
@@ -115,7 +115,7 @@ describe('Authentication Test', function() {
         });
     });
 
-    it('should get one study info', function(done) {
+    it('should get one study info', function() {
         var url = 'http://localhost/study/7720';
         var header = generateHawkHeader(url, 'GET');
         request = {
@@ -125,13 +125,15 @@ describe('Authentication Test', function() {
                 authorization: header.field
             }
         };
-        server.inject(request, function(response) {
-            response.statusCode.should.equal(200);
-            var result = JSON.parse(response.payload);
-            result.should.be.an.instanceOf(Object);
-            result.should.have.property('study_id');
-            done();
-        });
+        return server.injectThen(request)
+        .then(
+            function(response) {
+                response.statusCode.should.equal(200);
+                var result = JSON.parse(response.payload);
+                result.should.be.an.instanceOf(Object);
+                result.should.have.property('study_id');
+            }
+        );
     });
 
     it('should get all studies', function(done) {

@@ -16,6 +16,10 @@
             "create_Study",
             "read_Study",
             "update_Study"
+        ],
+        "Scanner": [
+            "create_Scan",
+            "read_Scan"
         ]
     }
 }

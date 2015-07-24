@@ -5,7 +5,6 @@ var hapi = require('hapi');
 var basic = require('hapi-auth-basic');
 var hawk = require('hapi-auth-hawk');
 var good = require('good');
-var boom = require('boom');
 var config = require('config');
 var redis = require('redis');
 var redisClient = redis.createClient(
@@ -17,13 +16,15 @@ var glob = require('glob');
 var dbmap = require(config.get('dbMapPath'));
 var dbconfig;
 if (process.env.NODE_ENV === 'production') {
-    dbconfig =  dbmap.prd.node_api;
-} else if(process.env.NODE_ENV === 'development') {
-    dbconfig =  dbmap.dev.node_api;
-} else if(process.env.NODE_ENV === 'staging') {
-    dbconfig =  dbmap.training.node_api;
+    dbconfig =  dbmap.prd.nodeApi;
+} else if (process.env.NODE_ENV === 'development') {
+    dbconfig =  dbmap.dev.nodeApi;
+} else if (process.env.NODE_ENV === 'staging') {
+    dbconfig =  dbmap.training.nodeApi;
 } else {
-    throw new Error ('unrecognised database environment: `' + process.env.NODE_ENV + '`');
+    throw new Error (
+        `unrecognised database environment: '${process.env.NODE_ENV}'`
+    );
 }
 
 var knexConfig = {
@@ -74,11 +75,13 @@ var httpOption = {
 if (config.has('sslCertPath')) {
     httpsOptions.tls = require('./lib/utils/sslCredentials.js');
 }
+
 var https = server.connection(httpsOptions);
 var http = server.connection(httpOption);
 
 // load mcrypt auth key
-server.app.authKey = fs.readFileSync(config.get('dbEncryptionKeyPath')).toString().trim();
+var dbEncryptionKeyPath = config.get('dbEncryptionKeyPath');
+server.app.authKey = fs.readFileSync(dbEncryptionKeyPath).toString().trim();
 
 process.stderr.on('data', function(data) {
     console.log(data);
@@ -105,7 +108,7 @@ var getHawkCredentials = function(id, callback) {
  * Generate a plugin array, including all route plugins under lib/app_routes
  * @return {array}
  */
-var setPlugins = function () {
+var setPlugins = function() {
     var plugins = [
         require('inject-then'),
         basic,
@@ -119,14 +122,14 @@ var setPlugins = function () {
             options: {
                 knex: knexConfig,
                 plugins: ['registry'],
-                models: './lib/models/',
+                models: './lib/models/'
             }
         }
     ];
 
     // add route plugins
     var newRoute;
-    glob.sync('./lib/app_routes/*.js').forEach (function (file) {
+    glob.sync('./lib/app_routes/*.js').forEach(function(file) {
         newRoute = {
             register: require(file),
             options: {
@@ -136,78 +139,14 @@ var setPlugins = function () {
         };
         plugins.push(newRoute);
     });
+
     return plugins;
 };
 
-/**
- * Check user permission on subject operation
- * @param {object} request - request object sent from browser
- * @param {function} callback - callback function with signature (object)
- * return
- */
-var checkSubjectPermission = function (request, callback) {
-    var allowed = true;
-    var method = request.method.toUpperCase();
-    var study_id = request.url.path.split('/')[2];
-    var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.auth.credentials.username;
-    server.plugins.hapiRelations.coins('Can %s %s from %s', username, method + '_SUBJECT', study_id,
-        function (err, can) {
-            if (!can) {
-                allowed = false;
-            }
-            return callback({ allowed: allowed });
-        }
-    );
-};
-
-/**
- * Check user permission on request
- * @param {object} request - request object sent from browser
- * @param {function} callback - callback function with signature (object)
- * return
- */
-/*
-var checkPermission = function (request, callback) {
-    var url = request.url.path.toLowerCase();
-    if (url.indexOf('/study/') === 0) {
-        var method = request.method.toUpperCase();
-        var temp = url.split('/');
-        var study_id = temp[2];
-        var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.auth.credentials.username;
-        // Doing permission check
-        server.plugins.hapiRelations.coins('Can %s %s from %s', username, method + '_STUDY', study_id,
-            function (err, can) {
-                if (!can) {
-                    //console.log('not allowed');
-                    return callback({ allowed: false });
-                } else if (temp.indexOf('subject') > 0) {
-                    checkSubjectPermission(request, callback);
-                } else {
-                    return callback({ allowed: true });
-                }
-            }
-        );
-    } else {
-        return callback({ allowed: true });
-    }
-};
-
-server.ext('onPostAuth', function(request, reply) {
-    var result = function (obj) {
-        if (!obj.allowed) {
-            return reply(boom.unauthorized('Insufficient Privileges'));
-        } else {
-            return reply.continue();
-        }
-    };
-    checkPermission(request, result);
-});
-*/
-
 server.app.pluginsRegistered = new Promise(function(res, rej) {
     server.app.resolvePluginsRegistered = res;
-    server.app.rejectPluginsRegistered= rej;
-}).then(function() {console.log('registered!')});
+    server.app.rejectPluginsRegistered = rej;
+});
 
 server.register(
     setPlugins(),
@@ -216,28 +155,36 @@ server.register(
             console.log('Failed loading plugin: ' + err);
             server.app.rejectPluginsRegistered(err);
         }
+
         console.log('testing bookshelf-plugs');
         var Study = server.plugins.bookshelf.model('Study');
         console.log(typeof Study);
-        console.log(new Study({study_id: 347}));
-        https.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
+
+        // jscs:disable
+        console.log(new Study({study_id: 347})); // jshint ignore:line
+        // jscs:enable
+        https.auth.strategy(
+            'default',
+            'hawk',
+            { getCredentialsFunc: getHawkCredentials }
+        );
         https.auth.default('default');
 
         // Mock relations plugin
         server.plugins.relations = require('relations');
         var relationsSchema = require(config.get('permissionsSchemaPath'));
-        require('./lib/permissions/load-schema.js')(server.plugins.relations, relationsSchema);
+        var loadSchema = require('./lib/permissions/load-schema.js');
+        loadSchema(server.plugins.relations, relationsSchema);
 
         // Wrap models with Shield
         var shield = require('bookshelf-shield');
         var shieldConfig = config.get('shieldConfig');
+
         // no shield config for User and UserStudyRole models yet
         //var models = server.plugins.bookshelf._models;
         var models = {
             Study: server.plugins.bookshelf.model('Study')
-        }
-
-
+        };
         shield({
             models: models,
             config: shieldConfig,
@@ -248,8 +195,17 @@ server.register(
             method: '*',
             path: '/{path*}',
             handler: function(request, reply) {
+                var url = require('url');
+                var newUrl = url.format({
+                    protocol: 'https',
+                    hostname: request.info.hostname,
+                    port: config.get('httpsPort'),
+                    pathname: request.url.path,
+                    query: request.query
+                });
+
                 //reply('Please use https instead of http.');
-                reply.redirect('https://' + request.info.hostname + ':' + config.httpsPort + request.url.path);
+                reply.redirect(newUrl);
             }
         });
 
@@ -259,7 +215,7 @@ server.register(
             method: 'GET',
             path: '/restricted',
             config: {
-                handler: function (request, reply) {
+                handler: function(request, reply) {
                     console.log('request received');
                     reply('top secret');
                 }
@@ -267,10 +223,11 @@ server.register(
         });
 
         if (!module.parent) {
-            server.start(function () {
+            server.start(function() {
                 console.log('server running at: ' + server.info.uri);
             });
         }
+
         server.app.resolvePluginsRegistered();
     });
 

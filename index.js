@@ -8,30 +8,16 @@ var good = require('good');
 var config = require('config');
 var redis = require('redis');
 var glob = require('glob');
-var dbmap = require(config.get('dbMapPath'));
 
 var redisClient = redis.createClient(
     config.get('redis').port,
     config.get('redis').host
 );
 
-var dbConfig = require('./lib/utils/db-config.js')();
+var dbConfig = require('./lib/utils/get-db-config.js')();
 
-var knexConfig = {
-    debug: true,
-    client: 'pg',
-    connection: {
-        host: dbConfig.host,
-        port: 5432,
-        user: dbConfig.username,
-        password: dbConfig.password,
-        database: dbConfig.db
-    },
-    pool: {
-        min: 1,
-        max: 10
-    }
-};
+var knexConfig = require('./lib/utils/get-knex-config.js')();
+
 var goodOptions = {
     reporters: [{
         reporter: require('good-console'),

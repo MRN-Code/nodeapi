@@ -118,13 +118,6 @@ var setPlugins = function () {
                 plugins: ['registry'],
                 models: './lib/models/',
             }
-        },
-        {
-            register: require('../hapi-relations'),
-            options: {
-                template: config.get('templateLocation'),
-                client: client,
-            }
         }
     ];
 
@@ -170,6 +163,7 @@ var checkSubjectPermission = function (request, callback) {
  * @param {function} callback - callback function with signature (object)
  * return
  */
+/*
 var checkPermission = function (request, callback) {
     var url = request.url.path.toLowerCase();
     if (url.indexOf('/study/') === 0) {
@@ -205,6 +199,7 @@ server.ext('onPostAuth', function(request, reply) {
     };
     checkPermission(request, result);
 });
+*/
 
 server.register(
     setPlugins(),
@@ -214,6 +209,24 @@ server.register(
         }
         https.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
         https.auth.default('default');
+
+        // Mock relations plugin
+        server.plugins.relations = require('relations');
+        var relationsSchema = require(config.get('permissionsSchemaPath'));
+        require('./lib/permissions/load-schema.js')(server.plugins.relations, relationsSchema);
+        server.plugins.relations.study('mochatest is PI of 7720');
+
+        // Wrap models with Shield
+        var shield = require('bookshelf-shield');
+        var shieldConfig = config.get('shieldConfig');
+        var models = {
+            Study: server.plugins.bookshelf.model('Study')
+        }
+        shield({
+            models: models,
+            config: shieldConfig,
+            acl: server.plugins.relations
+        });
 
         http.route({
             method: '*',
@@ -237,9 +250,11 @@ server.register(
             }
         });
 
-        server.start(function () {
-            console.log('server running at: ' + server.info.uri);
-        });
+        if (!module.parent) {
+            server.start(function () {
+                console.log('server running at: ' + server.info.uri);
+            });
+        }
     });
 
 module.exports = server;

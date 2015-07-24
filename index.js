@@ -8,8 +8,10 @@ var good = require('good');
 var boom = require('boom');
 var config = require('config');
 var redis = require('redis');
-var client = redis.createClient(config.get('redis').port, config.get('redis').host);
-var babel = require('babel/register');
+var redisClient = redis.createClient(
+    config.get('redis').port,
+    config.get('redis').host
+);
 var glob = require('glob');
 
 var dbmap = require(config.get('dbMapPath'));
@@ -53,7 +55,7 @@ var goodOptions = {
 // Set up DB
 //var userDB = { john: config.defaultUser };
 
-client.on('error', function() {
+redisClient.on('error', function() {
     console.log('Failed to connect to redis server.');
 }).on('connect', function() {
     console.log('Connected to redis server successfully.');
@@ -90,7 +92,7 @@ process.stderr.on('data', function(data) {
  *   `function(error, credentials){ ... }`
  */
 var getHawkCredentials = function(id, callback) {
-    client.hgetall(id, function(err, credentials) {
+    redisClient.hgetall(id, function(err, credentials) {
         if (!credentials) {
             callback(null, false);
         } else {
@@ -128,7 +130,7 @@ var setPlugins = function () {
         newRoute = {
             register: require(file),
             options: {
-                redisClient: client,
+                redisClient: redisClient,
                 relations: server.plugins.hapiRelations
             }
         };

@@ -227,12 +227,16 @@ server.register(
         server.plugins.relations = require('relations');
         var relationsSchema = require(config.get('permissionsSchemaPath'));
         require('./lib/permissions/load-schema.js')(server.plugins.relations, relationsSchema);
-        console.dir(server.plugins.bookshelf);
 
         // Wrap models with Shield
         var shield = require('bookshelf-shield');
         var shieldConfig = config.get('shieldConfig');
-        var models = server.plugins.bookshelf._models;
+        // no shield config for User and UserStudyRole models yet
+        //var models = server.plugins.bookshelf._models;
+        var models = {
+            Study: server.plugins.bookshelf.model('Study')
+        }
+
 
         shield({
             models: models,

@@ -7,35 +7,25 @@ var hawk = require('hapi-auth-hawk');
 var good = require('good');
 var config = require('config');
 var redis = require('redis');
+var glob = require('glob');
+var dbmap = require(config.get('dbMapPath'));
+
 var redisClient = redis.createClient(
     config.get('redis').port,
     config.get('redis').host
 );
-var glob = require('glob');
 
-var dbmap = require(config.get('dbMapPath'));
-var dbconfig;
-if (process.env.NODE_ENV === 'production') {
-    dbconfig =  dbmap.prd.nodeApi;
-} else if (process.env.NODE_ENV === 'development') {
-    dbconfig =  dbmap.dev.nodeApi;
-} else if (process.env.NODE_ENV === 'staging') {
-    dbconfig =  dbmap.training.nodeApi;
-} else {
-    throw new Error (
-        `unrecognised database environment: '${process.env.NODE_ENV}'`
-    );
-}
+var dbConfig = require('./lib/utils/db-config.js')();
 
 var knexConfig = {
     debug: true,
     client: 'pg',
     connection: {
-        host: dbconfig.host,
+        host: dbConfig.host,
         port: 5432,
-        user: dbconfig.username,
-        password: dbconfig.password,
-        database: dbconfig.db
+        user: dbConfig.username,
+        password: dbConfig.password,
+        database: dbConfig.db
     },
     pool: {
         min: 1,

@@ -14,9 +14,9 @@ var redisClient = redis.createClient(
     config.get('redis').host
 );
 
-var dbConfig = require('./lib/utils/get-db-config.js')();
-
 var knexConfig = require('./lib/utils/get-knex-config.js')();
+
+var goodConfig = require('./lib/utils/get-good-config.js');
 
 var goodOptions = {
     reporters: [{

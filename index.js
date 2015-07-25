@@ -11,23 +11,12 @@ var glob = require('glob');
 var knexConfig = require('./lib/utils/get-knex-config.js')();
 var goodConfig = require('./lib/utils/get-good-config.js')();
 var redisConfig = require('./lib/utils/get-redis-config.js')();
+var connectionConfig = require('./lib/utils/get-connection-options.js')();
 
 // Set up Server
 var server = new hapi.Server();
-var httpsOptions = {
-    labels: ['https'],
-    port: config.get('httpsPort')
-};
-var httpOption = {
-    labels: ['http'],
-    port: config.get('httpPort')
-};
-if (config.has('sslCertPath')) {
-    httpsOptions.tls = require('./lib/utils/sslCredentials.js');
-}
-
-var https = server.connection(httpsOptions);
-var http = server.connection(httpOption);
+var https = server.connection(connectionConfig.https);
+var http = server.connection(connectionConfig.http);
 
 // load mcrypt auth key
 var dbEncryptionKeyPath = config.get('dbEncryptionKeyPath');
@@ -45,7 +34,7 @@ process.stderr.on('data', function(data) {
  *   `function(error, credentials){ ... }`
  */
 var getHawkCredentials = function(id, callback) {
-    var redisClient = server.plugins['hapi-redis'];
+    var redisClient = server.plugins['hapi-redis'].client;
     redisClient.hgetall(id, function(err, credentials) {
         if (!credentials) {
             callback(null, false);
@@ -104,7 +93,7 @@ var setPlugins = function() {
         newRoute = {
             register: require(file),
             options: {
-                redisClient: server.plugins['hapi-redis'],
+                redisClient: server.plugins['hapi-redis'].client,
                 relations: server.plugins.hapiRelations
             }
         };

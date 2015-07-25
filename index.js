@@ -6,37 +6,11 @@ var basic = require('hapi-auth-basic');
 var hawk = require('hapi-auth-hawk');
 var good = require('good');
 var config = require('config');
-var redis = require('redis');
 var glob = require('glob');
 
-var redisClient = redis.createClient(
-    config.get('redis').port,
-    config.get('redis').host
-);
-
 var knexConfig = require('./lib/utils/get-knex-config.js')();
-
-var goodConfig = require('./lib/utils/get-good-config.js');
-
-var goodOptions = {
-    reporters: [{
-        reporter: require('good-console'),
-        events:{ log: '*', response: '*' }
-    }, {
-        reporter: require('good-file'),
-        events:{ log: '*', response: '*' },
-        config: { path: config.get('logPath'), prefix: 'node', rotate: 'daily' }
-    }]
-};
-
-// Set up DB
-//var userDB = { john: config.defaultUser };
-
-redisClient.on('error', function() {
-    console.log('Failed to connect to redis server.');
-}).on('connect', function() {
-    console.log('Connected to redis server successfully.');
-});
+var goodConfig = require('./lib/utils/get-good-config.js')();
+var redisConfig = require('./lib/utils/get-redis-config.js')();
 
 // Set up Server
 var server = new hapi.Server();
@@ -71,6 +45,7 @@ process.stderr.on('data', function(data) {
  *   `function(error, credentials){ ... }`
  */
 var getHawkCredentials = function(id, callback) {
+    var redisClient = server.plugins['hapi-redis'];
     redisClient.hgetall(id, function(err, credentials) {
         if (!credentials) {
             callback(null, false);
@@ -80,6 +55,23 @@ var getHawkCredentials = function(id, callback) {
     });
 };
 
+server.register(
+    {
+        register: require('hapi-redis'),
+        options: redisConfig
+    },
+    function handleFirstRegistration(err) {
+        if (err) {
+            server.log('Error loading plugins');
+            server.log(err.toString);
+            throw err;
+        }
+
+        registerOtherPlugins();
+    }
+
+);
+
 /**
  * Generate a plugin array, including all route plugins under lib/app_routes
  * @return {array}
@@ -87,12 +79,15 @@ var getHawkCredentials = function(id, callback) {
 var setPlugins = function() {
     var plugins = [
         require('inject-then'),
+        {
+            register: require('hapi-redis'),
+            options: redisConfig
+        },
         basic,
         hawk,
         {
             register: good,
-            options: goodOptions
-        },
+            options: goodConfig},
         {
             register: require('hapi-bookshelf-models'),
             options: {
@@ -109,7 +104,7 @@ var setPlugins = function() {
         newRoute = {
             register: require(file),
             options: {
-                redisClient: redisClient,
+                redisClient: server.plugins['hapi-redis'],
                 relations: server.plugins.hapiRelations
             }
         };
@@ -124,87 +119,91 @@ server.app.pluginsRegistered = new Promise(function(res, rej) {
     server.app.rejectPluginsRegistered = rej;
 });
 
-server.register(
-    setPlugins(),
-    function pluginError(err) {
-        if (err) {
-            console.log('Failed loading plugin: ' + err);
-            server.app.rejectPluginsRegistered(err);
-        }
-
-        console.log('testing bookshelf-plugs');
-        var Study = server.plugins.bookshelf.model('Study');
-        console.log(typeof Study);
-
-        // jscs:disable
-        console.log(new Study({study_id: 347})); // jshint ignore:line
-        // jscs:enable
-        https.auth.strategy(
-            'default',
-            'hawk',
-            { getCredentialsFunc: getHawkCredentials }
-        );
-        https.auth.default('default');
-
-        // Mock relations plugin
-        server.plugins.relations = require('relations');
-        var relationsSchema = require(config.get('permissionsSchemaPath'));
-        var loadSchema = require('./lib/permissions/load-schema.js');
-        loadSchema(server.plugins.relations, relationsSchema);
-
-        // Wrap models with Shield
-        var shield = require('bookshelf-shield');
-        var shieldConfig = config.get('shieldConfig');
-
-        // no shield config for User and UserStudyRole models yet
-        //var models = server.plugins.bookshelf._models;
-        var models = {
-            Study: server.plugins.bookshelf.model('Study')
-        };
-        shield({
-            models: models,
-            config: shieldConfig,
-            acl: server.plugins.relations
-        });
-
-        http.route({
-            method: '*',
-            path: '/{path*}',
-            handler: function(request, reply) {
-                var url = require('url');
-                var newUrl = url.format({
-                    protocol: 'https',
-                    hostname: request.info.hostname,
-                    port: config.get('httpsPort'),
-                    pathname: request.url.path,
-                    query: request.query
-                });
-
-                //reply('Please use https instead of http.');
-                reply.redirect(newUrl);
+function registerOtherPlugins() {
+    return server.register(
+        setPlugins(),
+        function pluginError(err) {
+            if (err) {
+                console.log('Failed loading plugin: ' + err);
+                server.app.rejectPluginsRegistered(err);
             }
-        });
 
-        // Hawk protected route:
-        // Requests must provide valid hawk signature
-        https.route({
-            method: 'GET',
-            path: '/restricted',
-            config: {
-                handler: function(request, reply) {
-                    console.log('request received');
-                    reply('top secret');
-                }
-            }
-        });
+            console.log('testing bookshelf-plugs');
+            var Study = server.plugins.bookshelf.model('Study');
+            console.log(typeof Study);
 
-        if (!module.parent) {
-            server.start(function() {
-                console.log('server running at: ' + server.info.uri);
+            // jscs:disable
+            console.log(new Study({study_id: 347})); // jshint ignore:line
+            // jscs:enable
+            https.auth.strategy(
+                'default',
+                'hawk',
+                { getCredentialsFunc: getHawkCredentials }
+            );
+            https.auth.default('default');
+
+            // Mock relations plugin
+            server.plugins.relations = require('relations');
+            var relationsSchema = require(config.get('permissionsSchemaPath'));
+            var loadSchema = require('./lib/permissions/load-schema.js');
+            loadSchema(server.plugins.relations, relationsSchema);
+
+            // Wrap models with Shield
+            var shield = require('bookshelf-shield');
+            var shieldConfig = config.get('shieldConfig');
+
+            // no shield config for User and UserStudyRole models yet
+            //var models = server.plugins.bookshelf._models;
+            var models = {
+                Study: server.plugins.bookshelf.model('Study')
+            };
+            shield({
+                models: models,
+                config: shieldConfig,
+                acl: server.plugins.relations
             });
+
+            http.route({
+                method: '*',
+                path: '/{path*}',
+                handler: function(request, reply) {
+                    var url = require('url');
+                    var newUrl = url.format({
+                        protocol: 'https',
+                        hostname: request.info.hostname,
+                        port: config.get('httpsPort'),
+                        pathname: request.url.path,
+                        query: request.query
+                    });
+
+                    //reply('Please use https instead of http.');
+                    reply.redirect(newUrl);
+                }
+            });
+
+            // Hawk protected route:
+            // Requests must provide valid hawk signature
+            https.route({
+                method: 'GET',
+                path: '/restricted',
+                config: {
+                    handler: function(request, reply) {
+                        console.log('request received');
+                        reply('top secret');
+                    }
+                }
+            });
+
+            if (!module.parent) {
+                server.start(function() {
+                    console.log('server running at: ' + server.info.uri);
+                });
+            }
+
+            server.app.resolvePluginsRegistered();
         }
 
-        server.app.resolvePluginsRegistered();
-    });
+    );
+}
 
 module.exports = server;

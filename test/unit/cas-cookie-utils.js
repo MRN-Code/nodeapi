@@ -74,4 +74,10 @@ describe('casCookieUtils', () => {
         });
 
     });
+
+    describe('invalidate', () => {
+        it('should return an invalidated string', () => {
+            return casCookieUtils.invalidate().should.equal('LOGGEDOUT');
+        });
+    });
 });

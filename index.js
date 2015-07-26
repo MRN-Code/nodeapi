@@ -33,13 +33,15 @@ process.stderr.on('data', function(data) {
 /**
  * get stored hawk credentials from db
  * @param {string} id - the id (public key)
- * @param {function} callbck - callback with signature:
+ * @param {function} callback - callback with signature:
  *   `function(error, credentials){ ... }`
  */
 function getHawkCredentials(id, callback) {
     var redisClient = server.plugins['hapi-redis'].client;
     redisClient.hgetall(id, function(err, credentials) {
-        if (!credentials) {
+        if (err) {
+            callback(err, false);
+        } else if (!credentials) {
             callback(null, false);
         } else {
             callback(null, credentials);
@@ -52,6 +54,7 @@ var plugins = [
         register: require('hapi-redis'),
         options: redisConfig
     },
+    require('inject-then'),
     require('hapi-auth-basic'),
     require('hapi-auth-hawk'),
     {
@@ -70,7 +73,10 @@ var plugins = [
             models: './lib/models/'
         }
     },
-    require('./lib/utils/register-routes.js')
+    {
+        register: require('./lib/utils/register-routes.js'),
+        options: { routesPath: 'lib/app-routes' }
+    }
 ];
 server.register(
     plugins,

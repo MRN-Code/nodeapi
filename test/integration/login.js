@@ -41,7 +41,7 @@ describe('Login Route', () => {
 
     describe('Unsuccessul login', () => {
         let responsePromise;
-        before(() => {
+        before('Attempt to login', () => {
             const authHeader = generateAuthHeader('wrongUser', 'wrongPwd');
             const request = {
                 method: 'GET',

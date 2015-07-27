@@ -39,6 +39,13 @@
                 "authKey": "study_id",
                 "aclContextName": "study"
             }
+        },
+        {
+            "defaults": {
+                "modelName": "Scan",
+                "authKey": "study_id",
+                "aclContextName": "study"
+            }
         }
     ]
 }

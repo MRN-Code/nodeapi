@@ -121,6 +121,13 @@ var setPlugins = function () {
                 plugins: ['registry'],
                 models: './lib/models/',
             }
+        },
+        {
+            register: require('../hapi-relations'),
+            options: {
+                template: config.get('permissionsSchemaPath'),
+                client: redisClient
+            }
         }
     ];
 
@@ -224,9 +231,9 @@ server.register(
         https.auth.default('default');
 
         // Mock relations plugin
-        server.plugins.relations = require('relations');
-        var relationsSchema = require(config.get('permissionsSchemaPath'));
-        require('./lib/permissions/load-schema.js')(server.plugins.relations, relationsSchema);
+        // server.plugins.relations = require('relations');
+        // var relationsSchema = require(config.get('permissionsSchemaPath'));
+        // require('./lib/permissions/load-schema.js')(server.plugins.relations, relationsSchema);
 
         // Wrap models with Shield
         var shield = require('bookshelf-shield');
@@ -234,14 +241,15 @@ server.register(
         // no shield config for User and UserStudyRole models yet
         //var models = server.plugins.bookshelf._models;
         var models = {
-            Study: server.plugins.bookshelf.model('Study')
+            Study: server.plugins.bookshelf.model('Study'),
+            Scan: server.plugins.bookshelf.model('Scan')
         }
 
 
         shield({
             models: models,
             config: shieldConfig,
-            acl: server.plugins.relations
+            acl: server.plugins.hapiRelations
         });
 
         http.route({

@@ -35,29 +35,6 @@ describe('Authentication Test', function() {
         });
     });
 
-    it('should log in successfully', function(done) {
-        request = {
-            method: 'GET',
-            url: 'http://localhost/login',
-            headers: {
-                Authorization: 'Basic ' + (new Buffer('mochatest:mocha')).toString('base64')
-            }
-        };
-
-        server.inject(request, function(response) {
-            //console.dir(response.result);
-            response.statusCode.should.equal(200);
-            credentials = JSON.parse(response.payload);
-            credentials.should.be.an.instanceOf(Object);
-            credentials.should.have.property('id');
-            credentials.should.have.property('key');
-            credentials.should.have.property('algorithm');
-            credentials.should.have.property('issueTime');
-            credentials.should.have.property('expireTime');
-            done();
-        });
-    });
-
     it('should list all keys', function(done) {
         var url = 'http://localhost/profile/keys';
         var header = generateHawkHeader(url, 'GET');

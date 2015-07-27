@@ -1,285 +1,168 @@
 'use strict';
 
-var fs = require('fs');
 var hapi = require('hapi');
-var basic = require('hapi-auth-basic');
-var hawk = require('hapi-auth-hawk');
-var good = require('good');
-var boom = require('boom');
 var config = require('config');
-var redis = require('redis');
-var redisClient = redis.createClient(
-    config.get('redis').port,
-    config.get('redis').host
-);
-var glob = require('glob');
 
-var dbmap = require(config.get('dbMapPath'));
-var dbconfig;
-if (process.env.NODE_ENV === 'production') {
-    dbconfig =  dbmap.prd.node_api;
-} else if(process.env.NODE_ENV === 'development') {
-    dbconfig =  dbmap.dev.node_api;
-} else if(process.env.NODE_ENV === 'staging') {
-    dbconfig =  dbmap.training.node_api;
-} else {
-    throw new Error ('unrecognised database environment: `' + process.env.NODE_ENV + '`');
-}
-
-var knexConfig = {
-    debug: true,
-    client: 'pg',
-    connection: {
-        host: dbconfig.host,
-        port: 5432,
-        user: dbconfig.username,
-        password: dbconfig.password,
-        database: dbconfig.db
-    },
-    pool: {
-        min: 1,
-        max: 10
-    }
-};
-var goodOptions = {
-    reporters: [{
-        reporter: require('good-console'),
-        events:{ log: '*', response: '*' }
-    }, {
-        reporter: require('good-file'),
-        events:{ log: '*', response: '*' },
-        config: { path: config.get('logPath'), prefix: 'node', rotate: 'daily' }
-    }]
-};
-
-// Set up DB
-//var userDB = { john: config.defaultUser };
-
-redisClient.on('error', function() {
-    console.log('Failed to connect to redis server.');
-}).on('connect', function() {
-    console.log('Connected to redis server successfully.');
-});
+var knexConfig = require('./lib/utils/get-knex-config.js')();
+var goodConfig = require('./lib/utils/get-good-config.js')();
+var redisConfig = require('./lib/utils/get-redis-config.js')();
+var connectionConfig = require('./lib/utils/get-connection-options.js')();
+var mcryptAuthKey = require('./lib/utils/get-mcrypt-key.js')();
 
 // Set up Server
 var server = new hapi.Server();
-var httpsOptions = {
-    labels: ['https'],
-    port: config.get('httpsPort')
-};
-var httpOption = {
-    labels: ['http'],
-    port: config.get('httpPort')
-};
-if (config.has('sslCertPath')) {
-    httpsOptions.tls = require('./lib/utils/sslCredentials.js');
-}
-var https = server.connection(httpsOptions);
-var http = server.connection(httpOption);
+var https = server.connection(connectionConfig.https);
+var http = server.connection(connectionConfig.http);
 
-// load mcrypt auth key
-server.app.authKey = fs.readFileSync(config.get('dbEncryptionKeyPath')).toString().trim();
+// Set server-wide authKey
+server.app.authKey = mcryptAuthKey;
 
+// Set promise to be resolved when server is ready.
+// Useful for testing
+server.app.pluginsRegistered = new Promise(function(res, rej) {
+    server.app.resolvePluginsRegistered = res;
+    server.app.rejectPluginsRegistered = rej;
+});
+
+// Redirect stderr to server logs
 process.stderr.on('data', function(data) {
-    console.log(data);
+    server.log(data);
 });
 
 // Helper functions
 /**
  * get stored hawk credentials from db
  * @param {string} id - the id (public key)
- * @param {function} callbck - callback with signature:
+ * @param {function} callback - callback with signature:
  *   `function(error, credentials){ ... }`
  */
-var getHawkCredentials = function(id, callback) {
+function getHawkCredentials(id, callback) {
+    var redisClient = server.plugins['hapi-redis'].client;
     redisClient.hgetall(id, function(err, credentials) {
-        if (!credentials) {
+        if (err) {
+            callback(err, false);
+        } else if (!credentials) {
             callback(null, false);
         } else {
             callback(null, credentials);
         }
     });
-};
+}
 
-/**
- * Generate a plugin array, including all route plugins under lib/app_routes
- * @return {array}
- */
-var setPlugins = function () {
-    var plugins = [
+var plugins = [
+    {
+        register: require('hapi-redis'),
+        options: redisConfig
+    },
         require('inject-then'),
-        basic,
-        hawk,
-        {
-            register: good,
-            options: goodOptions
-        },
-        {
-            register: require('hapi-bookshelf-models'),
-            options: {
-                knex: knexConfig,
-                plugins: ['registry'],
-                models: './lib/models/',
-            }
-        },
-        {
-            register: require('../hapi-relations'),
-            options: {
-                template: config.get('permissionsSchemaPath'),
-                client: redisClient
-            }
+        require('hapi-auth-basic'),
+        require('hapi-auth-hawk'),
+    {
+        register: require('hapi-redis'),
+        options: redisConfig
+    },
+    {
+        register: require('good'),
+        options: goodConfig
+    },
+    {
+        register: require('hapi-bookshelf-models'),
+        options: {
+            knex: knexConfig,
+            plugins: ['registry'],
+            models: './lib/models/'
         }
-    ];
-
-    // add route plugins
-    var newRoute;
-    glob.sync('./lib/app_routes/*.js').forEach (function (file) {
-        newRoute = {
-            register: require(file),
-            options: {
-                redisClient: redisClient,
-                relations: server.plugins.hapiRelations
-            }
-        };
-        plugins.push(newRoute);
-    });
-    return plugins;
-};
-
-/**
- * Check user permission on subject operation
- * @param {object} request - request object sent from browser
- * @param {function} callback - callback function with signature (object)
- * return
- */
-var checkSubjectPermission = function (request, callback) {
-    var allowed = true;
-    var method = request.method.toUpperCase();
-    var study_id = request.url.path.split('/')[2];
-    var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.auth.credentials.username;
-    server.plugins.hapiRelations.coins('Can %s %s from %s', username, method + '_SUBJECT', study_id,
-        function (err, can) {
-            if (!can) {
-                allowed = false;
-            }
-            return callback({ allowed: allowed });
+    },
+    {
+        register: require('./lib/utils/response-formatter.js'),
+        options: {
+            excludeVarieties: ['view', 'file'],
+            excludePlugins: ['hapi-swagger']
         }
-    );
-};
-
-/**
- * Check user permission on request
- * @param {object} request - request object sent from browser
- * @param {function} callback - callback function with signature (object)
- * return
- */
-/*
-var checkPermission = function (request, callback) {
-    var url = request.url.path.toLowerCase();
-    if (url.indexOf('/study/') === 0) {
-        var method = request.method.toUpperCase();
-        var temp = url.split('/');
-        var study_id = temp[2];
-        var username = 'gr6jwhvO3hIrWRhK0LTfXA=='; //request.auth.credentials.username;
-        // Doing permission check
-        server.plugins.hapiRelations.coins('Can %s %s from %s', username, method + '_STUDY', study_id,
-            function (err, can) {
-                if (!can) {
-                    //console.log('not allowed');
-                    return callback({ allowed: false });
-                } else if (temp.indexOf('subject') > 0) {
-                    checkSubjectPermission(request, callback);
-                } else {
-                    return callback({ allowed: true });
-                }
-            }
-        );
-    } else {
-        return callback({ allowed: true });
+    },
+    {
+        register: require('./lib/utils/register-routes.js'),
+        options: { routesPath: 'lib/app-routes' }
+    },
+    {
+        register: require('hapi-swagger'),
+        options: {
+            apiVersion: require('./package.json').version
+        }
+    },
+    {
+        register: require('../hapi-relations'),
+        options: {
+            template: config.get('permissionsSchemaPath'),
+            client: redisClient
+        }
     }
-};
+];
+/*
+server.register(
+    {
+        register: require('hapi-swaggered'),
+        options: config.get('swaggerConfig')
 
-server.ext('onPostAuth', function(request, reply) {
-    var result = function (obj) {
-        if (!obj.allowed) {
-            return reply(boom.unauthorized('Insufficient Privileges'));
-        } else {
-            return reply.continue();
+    },
+    {
+        select: 'http'
+    },
+    (err) => {
+        if (err) {
+            throw err;
         }
-    };
-    checkPermission(request, result);
-});
+    }
+
+);
 */
 
-server.app.pluginsRegistered = new Promise(function(res, rej) {
-    server.app.resolvePluginsRegistered = res;
-    server.app.rejectPluginsRegistered= rej;
-}).then(function() {console.log('registered!')});
-
 server.register(
-    setPlugins(),
+    plugins,
     function pluginError(err) {
         if (err) {
-            console.log('Failed loading plugin: ' + err);
+            server.log('Failed loading plugin: ' + err);
             server.app.rejectPluginsRegistered(err);
         }
-        console.log('testing bookshelf-plugs');
-        var Study = server.plugins.bookshelf.model('Study');
-        console.log(typeof Study);
-        console.log(new Study({study_id: 347}));
-        https.auth.strategy('default', 'hawk', { getCredentialsFunc: getHawkCredentials });
+
+        https.auth.strategy(
+            'default',
+            'hawk',
+            { getCredentialsFunc: getHawkCredentials }
+        );
+
         https.auth.default('default');
 
-        // Mock relations plugin
-        // server.plugins.relations = require('relations');
-        // var relationsSchema = require(config.get('permissionsSchemaPath'));
-        // require('./lib/permissions/load-schema.js')(server.plugins.relations, relationsSchema);
-
         // Wrap models with Shield
-        var shield = require('bookshelf-shield');
-        var shieldConfig = config.get('shieldConfig');
-        // no shield config for User and UserStudyRole models yet
-        //var models = server.plugins.bookshelf._models;
-        var models = {
-            Study: server.plugins.bookshelf.model('Study'),
-            Scan: server.plugins.bookshelf.model('Scan')
-        }
-
-
-        shield({
-            models: models,
-            config: shieldConfig,
-            acl: server.plugins.hapiRelations
-        });
+        require('./lib/utils/shields-up.js');
 
         http.route({
             method: '*',
             path: '/{path*}',
             handler: function(request, reply) {
-                //reply('Please use https instead of http.');
-                reply.redirect('https://' + request.info.hostname + ':' + config.httpsPort + request.url.path);
-            }
-        });
+                var url = require('url');
+                var newUrl = url.format({
+                    protocol: 'https',
+                    hostname: request.info.hostname,
+                    port: config.get('httpsPort'),
+                    pathname: request.url.path,
+                    query: request.query
+                });
 
-        // Hawk protected route:
-        // Requests must provide valid hawk signature
-        https.route({
-            method: 'GET',
-            path: '/restricted',
-            config: {
-                handler: function (request, reply) {
-                    console.log('request received');
-                    reply('top secret');
-                }
+                //reply('Please use https instead of http.');
+                reply.redirect(newUrl);
             }
         });
 
         if (!module.parent) {
-            server.start(function () {
+            server.start(function() {
                 console.log('server running at: ' + server.info.uri);
             });
         }
+
         server.app.resolvePluginsRegistered();
-    });
+    }
+
+);
 
 module.exports = server;

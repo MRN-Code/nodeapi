@@ -1,10 +1,12 @@
 'use strict';
-module.exports = function(grunt) {
+module.exports = function() {
     return {
         options: {
-            files: 'test/*_test.js',
+            files: [ 'test/integration/*.js', 'test/unit/*.js' ],
             harmony: true,
-            harmony_arrow_functions: true
+            /* jscs:disable */
+            harmony_arrow_functions: true //jshint ignore:line
+            /* jscs:enable */
         },
         spec: {
             options: {

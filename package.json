@@ -7,14 +7,11 @@
     "test": "test"
   },
   "dependencies": {
-    "babel": "5.4.7",
     "bcrypt": "0.8.3",
-    "bluebird": "2.9.34",
     "bookshelf": "0.8.1",
     "bookshelf-shield": "1.1.0",
     "boom": "2.7.2",
     "chai": "3.2.0",
-    "co": "4.5.4",
     "config": "1.13.0",
     "glob": "5.0.10",
     "good": "6.3.0",
@@ -31,8 +28,6 @@
     "mcrypt": "0.0.14",
     "redis": "0.12.1",
     "relations": "0.5.0",
-    "thenify": "3.1.0",
-    "thenify-all": "1.6.0",
     "uuid": "2.0.1"
   },
   "devDependencies": {
@@ -48,7 +43,6 @@
     "load-grunt-tasks": "3.2.0",
     "pg": "4.3.0",
     "should": "6.0.3",
-    "supertest": "1.0.1",
     "time-grunt": "1.2.1"
   },
   "scripts": {

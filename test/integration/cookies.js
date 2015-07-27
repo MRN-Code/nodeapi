@@ -67,7 +67,7 @@ describe('Cookies', () => {
                 .then((response) => {
                     const rawCookies = response.headers['set-cookie'];
                     cookie = getCasCookieValue(rawCookies[0]);
-                    credentials = JSON.parse(response.payload);
+                    credentials = JSON.parse(response.payload).data[0];
                 });
 
             return responsePromise;

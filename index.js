@@ -73,6 +73,7 @@ var plugins = [
             models: './lib/models/'
         }
     },
+    require('./lib/utils/response-formatter.js'),
     {
         register: require('./lib/utils/register-routes.js'),
         options: { routesPath: 'lib/app-routes' }

@@ -76,7 +76,7 @@ describe('Logout Route', () => {
                 }
             };
             responsePromise = server.injectThen(request).then((response) => {
-                credentials = JSON.parse(response.payload);
+                credentials = JSON.parse(response.payload).data[0];
             }).then(() => {
                 const url = baseUrl + '/' + credentials.id;
                 const header = generateHawkHeader(url, 'GET');

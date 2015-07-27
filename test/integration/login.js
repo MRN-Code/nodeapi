@@ -86,7 +86,7 @@ describe('Login Route', () => {
 
         it('Should should return a hawk auth object in payload', () => {
             return responsePromise.then((response) => {
-                credentials = JSON.parse(response.payload);
+                credentials = JSON.parse(response.payload).data[0];
                 credentials.should.to.be.instanceOf(Object);
                 credentials.should.to.have.property('id');
                 credentials.should.to.have.property('key');

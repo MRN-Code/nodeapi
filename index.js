@@ -94,7 +94,7 @@ var plugins = [
         register: require('../hapi-relations'),
         options: {
             template: config.get('permissionsSchemaPath'),
-            client: redisClient
+            client: 'hapi-redis'
         }
     }
 ];

@@ -73,12 +73,43 @@ var plugins = [
             models: './lib/models/'
         }
     },
-    require('./lib/utils/response-formatter.js'),
+    {
+        register: require('./lib/utils/response-formatter.js'),
+        options: {
+            excludeVarieties: ['view', 'file'],
+            excludePlugins: ['hapi-swagger']
+        }
+    },
     {
         register: require('./lib/utils/register-routes.js'),
         options: { routesPath: 'lib/app-routes' }
+    },
+    {
+        register: require('hapi-swagger'),
+        options: {
+            apiVersion: require('./package.json').version
+        }
     }
 ];
+/*
+server.register(
+    {
+        register: require('hapi-swaggered'),
+        options: config.get('swaggerConfig')
+
+    },
+    {
+        select: 'http'
+    },
+    (err) => {
+        if (err) {
+            throw err;
+        }
+    }
+
+);
+*/
+
 server.register(
     plugins,
     function pluginError(err) {

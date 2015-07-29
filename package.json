@@ -47,7 +47,8 @@
     "time-grunt": "1.2.1"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test",
+    "start": "node --harmony-arrow-functions index.js"
   },
   "repository": {
     "type": "git",

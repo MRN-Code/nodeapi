@@ -1,9 +1,9 @@
 'use strict';
 
-const hawk = require('hawk');
 const chai = require('chai');
 const config = require('config');
 const server = require('../../');
+const authUtils = require('../util/authentication.js');
 
 const baseUrl = 'http://localhost/auth/cookies';
 /* jscs: disable */
@@ -14,30 +14,6 @@ let credentials;
 
 // Set should property of all objects for BDD assertions
 chai.should();
-
-/**
- * generate the authentication header expected by login route
- * @param  {string} username
- * @param  {string} password
- * @return {string} The complete authorization header value
- */
-function generateAuthHeader(username, password) {
-    return [
-        'Basic',
-        (new Buffer(`${username}:${password}`)).toString('base64')
-    ].join(' ');
-}
-
-/**
- * generate the header expected by Hawk.
- * Uses the `credentials` var in the parent closure.
- * @param  {string} url
- * @param  {string} method e.g. 'GET'
- * @return {string} The hawk auth signature
- */
-function generateHawkHeader(url, method) {
-    return hawk.client.header(url, method, { credentials: credentials });
-}
 
 /**
  * extract the cookie value from the set-cookie header
@@ -55,15 +31,7 @@ describe('Cookies', () => {
     let responsePromise;
     before('wait for server to be ready', () => {
         return server.app.pluginsRegistered.then(() => {
-            const authHeader = generateAuthHeader('mochatest', 'mocha');
-            const request = {
-                method: 'GET',
-                url: 'http://localhost/auth/login',
-                headers: {
-                    Authorization: authHeader
-                }
-            };
-            responsePromise = server.injectThen(request)
+            responsePromise = authUtils.login(server, 'mochatest', 'mocha')
                 .then((response) => {
                     const rawCookies = response.headers['set-cookie'];
                     cookie = getCasCookieValue(rawCookies[0]);
@@ -71,16 +39,6 @@ describe('Cookies', () => {
                 });
 
             return responsePromise;
-        });
-    });
-
-    it('Should respond with 400 for invalid cookies', () => {
-        const request = {
-            method: 'GET',
-            url: baseUrl + '/InvalidCookieString'
-        };
-        return server.injectThen(request).then((response) => {
-            response.statusCode.should.equal(400);
         });
     });
 
@@ -115,24 +73,20 @@ describe('Cookies', () => {
     });
 
     it('Should respond with 401 after logout', () => {
-        const url = 'http://localhost/auth/logout/' + credentials.id;
-        const header = generateHawkHeader(url, 'GET');
-        const request = {
-            method: 'GET',
-            url: url,
-            headers: {
-                Authorization: header.field
-            }
-        };
-        responsePromise = server.injectThen(request).then(() => {
+        responsePromise = authUtils.logout(server).then(() => {
+            const method = 'GET';
+            const url = baseUrl + '/' + cookie;
             const request = {
-                method: 'GET',
-                url: baseUrl + '/' + cookie
+                method: method,
+                url: url,
+                headers: authUtils.generateHawkHeader(url, method).field
             };
             return server.injectThen(request).then((response) => {
                 response.statusCode.should.equal(401);
+                return response;
             });
         });
+
         return responsePromise;
     });
 

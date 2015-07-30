@@ -1,95 +1,24 @@
 'use strict';
 
-const hawk = require('hawk');
 const chai = require('chai');
 const server = require('../../');
-
-const baseUrl = 'http://localhost/auth/logout';
-let credentials;
+const authUtils = require('../util/authentication.js');
 
 // Set should property of all objects for BDD assertions
 chai.should();
-
-/**
- * generate the header expected by Hawk.
- * Uses the `credentials` var in the parent closure.
- * @param  {string} url
- * @param  {string} method e.g. 'GET'
- * @return {string} The hawk auth signature
- */
-function generateHawkHeader(url, method) {
-    return hawk.client.header(url, method, { credentials: credentials });
-}
-
-/**
- * generate the authentication header expected by login route
- * @param  {string} username
- * @param  {string} password
- * @return {string} The complete authorization header value
- */
-function generateAuthHeader(username, password) {
-    return [
-        'Basic',
-        (new Buffer(`${username}:${password}`)).toString('base64')
-    ].join(' ');
-}
 
 describe('Logout Route', () => {
     before('wait for server to be ready', () => {
         return server.app.pluginsRegistered;
     });
 
-    describe ('Already logged out', () => {
-        const url = baseUrl + '/invalidHawkId';
-        let responsePromise;
-        before(() => {
-            const header = generateHawkHeader(url, 'GET');
-            const request = {
-                method: 'GET',
-                url: url,
-                headers: {
-                    Authorization: header.field
-                }
-            };
-            responsePromise = server.injectThen(request);
-            return responsePromise;
-        });
-
-        it('Should respond with 401 unauthorized', () => {
-            return responsePromise.then((response) => {
-                response.statusCode.should.equal(401);
-                return response;
-            });
-        });
-
-    });
-
     describe ('Successful logout', () => {
         let responsePromise;
         before('Login first, then logout', () => {
-            const authHeader = generateAuthHeader('mochatest', 'mocha');
-            const request = {
-                method: 'GET',
-                url: 'http://localhost/auth/login',
-                headers: {
-                    Authorization: authHeader
-                }
-            };
-            responsePromise = server.injectThen(request).then((response) => {
-                credentials = JSON.parse(response.payload).data[0];
-            }).then(() => {
-                const url = baseUrl + '/' + credentials.id;
-                const header = generateHawkHeader(url, 'GET');
-                const request = {
-                    method: 'GET',
-                    url: url,
-                    headers: {
-                        Authorization: header.field
-                    }
-                };
-                responsePromise = server.injectThen(request);
-                return responsePromise;
-            });
+            responsePromise = authUtils.login(server, 'mochatest', 'mocha')
+                .then(() => {
+                    return authUtils.logout(server);
+                });
 
             return responsePromise;
         });
@@ -117,7 +46,8 @@ describe('Logout Route', () => {
             return responsePromise.then((response) => {
                 const redisClient = server.plugins['hapi-redis'].client;
                 return new Promise((res, rej) => {
-                    redisClient.hgetall(credentials.id, (result) => {
+                    const id = authUtils.getCredentials().id;
+                    redisClient.hgetall(id, (result) => {
                         if (result !== null) {
                             rej(new Error('Hawk key should no longer exist'));
                             return;
@@ -132,4 +62,31 @@ describe('Logout Route', () => {
         it('Should prohibit access to restricted resources');
     });
 
+    describe ('Already logged out', () => {
+        let loggedInAndOut = false;
+        let responsePromise;
+        before(() => {
+            responsePromise = authUtils.login(server, 'mochatest', 'mocha')
+                .then(() => {
+                    return authUtils.logout(server);
+                })
+                .then(() => {
+                    loggedInAndOut = true;
+                    return authUtils.logout(server);
+                })
+                .catch((err) => {
+                    return err.data;
+                });
+
+            return responsePromise;
+        });
+
+        it('Should respond with 401 unauthorized', () => {
+            return responsePromise.then((response) => {
+                loggedInAndOut.should.equal(true);
+                response.statusCode.should.equal(401);
+                return response;
+            });
+        });
+    });
 });

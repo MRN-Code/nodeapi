@@ -14,41 +14,7 @@ var server = new hapi.Server();
 var https = server.connection(connectionConfig.https);
 var http = server.connection(connectionConfig.http);
 
-// Set server-wide authKey
-server.app.authKey = mcryptAuthKey;
-
-// Set promise to be resolved when server is ready.
-// Useful for testing
-server.app.pluginsRegistered = new Promise(function(res, rej) {
-    server.app.resolvePluginsRegistered = res;
-    server.app.rejectPluginsRegistered = rej;
-});
-
-// Redirect stderr to server logs
-process.stderr.on('data', function(data) {
-    server.log(data);
-});
-
-// Helper functions
-/**
- * get stored hawk credentials from db
- * @param {string} id - the id (public key)
- * @param {function} callback - callback with signature:
- *   `function(error, credentials){ ... }`
- */
-function getHawkCredentials(id, callback) {
-    var redisClient = server.plugins['hapi-redis'].client;
-    redisClient.hgetall(id, function(err, credentials) {
-        if (err) {
-            callback(err, false);
-        } else if (!credentials) {
-            callback(null, false);
-        } else {
-            callback(null, credentials);
-        }
-    });
-}
-
+// Define plugins
 var plugins = [
     {
         register: require('hapi-redis'),
@@ -91,24 +57,21 @@ var plugins = [
         }
     }
 ];
-/*
-server.register(
-    {
-        register: require('hapi-swaggered'),
-        options: config.get('swaggerConfig')
 
-    },
-    {
-        select: 'http'
-    },
-    (err) => {
-        if (err) {
-            throw err;
-        }
-    }
+// Set server-wide authKey
+server.app.authKey = mcryptAuthKey;
 
-);
-*/
+// Set promise to be resolved when server is ready.
+// Useful for testing
+server.app.pluginsRegistered = new Promise(function(res, rej) {
+    server.app.resolvePluginsRegistered = res;
+    server.app.rejectPluginsRegistered = rej;
+});
+
+// Redirect stderr to server logs
+process.stderr.on('data', function(data) {
+    server.log(data);
+});
 
 server.register(
     plugins,
@@ -118,10 +81,13 @@ server.register(
             server.app.rejectPluginsRegistered(err);
         }
 
+        var redisClient = server.plugins['hapi-redis'].client;
+        var authUtils = require('./lib/utils/authentication.js')(redisClient);
+
         https.auth.strategy(
             'default',
             'hawk',
-            { getCredentialsFunc: getHawkCredentials }
+            { getCredentialsFunc: authUtils.getHawkCredentials }
         );
 
         https.auth.default('default');

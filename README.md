@@ -40,16 +40,16 @@ Authentication credentials and ACL permissions are stored in
 a redis datastore. You need to have redis installed and running
 before starting the server.
 
-On Linux:
+On Linux (Ubuntu):
 ```
-apt-get install redis;
+apt-get install redis-server;
 redis-server &
 ```
 
 On Mac:
 ```
 brew install redis
-redis-server &
+redis-server /usr/local/etc/redis.conf &
 ```
 
 ### coins_auth

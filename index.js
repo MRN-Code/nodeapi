@@ -10,7 +10,13 @@ var connectionConfig = require('./lib/utils/get-connection-options.js')();
 var mcryptAuthKey = require('./lib/utils/get-mcrypt-key.js')();
 
 // Set up Server
-var server = new hapi.Server();
+var server = new hapi.Server({
+    connections: {
+        routes: {
+            cors: true
+        }
+    }
+});
 var https = server.connection(connectionConfig.https);
 var http = server.connection(connectionConfig.http);
 

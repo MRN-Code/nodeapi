@@ -81,8 +81,7 @@ server.register(
             server.app.rejectPluginsRegistered(err);
         }
 
-        var redisClient = server.plugins['hapi-redis'].client;
-        var authUtils = require('./lib/utils/authentication.js')(redisClient);
+        var authUtils = require('./lib/utils/authentication.js')(server);
 
         https.auth.strategy(
             'default',

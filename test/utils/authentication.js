@@ -23,16 +23,16 @@ function generateHawkHeader(url, method) {
 }
 
 /**
- * generate the authentication header expected by login route
+ * generate the authentication payload expected by POST /auth/keys route
  * @param  {string} username
  * @param  {string} password
- * @return {string} The complete authorization header value
+ * @return {object} object to be sent as POST data to /auth/keys
  */
-function generateAuthHeader(username, password) {
-    return [
-        'Basic',
-        (new Buffer(`${username}:${password}`)).toString('base64')
-    ].join(' ');
+function generateAuthPayload(username, password) {
+    return {
+        username: new Buffer(username). toString('base64'),
+        password: new Buffer(password). toString('base64')
+    };
 }
 
 /**
@@ -45,13 +45,11 @@ function generateAuthHeader(username, password) {
  *                           the full response object
  */
 function login(server, username, password) {
-    const authHeader = generateAuthHeader(username, password);
+    const authPayload = generateAuthPayload(username, password);
     const request = {
-        method: 'GET',
-        url: baseUrl + '/login',
-        headers: {
-            Authorization: authHeader
-        }
+        method: 'POST',
+        url: baseUrl + '/keys',
+        payload: authPayload
     };
     const responsePromise = server.injectThen(request)
         .then((response) => {
@@ -81,10 +79,11 @@ function login(server, username, password) {
  */
 function logout(server, id) {
     id = id || internals.state.credentials.id;
-    const url = baseUrl + '/logout/' + id;
-    const header = generateHawkHeader(url, 'GET');
+    const url = baseUrl + '/keys/' + id;
+    const method = 'DELETE';
+    const header = generateHawkHeader(url, method);
     const request = {
-        method: 'GET',
+        method: method,
         url: url,
         headers: {
             Authorization: header.field
@@ -127,4 +126,4 @@ module.exports.logout = logout;
 module.exports.setCredentials = setCredentials;
 module.exports.getCredentials = getCredentials;
 module.exports.generateHawkHeader = generateHawkHeader;
-module.exports.generateAuthHeader = generateAuthHeader;
+module.exports.generateAuthPayload = generateAuthPayload;

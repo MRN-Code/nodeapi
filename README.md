@@ -1,6 +1,63 @@
 # nodeapi
 node based API for COINS
 
+# Requirements
+
+If you miss any of these requirements, remove all node modules and reinstall them
+after installing the requirements.
+
+### io.js
+In order to support ES2015 Specifications, it is best to run this application
+with io.js. If you don't have io.js installed, we recommend using the `n`
+package to manage your node versions:
+
+```
+npm i -g n
+```
+
+Then install io.js
+
+```
+n io latest
+```
+
+### mcrypt
+This package uses the [mcrypt](https://github.com/tugrul/node-mcrypt) package,
+which relies on some system-level dependencies.
+
+On Linux:
+```
+apt-get install libmcrypt4 libmcrypt-dev
+```
+
+On Mac:
+```
+brew install mcrypt
+```
+
+### redis
+Authentication credentials and ACL permissions are stored in
+a redis datastore. You need to have redis installed and running
+before starting the server.
+
+On Linux:
+```
+apt-get install redis;
+redis-server &
+```
+
+On Mac:
+```
+brew install redis
+redis-server &
+```
+
+### coins_auth
+Database connection parameters are expected to be found at `/coins/coins_auth/conn/dbmap.json`.
+Be sure to clone our coins_auth repo (private) to `/coins/coins_auth`.
+In addition, checkout the **nodeapi** branch of *coins_auth*, grab a copy of
+`coinscredentials.json` from another server, and run **grunt decrypt** in coins_auth/.
+
 # Design Specifications
 ## Response format
 All responses are a JSON string which parses to an object of the following format:

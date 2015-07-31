@@ -3,7 +3,7 @@
 const chai = require('chai');
 const config = require('config');
 const server = require('../../');
-const authUtils = require('../util/authentication.js');
+const authUtils = require('../utils/authentication.js');
 
 const baseUrl = 'http://localhost/auth/cookies';
 /* jscs: disable */

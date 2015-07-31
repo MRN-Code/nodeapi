@@ -2,7 +2,7 @@
 
 const chai = require('chai');
 const server = require('../../');
-const authUtils = require('../util/authentication.js');
+const authUtils = require('../utils/authentication.js');
 
 let credentials;
 

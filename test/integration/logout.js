@@ -2,7 +2,7 @@
 
 const chai = require('chai');
 const server = require('../../');
-const authUtils = require('../util/authentication.js');
+const authUtils = require('../utils/authentication.js');
 
 // Set should property of all objects for BDD assertions
 chai.should();

@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "bcrypt": "0.8.3",
+    "bluebird": "2.9.34",
     "bookshelf": "0.8.1",
     "bookshelf-shield": "1.1.0",
     "boom": "2.7.2",
@@ -30,7 +31,6 @@
     "mcrypt": "git+https://github.com/MRN-Code/node-mcrypt.git",
     "redis": "0.12.1",
     "relations": "0.5.0",
-    "thenify": "3.1.0",
     "uuid": "2.0.1"
   },
   "devDependencies": {

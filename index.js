@@ -1,92 +1,68 @@
 'use strict';
 
-var hapi = require('hapi');
-var config = require('config');
-
-var knexConfig = require('./lib/utils/get-knex-config.js')();
-var goodConfig = require('./lib/utils/get-good-config.js')();
-var redisConfig = require('./lib/utils/get-redis-config.js')();
-var connectionConfig = require('./lib/utils/get-connection-options.js')();
-var mcryptAuthKey = require('./lib/utils/get-mcrypt-key.js')();
+const hapi = require('hapi');
+const config = require('config');
+const Promise = require('bluebird');
+const _ = require('lodash');
+const connectionConfig = require('./lib/utils/get-connection-options.js')();
+const mcryptAuthKey = require('./lib/utils/get-mcrypt-key.js')();
+const plugins = require('./lib/utils/get-plugins.js')();
 
 // Set up Server
-var server = new hapi.Server({
+const server = new hapi.Server({
     connections: {
         routes: {
             cors: true
         }
     }
 });
+
+server.registerThen = Promise.promisify(server.register);
 var https = server.connection(connectionConfig.https);
 var http = server.connection(connectionConfig.http);
 
-// Define plugins
-var plugins = [
-    {
-        register: require('hapi-redis'),
-        options: redisConfig
-    },
-    require('inject-then'),
-    require('hapi-auth-basic'),
-    require('hapi-auth-hawk'),
-    {
-        register: require('hapi-redis'),
-        options: redisConfig
-    },
-    {
-        register: require('good'),
-        options: goodConfig
-    },
-    {
-        register: require('hapi-bookshelf-models'),
-        options: {
-            knex: knexConfig,
-            plugins: ['registry'],
-            models: './lib/models/'
-        }
-    },
-    {
-        register: require('./lib/utils/response-formatter.js'),
-        options: {
-            excludeVarieties: ['view', 'file'],
-            excludePlugins: ['hapi-swagger']
-        }
-    },
-    {
-        register: require('./lib/utils/register-routes.js'),
-        options: { routesPath: 'lib/app-routes' }
-    },
-    {
-        register: require('hapi-swagger'),
-        options: {
-            apiVersion: require('./package.json').version
-        }
-    }
-];
+Promise.onPossiblyUnhandledRejection((err) => {
+    server.log(['error', 'unhandled-rejection'], err);
+});
 
 // Set server-wide authKey
 server.app.authKey = mcryptAuthKey;
-
-// Set promise to be resolved when server is ready.
-// Useful for testing
-server.app.pluginsRegistered = new Promise(function(res, rej) {
-    server.app.resolvePluginsRegistered = res;
-    server.app.rejectPluginsRegistered = rej;
-});
 
 // Redirect stderr to server logs
 process.stderr.on('data', function(data) {
     server.log(data);
 });
 
-server.register(
-    plugins,
-    function pluginError(err) {
-        if (err) {
-            server.log('Failed loading plugin: ' + err);
-            server.app.rejectPluginsRegistered(err);
-        }
+//register plugins
+server.app.pluginsRegistered = plugins.reduce((cur, config) => {
+    const plugin = {
+        register: null,
+        options:{}
+    };
 
+    if (_.isFunction(config)) {
+        plugin.register = config;
+    } else {
+        plugin.register = config.register;
+    }
+
+    if (config.options) {
+        plugin.options = config.options;
+    }
+
+    return cur.then(() => {
+        return server.registerThen(plugin, config.registrationOptions || {});
+    })
+        .then(() => {
+            if (_.isFunction(config.afterRegistration)) {
+                return config.afterRegistration(server);
+            }
+
+            return;
+        });
+
+}, Promise.resolve())
+    .then(() => {
         var authUtils = require('./lib/utils/authentication.js')(server);
 
         https.auth.strategy(
@@ -98,6 +74,7 @@ server.register(
         https.auth.default('default');
 
         // Mock relations plugin
+        // TODO: replace with actual plugin
         server.plugins.relations = require('relations');
         var relationsSchema = require(config.get('permissionsSchemaPath'));
         var loadSchema = require('./lib/permissions/load-schema.js');
@@ -129,10 +106,14 @@ server.register(
                 console.log('server running at: ' + server.info.uri);
             });
         }
+    })
+    .catch((err) => {
+        console.log(err);
+        server.log('Error loading plugins');
+        server.log(err);
+        process.exit(1);
+        throw err;
 
-        server.app.resolvePluginsRegistered();
-    }
-
-);
+    });
 
 module.exports = server;

@@ -3,6 +3,7 @@
 const chai = require('chai');
 const redis = require('fakeredis');
 const _ = require('lodash');
+const Promise = require('bluebird');
 const redisClient = redis.createClient();
 const casCookieUtils = require('../../lib/utils/cas-cookie-utils.js');
 const credentials = {
@@ -12,6 +13,8 @@ const credentials = {
 };
 
 let jwt;
+
+Promise.promisifyAll(redisClient);
 
 chai.should();
 
@@ -35,6 +38,10 @@ describe('casCookieUtils', () => {
     });
 
     describe('verifyAndParse', () => {
+        const throwErrorOnSuccess = () => {
+            throw new Error('Should have failed');
+        };
+
         it('should return a promise', () => {
             const result = casCookieUtils.verifyAndParse(jwt, redisClient);
             result.should.be.instanceOf(Promise);
@@ -52,9 +59,8 @@ describe('casCookieUtils', () => {
 
         it('should reject an invalid JWT', () => {
             return casCookieUtils.verifyAndParse('foo', redisClient)
-                .then(() => {
-                    throw new Error('Should have failed');
-                }).catch((err) => {
+                .then(throwErrorOnSuccess)
+                .catch((err) => {
                     err.should.be.instanceOf(Error);
                 });
         });
@@ -66,9 +72,8 @@ describe('casCookieUtils', () => {
             };
             const testJwt = casCookieUtils.generate(fakeCreds);
             return casCookieUtils.verifyAndParse(testJwt, redisClient)
-                .then(() => {
-                    throw new Error('Should have failed');
-                }).catch((err) => {
+                .then(throwErrorOnSuccess)
+                .catch((err) => {
                     err.should.be.instanceOf(Error);
                 });
         });

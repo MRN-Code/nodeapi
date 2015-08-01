@@ -22,6 +22,7 @@ describe('POST keys (login)', () => {
                 .catch((err) => {
                     return err.data;
                 });
+
             return responsePromise;
         });
 
@@ -131,14 +132,18 @@ describe('DELETE keys (logout)', () => {
         let loggedInAndOut = false;
         let responsePromise;
         before(() => {
+            const callLogout = () => {
+                return authUtils.logout(server);
+            };
+
+            const callLogoutAgain = () => {
+                loggedInAndOut = true;
+                return authUtils.logout(server);
+            };
+
             responsePromise = authUtils.login(server, 'mochatest', 'mocha')
-                .then(() => {
-                    return authUtils.logout(server);
-                })
-                .then(() => {
-                    loggedInAndOut = true;
-                    return authUtils.logout(server);
-                })
+                .then(callLogout)
+                .then(callLogoutAgain)
                 .catch((err) => {
                     return err.data;
                 });

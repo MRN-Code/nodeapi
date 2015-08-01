@@ -80,9 +80,9 @@ const handleAllPluginsRegistered = () => {
     http.route({
         method: '*',
         path: '/{path*}',
-        handler: function(request, reply) {
-            var url = require('url');
-            var newUrl = url.format({
+        handler: (request, reply) => {
+            const url = require('url');
+            const newUrl = url.format({
                 protocol: 'https',
                 hostname: request.info.hostname,
                 port: config.get('httpsPort'),
@@ -96,8 +96,8 @@ const handleAllPluginsRegistered = () => {
     });
 
     if (!module.parent) {
-        server.start(function() {
-            console.log('server running at: ' + server.info.uri);
+        server.start(() => {
+            server.log(['startup'], 'server running at: ' + server.info.uri);
         });
     }
 };
@@ -112,8 +112,8 @@ Promise.onPossiblyUnhandledRejection((err) => {
 server.app.authKey = mcryptAuthKey;
 
 // Redirect stderr to server logs
-process.stderr.on('data', function(data) {
-    server.log(data);
+process.stderr.on('data', (data) => {
+    server.log(['error', 'stderr'], data);
 });
 
 //register plugins

@@ -45,6 +45,7 @@
     "load-grunt-config": "0.17.1",
     "load-grunt-tasks": "3.2.0",
     "pg": "4.3.0",
+    "pouchdb": "3.6.0",
     "should": "6.0.3",
     "time-grunt": "1.2.1"
   },

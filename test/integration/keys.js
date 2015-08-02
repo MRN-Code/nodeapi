@@ -2,23 +2,35 @@
 
 const chai = require('chai');
 const server = require('../../');
-const authUtils = require('../utils/authentication.js');
-
+const initApiClient = require('../utils/init-api-client.js');
+let apiClient;
 let credentials;
+
+/**
+ * set the apiClient variable inside the parent closure
+ * @param  {object} client an initialized API Client
+ * @return {object}        the same API Client
+ */
+const setApiClient = function(client) {
+    apiClient = client;
+    return client;
+};
 
 // Set should property of all objects for BDD assertions
 chai.should();
 
 describe('POST keys (login)', () => {
     before('wait for server to be ready', () => {
-        return server.app.pluginsRegistered;
+        return server.app.pluginsRegistered
+            .then(initApiClient)
+            .then(setApiClient);
     });
 
     describe('Unsuccessul login', () => {
         let responsePromise;
 
         before('Attempt to login', () => {
-            responsePromise = authUtils.login(server, 'wrongUser', 'wrongPwd')
+            responsePromise = apiClient.auth.login('wrongUser', 'wrongPwd')
                 .catch((err) => {
                     return err.data;
                 });
@@ -38,7 +50,7 @@ describe('POST keys (login)', () => {
     describe('Successful login', () => {
         let responsePromise;
         before(() => {
-            responsePromise = authUtils.login(server, 'mochatest', 'mocha');
+            responsePromise = apiClient.auth.login('mochatest', 'mocha');
             return responsePromise;
         });
 
@@ -81,9 +93,9 @@ describe('DELETE keys (logout)', () => {
     describe ('Successful logout', () => {
         let responsePromise;
         before('Login first, then logout', () => {
-            responsePromise = authUtils.login(server, 'mochatest', 'mocha')
+            responsePromise = apiClient.auth.login('mochatest', 'mocha')
                 .then(() => {
-                    return authUtils.logout(server);
+                    return apiClient.auth.logout();
                 });
 
             return responsePromise;
@@ -112,7 +124,7 @@ describe('DELETE keys (logout)', () => {
             return responsePromise.then((response) => {
                 const redisClient = server.plugins['hapi-redis'].client;
                 return new Promise((res, rej) => {
-                    const id = authUtils.getCredentials().id;
+                    const id = apiClient.getAuthCredentials().id;
                     redisClient.hgetall(id, (result) => {
                         if (result !== null) {
                             rej(new Error('Hawk key should no longer exist'));
@@ -133,15 +145,15 @@ describe('DELETE keys (logout)', () => {
         let responsePromise;
         before(() => {
             const callLogout = () => {
-                return authUtils.logout(server);
+                return apiClient.auth.logout();
             };
 
             const callLogoutAgain = () => {
                 loggedInAndOut = true;
-                return authUtils.logout(server);
+                return apiClient.auth.logout();
             };
 
-            responsePromise = authUtils.login(server, 'mochatest', 'mocha')
+            responsePromise = apiClient.auth.login('mochatest', 'mocha')
                 .then(callLogout)
                 .then(callLogoutAgain)
                 .catch((err) => {

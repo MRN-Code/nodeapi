@@ -81,10 +81,6 @@ var plugins = [
         }
     },
     {
-        register: require('./lib/utils/register-routes.js'),
-        options: { routesPath: 'lib/app-routes' }
-    },
-    {
         register: require('hapi-swagger'),
         options: {
             apiVersion: require('./package.json').version
@@ -96,6 +92,10 @@ var plugins = [
             template: config.get('permissionsSchemaPath'),
             client: 'hapi-redis'
         }
+    },
+    {
+        register: require('./lib/utils/register-routes.js'),
+        options: { routesPath: 'lib/app-routes' }
     }
 ];
 /*

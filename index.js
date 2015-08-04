@@ -58,10 +58,6 @@ var plugins = [
         require('hapi-auth-basic'),
         require('hapi-auth-hawk'),
     {
-        register: require('hapi-redis'),
-        options: redisConfig
-    },
-    {
         register: require('good'),
         options: goodConfig
     },

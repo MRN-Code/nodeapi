@@ -2,6 +2,7 @@
 
 var hapi = require('hapi');
 var config = require('config');
+var fs = require('fs');
 
 var knexConfig = require('./lib/utils/get-knex-config.js')();
 var goodConfig = require('./lib/utils/get-good-config.js')();
@@ -49,6 +50,10 @@ function getHawkCredentials(id, callback) {
     });
 }
 
+var schema = JSON.parse(
+    fs.readFileSync(config.get('permissionsSchemaPath'), 'utf8')
+);
+
 var plugins = [
     {
         register: require('hapi-redis'),
@@ -83,10 +88,12 @@ var plugins = [
         }
     },
     {
-        register: require('../hapi-relations'),
+        register: require('hapi-relations'),
         options: {
-            template: config.get('permissionsSchemaPath'),
-            client: 'hapi-redis'
+            schema: schema,
+            client: 'hapi-redis',
+            clientType: 'redis',
+            pluginClient: true
         }
     },
     {

@@ -1,43 +1,26 @@
 'use strict';
 
-const hawk = require('hawk');
 const chai = require('chai');
 const config = require('config');
 const server = require('../../');
-
+const initApiClient = require('../utils/init-api-client.js');
 const baseUrl = 'http://localhost/auth/cookies';
 /* jscs: disable */
 const expiredCookie = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1vY2hhdGVzdCIsImlkIjoiNDY4NmQxZTYtOGZkYS00NjhiLTg0MDUtMDQzNmU2NTljMWNhIiwiaWF0IjoxNDM3OTQ3MTIyLCJleHAiOjE0Mzc5NDg5MjJ9.O8HCYEe0S5lQ5dZPNoEcrrr3yFpyXUN3Mm7BJbxeaYI'; //jshint ignore:line
 /* jscs: enable */
+let apiClient;
 let cookie;
 let credentials;
 
-// Set should property of all objects for BDD assertions
-chai.should();
-
 /**
- * generate the authentication header expected by login route
- * @param  {string} username
- * @param  {string} password
- * @return {string} The complete authorization header value
+ * set the apiClient variable inside the parent closure
+ * @param  {object} client an initialized API Client
+ * @return {object}        the same API Client
  */
-function generateAuthHeader(username, password) {
-    return [
-        'Basic',
-        (new Buffer(`${username}:${password}`)).toString('base64')
-    ].join(' ');
-}
-
-/**
- * generate the header expected by Hawk.
- * Uses the `credentials` var in the parent closure.
- * @param  {string} url
- * @param  {string} method e.g. 'GET'
- * @return {string} The hawk auth signature
- */
-function generateHawkHeader(url, method) {
-    return hawk.client.header(url, method, { credentials: credentials });
-}
+const setApiClient = function(client) {
+    apiClient = client;
+    return client;
+};
 
 /**
  * extract the cookie value from the set-cookie header
@@ -51,37 +34,29 @@ function getCasCookieValue(rawCookie) {
     return cookie;
 }
 
+/**
+ * convenience function to login with a working username and pwd
+ * @return {Promise} resolves to login response
+ */
+function login() {
+    return apiClient.auth.login('mochatest', 'mocha');
+}
+
+// Set should property of all objects for BDD assertions
+chai.should();
+
 describe('Cookies', () => {
-    let responsePromise;
     before('wait for server to be ready', () => {
-        return server.app.pluginsRegistered.then(() => {
-            const authHeader = generateAuthHeader('mochatest', 'mocha');
-            const request = {
-                method: 'GET',
-                url: 'http://localhost/auth/login',
-                headers: {
-                    Authorization: authHeader
-                }
-            };
-            responsePromise = server.injectThen(request)
-                .then((response) => {
-                    const rawCookies = response.headers['set-cookie'];
-                    cookie = getCasCookieValue(rawCookies[0]);
-                    credentials = JSON.parse(response.payload).data[0];
-                });
-
-            return responsePromise;
-        });
-    });
-
-    it('Should respond with 400 for invalid cookies', () => {
-        const request = {
-            method: 'GET',
-            url: baseUrl + '/InvalidCookieString'
-        };
-        return server.injectThen(request).then((response) => {
-            response.statusCode.should.equal(400);
-        });
+        return server.app.pluginsRegistered
+            .then(initApiClient)
+            .then(setApiClient)
+            .then(login)
+            .then((response) => {
+                const rawCookies = response.headers['set-cookie'];
+                cookie = getCasCookieValue(rawCookies[0]);
+                credentials = response.body.data[0];
+                return;
+            });
     });
 
     it('Should respond with 400 for invalid cookies', () => {
@@ -115,25 +90,31 @@ describe('Cookies', () => {
     });
 
     it('Should respond with 401 after logout', () => {
-        const url = 'http://localhost/auth/logout/' + credentials.id;
-        const header = generateHawkHeader(url, 'GET');
-        const request = {
-            method: 'GET',
-            url: url,
-            headers: {
-                Authorization: header.field
-            }
+        const logoutThenResetOldCredentials = (oldCredentials) => {
+            return apiClient.auth.logout()
+                .then(() => {
+                    return apiClient.setAuthCredentials(oldCredentials);
+                });
+
         };
-        responsePromise = server.injectThen(request).then(() => {
+
+        const sendRequest = () => {
+            const method = 'GET';
+            const url = baseUrl + '/' + cookie;
             const request = {
-                method: 'GET',
-                url: baseUrl + '/' + cookie
+                method: method,
+                url: url,
+                headers: apiClient.generateHawkHeader(url, method).field
             };
             return server.injectThen(request).then((response) => {
                 response.statusCode.should.equal(401);
+                return response;
             });
-        });
-        return responsePromise;
+        };
+
+        return apiClient.getAuthCredentials()
+            .then(logoutThenResetOldCredentials)
+            .then(sendRequest);
     });
 
 });

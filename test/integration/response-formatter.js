@@ -111,7 +111,6 @@ describe('responseFormatter', () => {
             verifyResponseFormat(response.result);
             response.statusCode.should.equal(401);
             response.result.error.message.should.equal(expectedMessage);
-            console.log(response.result);
         });
     });
 

@@ -10,7 +10,7 @@
     "bcrypt": "0.8.3",
     "bluebird": "2.9.34",
     "bookshelf": "0.8.1",
-    "bookshelf-shield": "1.1.0",
+    "bookshelf-shield": "2.0.0",
     "boom": "2.7.2",
     "chai": "3.2.0",
     "config": "1.13.0",

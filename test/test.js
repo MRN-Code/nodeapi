@@ -1,6 +1,6 @@
 'use strict';
 var hawk = require('hawk');
-var should = require('should');
+var chai = require('chai');
 //var supertest = require('supertest');
 var server = require('../');
 var redisClient = require('redis').createClient();
@@ -16,6 +16,8 @@ var testCredential = {
 var generateHawkHeader = function(url, method) {
     return hawk.client.header(url, method, { credentials: credentials });
 };
+
+chai.should();
 
 describe('Authentication Test', function() {
     before('wait for server to be ready', function(){

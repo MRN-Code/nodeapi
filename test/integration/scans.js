@@ -4,7 +4,6 @@ const chai = require('chai');
 const server = require('../../');
 const initApiClient = require('../utils/init-api-client.js');
 let apiClient;
-let credentials;
 
 /**
  * set the apiClient variable inside the parent closure

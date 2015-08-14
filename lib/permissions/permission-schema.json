@@ -2,13 +2,18 @@
     "study": {
         "PI": [
             "read_Study",
-            "update_Study"
+            "update_Study",
+            "read_Scan"
         ],
         "Coordinator": [
             "read_Study"
         ],
         "DataEntry": [
             "read_Study"
+        ],
+        "Scanner": [
+            "create_Scan",
+            "read_Scan"
         ]
     },
     "site": {
@@ -16,10 +21,6 @@
             "create_Study",
             "read_Study",
             "update_Study"
-        ],
-        "Scanner": [
-            "create_Scan",
-            "read_Scan"
         ]
     }
 }

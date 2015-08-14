@@ -67,15 +67,8 @@ const handleAllPluginsRegistered = () => {
 
     https.auth.default('default');
 
-    // Mock relations plugin
-    // TODO: replace with actual plugin
-    server.plugins.relations = require('relations');
-    const relationsSchema = require(config.get('permissionsSchemaPath'));
-    const loadSchema = require('./lib/permissions/load-schema.js');
-    loadSchema(server.plugins.relations, relationsSchema);
-
     // Wrap models with Shield
-    require('./lib/utils/shields-up.js');
+    require('./lib/utils/shields-up.js')(server);
 
     http.route({
         method: '*',

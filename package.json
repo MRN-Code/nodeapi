@@ -6,6 +6,9 @@
   "directories": {
     "test": "test"
   },
+  "engines": {
+      "iojs": "2.5.0"
+  },
   "dependencies": {
     "bcrypt": "0.8.3",
     "bluebird": "2.9.34",

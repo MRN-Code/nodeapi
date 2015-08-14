@@ -160,5 +160,6 @@ module.exports = function init(config) {
     me.setAuthCredentials = setAuthCredentials;
     me.getAuthCredentials = getAuthCredentials;
     me.auth = require('./authentication.js')(me);
+    me.scans = require('./scans.js')(me);
     return me;
 };

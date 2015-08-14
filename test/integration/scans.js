@@ -17,7 +17,7 @@ const setApiClient = function(client) {
 };
 
 // Set should property of all objects for BDD assertions
-chai.should();
+const should = chai.should();
 
 describe('Scan route test', () => {
     before('wait for server to be ready', () => {
@@ -35,20 +35,33 @@ describe('Scan route test', () => {
 
         it('Should return all scans', () => {
             return responsePromise.then((response) => {
-                return new Promise((res, rej) => {
-                    const url = 'http://localhost/scans';
-                    const request = {
-                        method: 'GET',
-                        url: url
-                    };
-                    server.inject(request, function(response) {
-                        if(response.statusCode !== '200') {
-                            rej(new Error('sdfsdf'));
-                        } else {
-                            console.log(response);
-                            res('ddd');
-                        }
-                    });
+                apiClient.scans.get()
+                .then((response) => {
+                    response.result.data.should.have.length.of.at.least(1);
+                    response.result.data[0].should.have.property('scan_id');
+                    should.equal(response.result.error, null);
+                });
+            });
+        });
+
+        it('Should return scans by ursi', () => {
+            return responsePromise.then((response) => {
+                apiClient.scans.get({ursi: 'M06123761'})
+                .then((response) => {
+                    response.result.data.should.have.length.of.at.least(7);
+                    response.result.data[0].should.have.property('scan_id');
+                    should.equal(response.result.error, null);
+                });
+            });
+        });
+
+        it('Should return scans by study', () => {
+            return responsePromise.then((response) => {
+                apiClient.scans.get({study_id: 2319})
+                .then((response) => {
+                    response.result.data.should.have.length.of.at.least(9);
+                    response.result.data[0].should.have.property('scan_id');
+                    should.equal(response.result.error, null);
                 });
             });
         });

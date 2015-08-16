@@ -49,7 +49,7 @@ module.exports = function initApiClient() {
             body: 'payload'
         },
         baseUrl: 'http://localhost:' + config.get('httpsPort'),
-        pouchClient: new PouchDB('api-test'),
+        pouchClient: new PouchDB('/tmp/pouchdb-coins-api-test'),
         formatResponseCallback: formatResponseCallback,
         formatRequestHeaders: formatRequestHeaders,
         onPreFormatRequestOptions: onPreFormatRequestOptions

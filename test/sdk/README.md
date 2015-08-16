@@ -24,7 +24,7 @@ const Promise = require('bluebird');
 const apiClientOptions = {
     requestFn: Promise.promisify(request),
     baseUrl: 'http://localhost:3000',
-    pouchClient: new PouchDB('api-test')
+    pouchClient: new PouchDB('/tmp/pouchdb-coins-api-test')
 };j
 const client = require('../sdk/index.js')(apiClientOptions);
 ```

@@ -82,4 +82,16 @@ describe('Scan routes', () => {
                 });
         });
     });
+
+    describe('POST /scans', () => {
+        it('Should reject an invalid payload');
+        it('Should add a new scan with a valid payload');
+        it('Should reject with 400 if URSI is not enrolled in study');
+    });
+
+    describe('PUT /scans', () => {
+        it('Should reject an invalid payload');
+        it('Should update an existing scan with a valid payload');
+        it('Should reject with 400 if URSI is not enrolled in study');
+    });
 });

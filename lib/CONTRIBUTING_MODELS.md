@@ -1,6 +1,8 @@
 Contributing new models
 =====
 
+Note: this file cannot be placed in the `models/` directory because hapi-bookshelf-models will attempt to parse it.
+
 Follow the steps below to add new models. The models will be available to you inside of routes by calling `server.plugins.bookshelf.models('ModelName');`
 
 - [ ] Copy the `model template` below to a new file in this directory. It will be automatically registered at `server.plugins.bookshelf.models('ModelName')` when the server is restarted.

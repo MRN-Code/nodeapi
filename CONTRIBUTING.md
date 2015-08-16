@@ -39,7 +39,7 @@ Here is a simple checklist for adding new routes. It explains where new code mus
     - [ ] **Access verbs** for those models are added to `lib/permissions/permission-schema.json`
     - [ ] **shieldConfig** objects must be added to `config/default.json`
 
-Note that the models are accessed through `bookshelf-shield`, which exposes `create`, `read`, `readAll`, `update`, and `delete` methods instead of the standard bookeshelf `save`, `fetch`, `fetchAll`, `remove`. **See `lib/models/CONTRIBUTING.md`**.
+Note that the models are accessed through `bookshelf-shield`, which exposes `create`, `read`, `readAll`, `update`, and `delete` methods instead of the standard bookeshelf `save`, `fetch`, `fetchAll`, `remove`. **See `lib/CONTRIBUTING_MODELS.md`**.
 
 - [ ] **Routes**: Routes are defined in `lib/app-routes`. To add a completely new route, simply add a new file that exports a hapi plugin registration object. **See `lib/app-routes/CONTRIBUTING.md`**.
 

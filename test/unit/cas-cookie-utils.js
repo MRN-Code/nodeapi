@@ -3,7 +3,7 @@
 const chai = require('chai');
 const redis = require('fakeredis');
 const _ = require('lodash');
-const Promise = require('bluebird');
+const Bluebird = require('bluebird');
 const redisClient = redis.createClient();
 const casCookieUtils = require('../../lib/utils/cas-cookie-utils.js');
 const credentials = {
@@ -14,7 +14,7 @@ const credentials = {
 
 let jwt;
 
-Promise.promisifyAll(redisClient);
+Bluebird.promisifyAll(redisClient);
 
 chai.should();
 
@@ -44,7 +44,7 @@ describe('casCookieUtils', () => {
 
         it('should return a promise', () => {
             const result = casCookieUtils.verifyAndParse(jwt, redisClient);
-            result.should.be.instanceOf(Promise);
+            result.should.be.instanceOf(Bluebird);
         });
 
         it('should parse a valid jwt', () => {

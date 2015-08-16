@@ -1,32 +1,25 @@
 'use strict';
-const _ = require('lodash');
-
 
 let me;
+const baseUri = '/scans';
 
 /**
- * attempt to login to the API. This sets the API credentials
- * @param  {string} username is the username to login with
- * @param  {string} password is the password to login with
+ * get scans
+ * @param  {object} queryParameters: optional object of query parameters
+ *                                   See swagger docs for accepted parameters
  * @return {Promise}         a promise that resolves to server response
  *                           or rejects with an error, where error.data contains
  *                           the full response object
  */
-function get(queryParameters) {
-    let baseUri = '/scans';
-
-    if (queryParameters) {
-        baseUri += '?';
-        _.each(queryParameters,(n, key) => {
-            baseUri += key + '=' + n + '&';
-        });
-        baseUri = baseUri.slice(0, -1);
-    }
+function getScans(queryParameters) {
+    queryParameters = queryParameters || {};
 
     const request = {
         method: 'GET',
         uri: baseUri,
+        qs: queryParameters
     };
+
     return me.makeRequest(request, true)
         .then((response) => {
             let err;
@@ -48,7 +41,7 @@ function get(queryParameters) {
 function init(base) {
     me = base;
     return {
-        get: get,
+        get: getScans
     };
 }
 

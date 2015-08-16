@@ -21,7 +21,6 @@ const defaultConfig = {
 };
 const me = {};
 
-
 /**
  * get the currently stored auth credentials
  * @param  {boolean} raw return raw pouchDB response (defaults to false)
@@ -99,6 +98,10 @@ const generateHawkHeader = (url, method) => {
  * @return {object}            the object after mapping keys to new ones
  */
 const formatRequestOptions = (requestOptions) => {
+    if (_.isFunction(me.config.onPreFormatRequestOptions)) {
+        requestOptions = me.config.onPreFormatRequestOptions(requestOptions);
+    }
+
     requestOptions.uri = me.config.baseUrl + requestOptions.uri;
     return _.mapKeys(requestOptions, (value, key) => {
         return me.config.requestObjectMap[key] || key;

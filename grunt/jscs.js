@@ -1,9 +1,9 @@
 'use strict';
-module.exports = function(grunt) {
+module.exports = function() {
     return {
         all: {
             options: {
-                config: '.jscs.json'
+                config: '.jscsrc'
             },
             files: {
                 src: [
@@ -11,7 +11,7 @@ module.exports = function(grunt) {
                     'grunt/**/*.js',
                     '*.js',
                     'lib/**/*.js'
-                ],
+                ]
             }
         }
     };

@@ -2,7 +2,7 @@
 module.exports = function() {
     return {
         options: {
-            files: [ 'test/integration/*.js', 'test/unit/*.js' ],
+            files: ['test/integration/*.js', 'test/unit/*.js'],
             harmony: true,
             /* jscs:disable */
             harmony_arrow_functions: true //jshint ignore:line

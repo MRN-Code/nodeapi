@@ -1,6 +1,7 @@
 'use strict';
 
 const chai = require('chai');
+const Bluebird = require('Bluebird');
 const server = require('../../');
 const initApiClient = require('../utils/init-api-client.js');
 let apiClient;
@@ -123,7 +124,7 @@ describe('DELETE keys (logout)', () => {
         it('Should unset the hawk key in the key store', () => {
             return responsePromise.then((response) => {
                 const redisClient = server.plugins['hapi-redis'].client;
-                return new Promise((res, rej) => {
+                return new Bluebird((res, rej) => {
                     const id = apiClient.getAuthCredentials().id;
                     redisClient.hgetall(id, (result) => {
                         if (result !== null) {

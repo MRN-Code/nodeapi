@@ -2,7 +2,7 @@
 
 const hapi = require('hapi');
 const config = require('config');
-const Promise = require('bluebird');
+const Bluebird = require('bluebird');
 const _ = require('lodash');
 const connectionConfig = require('./lib/utils/get-connection-options.js')();
 const mcryptAuthKey = require('./lib/utils/get-mcrypt-key.js')();
@@ -17,7 +17,6 @@ const server = new hapi.Server({
     }
 });
 
-const https = server.connection(connectionConfig.https);
 const http = server.connection(connectionConfig.http);
 
 const registerPluginThen = (currentPromise, config) => {
@@ -59,34 +58,16 @@ const registerPluginThen = (currentPromise, config) => {
 const handleAllPluginsRegistered = () => {
     const authUtils = require('./lib/utils/authentication.js')(server);
 
-    https.auth.strategy(
+    http.auth.strategy(
         'default',
         'hawk',
         { getCredentialsFunc: authUtils.getHawkCredentials }
     );
 
-    https.auth.default('default');
+    http.auth.default('default');
 
     // Wrap models with Shield
     require('./lib/utils/shields-up.js')(server);
-
-    http.route({
-        method: '*',
-        path: '/{path*}',
-        handler: (request, reply) => {
-            const url = require('url');
-            const newUrl = url.format({
-                protocol: 'https',
-                hostname: request.info.hostname,
-                port: config.get('httpsPort'),
-                pathname: request.url.path,
-                query: request.query
-            });
-
-            //reply('Please use https instead of http.');
-            reply.redirect(newUrl);
-        }
-    });
 
     if (!module.parent) {
         server.start(() => {
@@ -95,9 +76,9 @@ const handleAllPluginsRegistered = () => {
     }
 };
 
-server.registerThen = Promise.promisify(server.register);
+server.registerThen = Bluebird.promisify(server.register);
 
-Promise.onPossiblyUnhandledRejection((err) => {
+Bluebird.onPossiblyUnhandledRejection((err) => {
     server.log(['error', 'unhandled-rejection'], err);
 });
 
@@ -112,7 +93,7 @@ process.stderr.on('data', (data) => {
 //register plugins
 server.app.pluginsRegistered = plugins.reduce(
     registerPluginThen,
-    Promise.resolve()
+    Bluebird.resolve()
 ).then(handleAllPluginsRegistered)
     .catch((err) => {
         console.log(err);

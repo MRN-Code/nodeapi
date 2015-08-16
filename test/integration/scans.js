@@ -2,7 +2,6 @@
 
 const chai = require('chai');
 const server = require('../../');
-const _ = require('lodash');
 const Bluebird = require('bluebird');
 const initApiClient = require('../utils/init-api-client.js');
 let apiClient;
@@ -43,16 +42,12 @@ describe('Scan routes', () => {
     });
 
     describe('GET /scans', () => {
-        let responsePromise;
         before(() => {
-            responsePromise = apiClient.auth.login('mochatest', 'mocha');
-            return responsePromise;
+            return apiClient.auth.login('mochatest', 'mocha');
         });
 
         it('Should return all scans', () => {
-            return responsePromise
-                .then(_.noop)
-                .then(apiClient.scans.get)
+            return apiClient.scans.get()
                 .then((response) => {
                     response.result.data.should.have.length.of.at.least(9);
                     response.result.data[0].should.have.property('scan_id');
@@ -61,9 +56,7 @@ describe('Scan routes', () => {
         });
 
         it('Should return scans by ursi', () => {
-            return responsePromise
-                .then(_.noop)
-                .then(_.partial(apiClient.scans.get, {ursi: 'M06123761'}))
+            return apiClient.scans.get({ ursi: 'M06123761' })
                 .then((response) => {
                     response.result.data.should.have.length.of.at.least(7);
                     response.result.data[0].should.have.property('scan_id');
@@ -72,15 +65,15 @@ describe('Scan routes', () => {
         });
 
         it('Should return scans by study', () => {
-            return responsePromise
-                .then(_.noop)
-                .then(_.partial(apiClient.scans.get, {studyId: 2319}))
+            return apiClient.scans.get({ studyId: 2319 })
                 .then((response) => {
                     response.result.data.should.have.length.of.at.least(9);
                     response.result.data[0].should.have.property('scan_id');
                     should.equal(response.result.error, null);
                 });
         });
+
+        it('Should return a single scan by ID');
     });
 
     describe('POST /scans', () => {

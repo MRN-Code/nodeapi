@@ -1,6 +1,6 @@
 {
   "name": "nodeapi",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "node api for COINS",
   "main": "index.js",
   "directories": {

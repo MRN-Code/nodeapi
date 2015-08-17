@@ -1,7 +1,7 @@
 'use strict';
 
 const chai = require('chai');
-const Bluebird = require('Bluebird');
+const Bluebird = require('bluebird');
 const server = require('../../');
 const initApiClient = require('../utils/init-api-client.js');
 let apiClient;

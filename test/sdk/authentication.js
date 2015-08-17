@@ -5,6 +5,27 @@ const baseUri = '/auth';
 let me;
 
 /**
+ * Set me.btoa for base64 encoding in a browser-compatible way.
+ * IE < 10 not supported
+ * @return {object} me
+ */
+function setBtoa() {
+    if (typeof btoa === 'function') {
+        //we are in browser, and btoa will be defined for us
+        me.btoa = btoa;
+    } else if (typeof Buffer === 'function') {
+        //probably in Node.js environment
+        me.btoa = (str) => {
+            return new Buffer(str).toString('base64');
+        };
+    } else {
+        throw new Error('Envonment unsupported: need `btoa` or `Buffer`');
+    }
+
+    return me;
+}
+
+/**
  * generate the authentication payload expected by POST /auth/keys route
  * @param  {string} username
  * @param  {string} password
@@ -12,8 +33,8 @@ let me;
  */
 function generateLoginPayload(username, password) {
     return {
-        username: new Buffer(username). toString('base64'),
-        password: new Buffer(password). toString('base64')
+        username: me.btoa(username),
+        password: me.btoa(password)
     };
 }
 
@@ -111,6 +132,7 @@ function logout(id) {
  */
 function init(base) {
     me = base;
+    setBtoa();
     return {
         login: login,
         logout: logout

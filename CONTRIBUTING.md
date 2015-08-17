@@ -2,7 +2,8 @@ COINS API Contribution Guidelines
 =========
 
 # Workflow
-As of v1.0.0, all changes will follow the standard COINS gitflow model: Here's the basics:
+As of v1.0.0, all changes will follow the standard COINS gitflow model: Here are the basics:
+
 1. Create a new branch from the `develop` branch of this repo.
 1. Add your tests, features, fixes and documentation.
 1. Run `npm test` to verify that all tests pass.

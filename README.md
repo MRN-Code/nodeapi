@@ -6,7 +6,7 @@ node based API for COINS
 If you miss any of these requirements, remove all node modules and reinstall them
 after installing the requirements.
 
-### io.js
+### io.js v2.5
 In order to support ES2015 Specifications, it is best to run this application
 with io.js. If you don't have io.js installed, we recommend using the `n`
 package to manage your node versions:
@@ -18,7 +18,7 @@ npm i -g n
 Then install io.js
 
 ```
-n io latest
+n io 2.5
 ```
 
 ### mcrypt

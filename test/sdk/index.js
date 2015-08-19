@@ -14,7 +14,7 @@ const defaultConfig = {
     baseUrl: 'https://coins-api.mrn.org/api',
     version: require('./../../package.json').version,
     pouchClient: null,
-    formatRequestHeaders: _.identinty,
+    formatRequestHeaders: _.identity,
     formatResponseCallback: function(respArray) {
         respArray[0].body = JSON.parse(respArray[0].body);
         return respArray[0];

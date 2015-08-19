@@ -1,9 +1,9 @@
 'use strict';
 
 // TODO use semver to autmatically append to url
-const _ = require('lodash');
-const authKeyId = 'COINS_AUTH_CREDENTIALS';
-const defaultConfig = {
+var _ = require('lodash');
+var authKeyId = 'COINS_AUTH_CREDENTIALS';
+var defaultConfig = {
     requestFn: null,
     requestObjectMap: {
         method: 'method',
@@ -20,16 +20,16 @@ const defaultConfig = {
         return respArray[0];
     }
 };
-const me = {};
+var me = {};
 
 /**
  * get the currently stored auth credentials
  * @param  {boolean} raw return raw pouchDB response (defaults to false)
  * @return {Promise}     resolves to the credentials object or the pouchDB resp
  */
-const getAuthCredentials = (raw) => {
-    const catchNotFound = (err) => {
-        let newErr;
+var getAuthCredentials = function(raw) {
+    var catchNotFound = function(err) {
+        var newErr;
         if (err.status === 404) {
             return null;
         }
@@ -39,7 +39,7 @@ const getAuthCredentials = (raw) => {
         throw newErr;
     };
 
-    const formatResult = (result) => {
+    var formatResult = function(result) {
         if (result) {
             if (!raw) {
                 return result.credentials;
@@ -59,14 +59,14 @@ const getAuthCredentials = (raw) => {
  * @param  {object} val the credentials to be saved
  * @return {Promise}    resolves to an object containing the id and rev
  */
-const setAuthCredentials = (val) => {
+var setAuthCredentials = function(val) {
     if (val.credentials === undefined) {
         val = {credentials: val};
     }
 
     return getAuthCredentials(true)
-        .then((existing) => {
-            let rev;
+        .then(function(existing) {
+            var rev;
             if (existing) {
                 rev = existing._rev;
             }
@@ -82,9 +82,9 @@ const setAuthCredentials = (val) => {
  * @param  {string} method e.g. 'GET'
  * @return {string} The hawk auth signature
  */
-const generateHawkHeader = (url, method) => {
+var generateHawkHeader = function(url, method) {
     return me.getAuthCredentials()
-        .then((credentials) => {
+        .then(function(credentials) {
             if (!credentials) {
                 throw new Error('No credentials found to sign with');
             }
@@ -98,7 +98,7 @@ const generateHawkHeader = (url, method) => {
  * @param  {object} requestObj the object to be passed to the requestFn
  * @return {object}            the object after mapping keys to new ones
  */
-const formatRequestOptions = (requestOptions) => {
+var formatRequestOptions = function(requestOptions) {
     if (_.isFunction(me.config.onPreFormatRequestOptions)) {
         requestOptions = me.config.onPreFormatRequestOptions(requestOptions);
     }
@@ -108,7 +108,7 @@ const formatRequestOptions = (requestOptions) => {
         '/v' + me.config.version,
         requestOptions.uri
     ].join('');
-    return _.mapKeys(requestOptions, (value, key) => {
+    return _.mapKeys(requestOptions, function(value, key) {
         return me.config.requestObjectMap[key] || key;
     });
 };
@@ -118,14 +118,14 @@ const formatRequestOptions = (requestOptions) => {
  * @param  {object} options request options to be passed to requestFn
  * @return {Promise}        promise that resolves with the value of the response
  */
-const makeRequest = (options, sign) => {
-    const formattedOptions = formatRequestOptions(options);
+var makeRequest = function(options, sign) {
+    var formattedOptions = formatRequestOptions(options);
 
     /**
      * convenience function for sending the formatted request
      * @return {Promise} resolves to the formatted response value
      */
-    const sendRequest = () => {
+    var sendRequest = function() {
         return me.config.requestFn(formattedOptions)
             .then(me.config.formatResponseCallback);
     };
@@ -135,8 +135,8 @@ const makeRequest = (options, sign) => {
      * @param  {object} header output from hawk.client.header();
      * @return {null}        nothing
      */
-    const addFormattedHeader = (header) => {
-        const headers = formattedOptions.headers || [];
+    var addFormattedHeader = function(header) {
+        var headers = formattedOptions.headers || [];
         headers.push({
             name: 'Authorization',
             value: header.field
@@ -145,7 +145,7 @@ const makeRequest = (options, sign) => {
         return;
     };
 
-    let masterPromise;
+    var masterPromise;
     if (sign !== false) {
         masterPromise = generateHawkHeader(
             formattedOptions.url,

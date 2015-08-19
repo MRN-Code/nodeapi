@@ -1,8 +1,8 @@
 'use strict';
 
-const baseUri = '/auth';
+var baseUri = '/auth';
 
-let me;
+var me;
 
 /**
  * Set me.btoa for base64 encoding in a browser-compatible way.
@@ -15,7 +15,7 @@ function setBtoa() {
         me.btoa = btoa;
     } else if (typeof Buffer === 'function') {
         //probably in Node.js environment
-        me.btoa = (str) => {
+        me.btoa = function(str) {
             return new Buffer(str).toString('base64');
         };
     } else {
@@ -47,22 +47,22 @@ function generateLoginPayload(username, password) {
  *                           the full response object
  */
 function login(username, password) {
-    const authPayload = generateLoginPayload(username, password);
-    const request = {
+    var authPayload = generateLoginPayload(username, password);
+    var request = {
         method: 'POST',
         uri: baseUri + '/keys',
         body: authPayload
     };
     return me.makeRequest(request, false)
-        .then((response) => {
-            let err;
+        .then(function(response) {
+            var err;
             if (response.statusCode !== 200) {
                 err = new Error(response.body.error.message);
                 err.data = response;
                 throw err;
             } else {
                 return me.setAuthCredentials(response.body.data[0])
-                    .then(() => { return response; });
+                    .then(function() { return response; });
             }
         });
 }
@@ -81,11 +81,11 @@ function logout(id) {
      * @param  {object} credentials hawk credentials object
      * @return {Promise}             resolves to response
      */
-    const sendRequest = (credentials) => {
+    var sendRequest = function(credentials) {
         id = id || credentials.id;
-        const uri = baseUri + '/keys/' + id;
-        const method = 'DELETE';
-        const request = {
+        var uri = baseUri + '/keys/' + id;
+        var method = 'DELETE';
+        var request = {
             method: method,
             uri: uri
         };
@@ -98,15 +98,15 @@ function logout(id) {
      * @param  {object} response the response sent back from the server
      * @return {Promise}          resolves to the response object
      */
-    const handleResponse = (response) => {
-        const loggedOutCreds = { status: 'logged out', date: Date.now() };
-        let err;
+    var handleResponse = function(response) {
+        var loggedOutCreds = { status: 'logged out', date: Date.now() };
+        var err;
 
         /**
          * convenience function to return the response
          * @return {object} response object
          */
-        const returnResponse = () => {
+        var returnResponse = function() {
             return response;
         };
 

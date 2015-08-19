@@ -1,7 +1,7 @@
 'use strict';
 
-let me;
-const baseUri = '/scans';
+var me;
+var baseUri = '/scans';
 
 /**
  * get scans
@@ -14,15 +14,15 @@ const baseUri = '/scans';
 function getScans(queryParameters) {
     queryParameters = queryParameters || {};
 
-    const request = {
+    var request = {
         method: 'GET',
         uri: baseUri,
         qs: queryParameters
     };
 
     return me.makeRequest(request, true)
-        .then((response) => {
-            let err;
+        .then(function(response) {
+            var err;
             if (response.statusCode !== 200) {
                 err = new Error(response.body.error.message);
                 err.data = response;

@@ -2,6 +2,16 @@
 
 // TODO use semver to autmatically append to url
 var _ = require('lodash');
+var storage = (function() {
+    if (typeof localStorage !== 'undefined') {
+        return localStorage;
+    }
+
+    var Storage = require('dom-storage');
+
+    return new Storage(null, { strict: true });
+})();
+
 var authKeyId = 'COINS_AUTH_CREDENTIALS';
 var defaultConfig = {
     requestFn: null,
@@ -13,7 +23,6 @@ var defaultConfig = {
     },
     baseUrl: 'https://coins-api.mrn.org/api',
     version: require('./../../package.json').version,
-    pouchClient: null,
     formatRequestHeaders: _.identity,
     formatResponseCallback: function(respArray) {
         respArray[0].body = JSON.parse(respArray[0].body);
@@ -24,55 +33,24 @@ var me = {};
 
 /**
  * get the currently stored auth credentials
- * @param  {boolean} raw return raw pouchDB response (defaults to false)
  * @return {Promise}     resolves to the credentials object or the pouchDB resp
  */
-var getAuthCredentials = function(raw) {
-    var catchNotFound = function(err) {
-        var newErr;
-        if (err.status === 404) {
-            return null;
-        }
-
-        newErr = new Error('API Client error getting Auth Credentials');
-        newErr.data = err;
-        throw newErr;
-    };
-
-    var formatResult = function(result) {
-        if (result) {
-            if (!raw) {
-                return result.credentials;
-            }
-        }
-
-        return result;
-    };
-
-    return me.config.pouchClient.get(authKeyId)
-        .catch(catchNotFound)
-        .then(formatResult);
+var getAuthCredentials = function() {
+    return new Promise(function(resolve) {
+        resolve(JSON.parse(storage.getItem(authKeyId)));
+    });
 };
 
 /**
- * set auth credentials in pouchDB
+ * set auth credentials
  * @param  {object} val the credentials to be saved
  * @return {Promise}    resolves to an object containing the id and rev
  */
-var setAuthCredentials = function(val) {
-    if (val.credentials === undefined) {
-        val = {credentials: val};
-    }
-
-    return getAuthCredentials(true)
-        .then(function(existing) {
-            var rev;
-            if (existing) {
-                rev = existing._rev;
-            }
-
-            return me.config.pouchClient.put(val, authKeyId, rev);
-        });
+var setAuthCredentials = function(credentials) {
+    return new Promise(function(resolve) {
+        storage.setItem(authKeyId, JSON.stringify(credentials));
+        resolve(getAuthCredentials());
+    });
 };
 
 /**

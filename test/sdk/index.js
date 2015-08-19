@@ -162,7 +162,7 @@ const makeRequest = (options, sign) => {
 module.exports = function init(config) {
     _.defaultsDeep(config, defaultConfig);
     me.config = config;
-    me.getHawkHeader = require('hawk').client.header;
+    me.getHawkHeader = require('hawk/lib/browser.js').client.header;
     me.generateHawkHeader = generateHawkHeader;
     me.makeRequest = makeRequest;
     me.setAuthCredentials = setAuthCredentials;

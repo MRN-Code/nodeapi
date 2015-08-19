@@ -46,13 +46,13 @@ module.exports = function initApiClient() {
         requestFn: _.bind(server.injectThen, server),
         requestObjectMap: {
             uri: 'url',
-            body: 'payload'
+            body: 'payload',
         },
-        baseUrl: 'http://localhost:' + config.get('httpPort'),
+        baseUrl: 'http://localhost:' + config.get('httpPort') + '/api',
         pouchClient: new PouchDB('/tmp/pouchdb-coins-api-test'),
         formatResponseCallback: formatResponseCallback,
         formatRequestHeaders: formatRequestHeaders,
-        onPreFormatRequestOptions: onPreFormatRequestOptions
+        onPreFormatRequestOptions: onPreFormatRequestOptions,
     };
     return require('../sdk/index.js')(apiClientOptions);
 };

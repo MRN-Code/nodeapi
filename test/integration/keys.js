@@ -89,7 +89,7 @@ describe('DELETE keys (logout)', () => {
         return server.app.pluginsRegistered;
     });
 
-    describe ('Successful logout', () => {
+    describe('Successful logout', () => {
         let responsePromise;
         before('Login first, then logout', () => {
             responsePromise = apiClient.auth.login('mochatest', 'mocha')
@@ -143,7 +143,7 @@ describe('DELETE keys (logout)', () => {
         it('Should prohibit access to restricted resources');
     });
 
-    describe ('Already logged out', () => {
+    describe('Already logged out', () => {
         let loggedInAndOut = false;
         let responsePromise;
         before(() => {

@@ -11,7 +11,8 @@ const defaultConfig = {
         headers: 'headers',
         uri: 'uri'
     },
-    baseUrl: 'https://api.coins.mrn.org',
+    baseUrl: 'https://coins-api.mrn.org/api',
+    version: require('./../../package.json').version,
     pouchClient: null,
     formatRequestHeaders: _.identinty,
     formatResponseCallback: function(respArray) {
@@ -102,7 +103,11 @@ const formatRequestOptions = (requestOptions) => {
         requestOptions = me.config.onPreFormatRequestOptions(requestOptions);
     }
 
-    requestOptions.uri = me.config.baseUrl + requestOptions.uri;
+    requestOptions.uri = [
+        me.config.baseUrl,
+        '/v' + me.config.version,
+        requestOptions.uri
+    ].join('');
     return _.mapKeys(requestOptions, (value, key) => {
         return me.config.requestObjectMap[key] || key;
     });

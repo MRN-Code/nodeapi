@@ -3,5 +3,6 @@
     "preset": "airbnb",
     "validateIndentation": 4,
     "safeContextKeyword": ["self"],
-    "disallowMultipleVarDecl": "exceptUndefined"
+    "disallowMultipleVarDecl": "exceptUndefined",
+    "requireTrailingComma": null
 }

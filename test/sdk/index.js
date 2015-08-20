@@ -3,6 +3,7 @@
 // TODO use semver to autmatically append to url
 var assign = require('es6-object-assign').assign;
 var renameKeys = require('rename-keys');
+var hawkClientHeader = require('hawk/lib/browser.js').client.header;
 var storage = (function() {
     if (typeof localStorage !== 'undefined') {
         return localStorage;
@@ -12,6 +13,10 @@ var storage = (function() {
 
     return new Storage(null, { strict: true });
 })();
+
+var authentication = require('./authentication.js');
+var scans = require('./scans.js');
+var pkg = require('./../../package.json');
 
 var authKeyId = 'COINS_AUTH_CREDENTIALS';
 var defaultConfig = {
@@ -23,7 +28,7 @@ var defaultConfig = {
         uri: 'uri'
     },
     baseUrl: 'https://coins-api.mrn.org/api',
-    version: require('./../../package.json').version,
+    version: pkg.version,
     formatRequestHeaders: function(value) {
         return value;
     },
@@ -144,12 +149,12 @@ var makeRequest = function(options, sign) {
 
 module.exports = function init(config) {
     me.config = assign({}, defaultConfig, config);
-    me.getHawkHeader = require('hawk/lib/browser.js').client.header;
+    me.getHawkHeader = hawkClientHeader;
     me.generateHawkHeader = generateHawkHeader;
     me.makeRequest = makeRequest;
     me.setAuthCredentials = setAuthCredentials;
     me.getAuthCredentials = getAuthCredentials;
-    me.auth = require('./authentication.js')(me);
-    me.scans = require('./scans.js')(me);
+    me.auth = authentication(me);
+    me.scans = scans(me);
     return me;
 };

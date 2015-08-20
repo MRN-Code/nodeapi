@@ -42,6 +42,7 @@
     "vision": "3.0.0"
   },
   "devDependencies": {
+    "btoa": "1.1.2",
     "code": "1.5.0",
     "dom-storage": "2.0.1",
     "es6-object-assign": "1.0.1",

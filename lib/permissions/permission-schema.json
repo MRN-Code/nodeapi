@@ -14,6 +14,33 @@
         "Scanner": [
             "create_Scan",
             "read_Scan"
+        ],
+        "DataEntry": [
+            "exists"
+        ],
+        "ViewAsmtData": [
+            "exists"
+        ],
+        "Co-Investigator": [
+            "exists"
+        ],
+        "DataEntry2": [
+            "exists"
+        ],
+        "SubjectViewing": [
+            "exists"
+        ],
+        "AdminCalibrationData": [
+            "exists"
+        ],
+        "qbUser": [
+            "exists"
+        ],
+        "DXAdmin": [
+            "exists"
+        ],
+        "DataContributor": [
+            "exists"
         ]
     },
     "site": {
@@ -21,6 +48,50 @@
             "create_Study",
             "read_Study",
             "update_Study"
+        ],
+        "guest": [
+            "exists"
+        ],
+        "everybody": [
+            "exists"
+        ],
+        "acctmanagment": [
+            "exists"
+        ],
+        "InternalReporting": [
+            "exists"
+        ],
+        "Radiologist": [
+            "exists"
+        ],
+        "ProjectManager": [
+            "exists"
+        ],
+        "MRTech": [
+            "exists"
+        ],
+        "Admin": [
+            "exists"
+        ],
+        "RadLetters": [
+            "exists"
+        ],
+        "Accountant": [
+            "exists"
+        ],
+        "OlinAdmin": [
+            "exists"
+        ],
+        "RadLetersAllStudies": [
+            "exists"
+        ],
+        "querySuper": [
+            "exists"
+        ]
+    },
+    "meta": {
+        "Super": [
+            "exists"
         ]
     }
 }

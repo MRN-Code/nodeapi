@@ -1,7 +1,8 @@
 'use strict';
 
 // TODO use semver to autmatically append to url
-var _ = require('lodash');
+var assign = require('es6-object-assign').assign;
+var renameKeys = require('rename-keys');
 var storage = (function() {
     if (typeof localStorage !== 'undefined') {
         return localStorage;
@@ -23,7 +24,10 @@ var defaultConfig = {
     },
     baseUrl: 'https://coins-api.mrn.org/api',
     version: require('./../../package.json').version,
-    formatRequestHeaders: _.identity,
+    formatRequestHeaders: function(value) {
+        return value;
+    },
+
     formatResponseCallback: function(respArray) {
         respArray[0].body = JSON.parse(respArray[0].body);
         return respArray[0];
@@ -77,7 +81,7 @@ var generateHawkHeader = function(url, method) {
  * @return {object}            the object after mapping keys to new ones
  */
 var formatRequestOptions = function(requestOptions) {
-    if (_.isFunction(me.config.onPreFormatRequestOptions)) {
+    if (me.config.onPreFormatRequestOptions instanceof Function) {
         requestOptions = me.config.onPreFormatRequestOptions(requestOptions);
     }
 
@@ -86,7 +90,8 @@ var formatRequestOptions = function(requestOptions) {
         '/v' + me.config.version,
         requestOptions.uri
     ].join('');
-    return _.mapKeys(requestOptions, function(value, key) {
+
+    return renameKeys(requestOptions, function(key) {
         return me.config.requestObjectMap[key] || key;
     });
 };
@@ -138,8 +143,7 @@ var makeRequest = function(options, sign) {
 };
 
 module.exports = function init(config) {
-    _.defaultsDeep(config, defaultConfig);
-    me.config = config;
+    me.config = assign({}, defaultConfig, config);
     me.getHawkHeader = require('hawk/lib/browser.js').client.header;
     me.generateHawkHeader = generateHawkHeader;
     me.makeRequest = makeRequest;

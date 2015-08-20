@@ -104,8 +104,7 @@
 
     /**
      * get the currently stored auth credentials
-     * @return {Promise}        resolves to the credentials object or the
-     *                          pouchDB resp
+     * @return {Promise}        resolves to the credentials object
      */
     var getAuthCredentials = function() {
         return new Promise(function(resolve) {

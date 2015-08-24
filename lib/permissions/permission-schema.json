@@ -1,26 +1,97 @@
 {
     "study": {
-        "PI": [
+        "pi": [
             "read_Study",
             "update_Study",
             "read_Scan"
         ],
-        "Coordinator": [
+        "coordinator": [
             "read_Study"
         ],
-        "DataEntry": [
+        "dataentry": [
             "read_Study"
         ],
-        "Scanner": [
+        "scanner": [
             "create_Scan",
             "read_Scan"
+        ],
+        "dataentry": [
+            "exists"
+        ],
+        "viewasmtdata": [
+            "exists"
+        ],
+        "co-investigator": [
+            "exists"
+        ],
+        "dataentry2": [
+            "exists"
+        ],
+        "subjectviewing": [
+            "exists"
+        ],
+        "admincalibrationdata": [
+            "exists"
+        ],
+        "qbuser": [
+            "exists"
+        ],
+        "dxadmin": [
+            "exists"
+        ],
+        "datacontributor": [
+            "exists"
         ]
     },
     "site": {
-        "SiteAdmin": [
+        "siteadmin": [
             "create_Study",
             "read_Study",
             "update_Study"
+        ],
+        "guest": [
+            "exists"
+        ],
+        "everybody": [
+            "exists"
+        ],
+        "acctmanagment": [
+            "exists"
+        ],
+        "internalreporting": [
+            "exists"
+        ],
+        "radiologist": [
+            "exists"
+        ],
+        "projectmanager": [
+            "exists"
+        ],
+        "mrtech": [
+            "exists"
+        ],
+        "admin": [
+            "exists"
+        ],
+        "radletters": [
+            "exists"
+        ],
+        "accountant": [
+            "exists"
+        ],
+        "olinadmin": [
+            "exists"
+        ],
+        "radletersallstudies": [
+            "exists"
+        ],
+        "querysuper": [
+            "exists"
+        ]
+    },
+    "meta": {
+        "super": [
+            "exists"
         ]
     }
 }

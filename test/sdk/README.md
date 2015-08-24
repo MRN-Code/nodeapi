@@ -9,12 +9,6 @@ needs to be initialized with a function that can be used to make XHR requests.
 The client was designed to work with the [request](https://www.npmjs.com/package/request)
 package, but it can be adapted to work with others (like browser-request, or xhr).
 
-### PouchDB
-Again, in the interest of portability, the client relies on PouchDB to store
-information persistently. In the browser, you will want to supply a PouchDB
-instance that persists data to *localstorage* or *indexeddb*. For testing purposes,
-an in-memory PouchDB will also work fine.
-
 # Configuration
 
 ### Basic configuration:
@@ -23,8 +17,7 @@ const request = require('request');
 const Promise = require('bluebird');
 const apiClientOptions = {
     requestFn: Promise.promisify(request),
-    baseUrl: 'http://localhost:3000',
-    pouchClient: new PouchDB('/tmp/pouchdb-coins-api-test')
+    baseUrl: 'http://localhost:3000'
 };j
 const client = require('../sdk/index.js')(apiClientOptions);
 ```
@@ -48,19 +41,19 @@ with the COINS API:
 
 ### *{Promise}* = .auth.login(username, password)
 
-Sends POST request to /auth/keys, and stores resulting credentials in pouchdb.
+Sends POST request to /auth/keys, and stores resulting credentials.
 
 ### *{Promise}* = .auth.logout(username, password)
 
-Sends DELETE request to /auth/keys, and removes credentials from pouchdb.
+Sends DELETE request to /auth/keys, and removes credentials.
 
 ### *{Promise}* = .getAuthCredentials()
 
-Get the credentials currently stored in pouchdb.
+Get the credentials currently stored.
 
 ### *{Promise}* = .setAuthCredentials(val)
 
-Set the credentials stored in pouchdb: will overwrite if already set.
+Set the credentials stored: will overwrite if already set.
 
 ### *{Promise}* = .makeRequest(options, sign)
 

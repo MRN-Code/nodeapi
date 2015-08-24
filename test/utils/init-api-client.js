@@ -41,7 +41,6 @@ const onPreFormatRequestOptions = (request) => {
  */
 module.exports = function initApiClient() {
     const config = require('config');
-    const PouchDB = require('pouchdb');
     const apiClientOptions = {
         requestFn: _.bind(server.injectThen, server),
         requestObjectMap: {
@@ -49,7 +48,6 @@ module.exports = function initApiClient() {
             body: 'payload',
         },
         baseUrl: 'http://localhost:' + config.get('httpPort') + '/api',
-        pouchClient: new PouchDB('/tmp/pouchdb-coins-api-test'),
         formatResponseCallback: formatResponseCallback,
         formatRequestHeaders: formatRequestHeaders,
         onPreFormatRequestOptions: onPreFormatRequestOptions,

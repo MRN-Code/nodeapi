@@ -89,7 +89,7 @@
             "exists"
         ]
     },
-    "meta": {
+    "application": {
         "super": [
             "exists"
         ]

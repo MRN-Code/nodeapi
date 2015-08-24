@@ -9,15 +9,13 @@
             'hawk',
             'renameKeys',
             './authentication',
-            './scans',
-            './version'
+            './scans'
         ], function(
             ObjectAssign,
             hawk,
             rename,
             authentication,
-            scans,
-            version
+            scans
         ) {
             return factory(
                 ObjectAssign.assign,
@@ -25,8 +23,7 @@
                 rename,
                 localStorage,
                 authentication,
-                scans,
-                version
+                scans
             );
         });
     } else if (typeof module === 'object' && module.exports) {
@@ -49,8 +46,7 @@
             require('rename-keys'),
             storage,
             require('./authentication'),
-            require('./scans'),
-            require('./../../package.json').version
+            require('./scans')
         );
 
     } else {
@@ -61,8 +57,7 @@
             root.rename,
             root.localStorage,
             root.CoinsApiClient.authentication,
-            root.CoinsApiClient.scans,
-            root.CoinsApiClient.version
+            root.CoinsApiClient.scans
         );
 
     }
@@ -73,8 +68,7 @@
     renameKeys,
     localStorage,
     authentication,
-    scans,
-    version
+    scans
 ) {
     'use strict';
 
@@ -90,7 +84,7 @@
             uri: 'uri'
         },
         baseUrl: 'https://coins-api.mrn.org/api',
-        version: version,
+        version: null,
         formatRequestHeaders: function(value) {
             return value;
         },

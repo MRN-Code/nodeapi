@@ -1,50 +1,50 @@
 {
     "study": {
-        "PI": [
+        "pi": [
             "read_Study",
             "update_Study",
             "read_Scan"
         ],
-        "Coordinator": [
+        "coordinator": [
             "read_Study"
         ],
-        "DataEntry": [
+        "dataentry": [
             "read_Study"
         ],
-        "Scanner": [
+        "scanner": [
             "create_Scan",
             "read_Scan"
         ],
-        "DataEntry": [
+        "dataentry": [
             "exists"
         ],
-        "ViewAsmtData": [
+        "viewasmtdata": [
             "exists"
         ],
-        "Co-Investigator": [
+        "co-investigator": [
             "exists"
         ],
-        "DataEntry2": [
+        "dataentry2": [
             "exists"
         ],
-        "SubjectViewing": [
+        "subjectviewing": [
             "exists"
         ],
-        "AdminCalibrationData": [
+        "admincalibrationdata": [
             "exists"
         ],
-        "qbUser": [
+        "qbuser": [
             "exists"
         ],
-        "DXAdmin": [
+        "dxadmin": [
             "exists"
         ],
-        "DataContributor": [
+        "datacontributor": [
             "exists"
         ]
     },
     "site": {
-        "SiteAdmin": [
+        "siteadmin": [
             "create_Study",
             "read_Study",
             "update_Study"
@@ -58,39 +58,39 @@
         "acctmanagment": [
             "exists"
         ],
-        "InternalReporting": [
+        "internalreporting": [
             "exists"
         ],
-        "Radiologist": [
+        "radiologist": [
             "exists"
         ],
-        "ProjectManager": [
+        "projectmanager": [
             "exists"
         ],
-        "MRTech": [
+        "mrtech": [
             "exists"
         ],
-        "Admin": [
+        "admin": [
             "exists"
         ],
-        "RadLetters": [
+        "radletters": [
             "exists"
         ],
-        "Accountant": [
+        "accountant": [
             "exists"
         ],
-        "OlinAdmin": [
+        "olinadmin": [
             "exists"
         ],
-        "RadLetersAllStudies": [
+        "radletersallstudies": [
             "exists"
         ],
-        "querySuper": [
+        "querysuper": [
             "exists"
         ]
     },
     "meta": {
-        "Super": [
+        "super": [
             "exists"
         ]
     }

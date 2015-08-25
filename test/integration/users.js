@@ -30,16 +30,6 @@ describe('Users', () => {
             });
     });
 
-    it('Gets a list of all users', () => {
-        return apiClient.users.get
-            .then();
-    });
-
-    it('Gets a single user', () => {
-        return apiClient.users.get('mochatest')
-            .then();
-    });
-
     it('Posts a new user');
 
     it('Prevents a user with an existing username');
@@ -47,13 +37,5 @@ describe('Users', () => {
     it('Prevents a new user with an existing email');
 
     it('Prevents a new user with an empty password');
-
-    it('Updates an existing user');
-
-    it('Prevents updating to an existing username');
-
-    it('Prevents updating to an existing email');
-
-    it('Prevents updating to an empty password');
 
 });

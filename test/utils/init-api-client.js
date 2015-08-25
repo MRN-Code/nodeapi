@@ -51,6 +51,7 @@ module.exports = function initApiClient() {
         formatResponseCallback: formatResponseCallback,
         formatRequestHeaders: formatRequestHeaders,
         onPreFormatRequestOptions: onPreFormatRequestOptions,
+        version: require('../../package.json').version,
     };
     return require('../sdk/index.js')(apiClientOptions);
 };

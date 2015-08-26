@@ -56,12 +56,10 @@ const registerPluginThen = (currentPromise, config) => {
  * @return {null} none
  */
 const handleAllPluginsRegistered = () => {
-    const authUtils = require('./lib/utils/authentication.js')(server);
-
     http.auth.strategy(
         'default',
         'hawk',
-        { getCredentialsFunc: authUtils.getHawkCredentials }
+        { getCredentialsFunc: server.plugins.utilities.auth.getHawkCredentials }
     );
 
     http.auth.default('default');

@@ -49,5 +49,17 @@
                 "aclContextName": "study"
             }
         }
-    ]
+    ],
+    "coinstac": {
+        "pouchdb": {
+            "consortiaMeta": {
+                "path": "/tmp/coinstac-pouchdb",
+                "name": "consortiaMeta"
+            },
+            "consortia": {
+                "path": "/tmp/coinstac-pouchdb",
+                "name": "consortia"
+            }
+        }
+    }
 }

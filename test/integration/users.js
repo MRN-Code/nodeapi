@@ -42,10 +42,7 @@ describe('Users', () => {
     before('wait for server to be ready', () => {
         return server.app.pluginsRegistered
             .then(initApiClient)
-            .then(setApiClient)
-            .then(() => {
-                return apiClient.auth.login('mochatest', 'mocha');
-            });
+            .then(setApiClient);
     });
 
     describe('POST /users', () => {

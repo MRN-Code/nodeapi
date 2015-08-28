@@ -25,7 +25,6 @@ const mockConsortiaDb = () => {
         pouchConfig: { db: require('memdown') }
     });
     server.plugins.houchdb.consortiaMeta = db;
-    console.log('mocking data');
     return db.clear()
         .then(() => {
             Bluebird.all(_.map(mockConsortia, db.add, db));

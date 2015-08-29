@@ -1,7 +1,9 @@
 Contributing to the SDK
 =======
 
-Follow the steps below to add a new sub-library to the SDK.
+The SDK utilizes [UMD wrappers](https://github.com/umdjs/umd) so that it works in AMD, CommonJS and browser environments. Refer to the [return exports template](https://github.com/umdjs/umd/blob/master/returnExports.js) for notes on use.
+
+Follow these steps to add a new sub-library to the SDK:
 
 - [ ] Create a new file in `test/sdk/` named after the routes that you will be testing.
 
@@ -9,43 +11,40 @@ Follow the steps below to add a new sub-library to the SDK.
 
 - [ ] Add your client library logic (see existing files in `test/sdk/` for more exaples).
 
-- [ ] require your new client library file at the bottom of `test/sdk/index.js`.
+- [ ] Inject your new client library into the entry point’s `factory`.
 
 - [ ] test your client library by writing integration tests that use it (see `test/CONTRIBUTING.md`)
 
 ### client library template
-```
-'use strict';
 
-const baseUri = '/auth';
+```js
+/* jshint strict:false */
+/* global define */
 
-let me;
+(function(root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['my-required-package'], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory(require('my-required-package'));
+    } else {
+        // Browser globals (root is window)
+        root.CoinsApiClient = root.CoinsApiClient || {};
+        root.CoinsApiClient.MyNewClientLib = factory(
+            root.CoinsLogonApiClient.MyRequiredPackage
+        );
+    }
+}(this, function(MyRequiredPackage) {
 
-// define private functions
+    function MyNewClientLib() {
 
-/**
- * some function description
- * @param  {object} param1 this is an input param
- * @return {object}  this is the object returned
- */
-function myPrivateFunc(param1) {
-    ..do stuff
-    return thing;
-}
+    }
 
-// define public functions
-/**
- * initialize the internals with the config from index.js
- * @param  {object} config the config object from index.js
- * @return {null}        nothing
- */
-function init(base) {
-    me = base;
-    return {
-        exposedFunc: myPrivateFunc
-    };
-}
+    // Your script's content...
 
-module.exports = init;
-
+    return MyNewClientLib;
+}));
 ```

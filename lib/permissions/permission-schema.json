@@ -11,10 +11,6 @@
         "dataentry": [
             "read_Study"
         ],
-        "scanner": [
-            "create_Scan",
-            "read_Scan"
-        ],
         "dataentry": [
             "exists"
         ],
@@ -48,6 +44,10 @@
             "create_Study",
             "read_Study",
             "update_Study"
+        ],
+        "scanner": [
+            "create_Scan",
+            "read_Scan"
         ],
         "guest": [
             "exists"

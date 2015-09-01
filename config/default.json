@@ -1,8 +1,5 @@
 {
-    "httpPort": 3000,
-    "sslCertPath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/STAR_mrn_org.crt",
-    "sslKeyPath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/mrn_wildcard.key",
-    "sslBundlePath": "/coins/keys/comodo_mrn_wildcard_ssl_cert/STAR_mrn_org.ca-bundle",
+    "httpPort": 8800,
     "cookieDomain": ".mrn.org",
     "hawkKeyLifespan": 1800000,
     "algorithm": "sha256",

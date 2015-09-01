@@ -3,6 +3,15 @@ node based API for COINS
 
 # Requirements
 
+If things aren't working, go down this quick checklist.
+
+-[ ] Are you running io.js v2.5? Does not work with v3+ or Node.js
+-[ ] Did you install the mcrypt system package (not the npm package)?
+-[ ] Is a redis server installed and running locally?
+-[ ] Have you pulled the latest changes in coins_auth, and run `grunt build`?
+-[ ] Is nginx installed, configured and running locally?
+
+
 If you miss any of these requirements, remove all node modules and reinstall them
 after installing the requirements.
 
@@ -54,9 +63,17 @@ redis-server /usr/local/etc/redis.conf &
 
 ### coins_auth
 Database connection parameters are expected to be found at `/coins/coins_auth/conn/dbmap.json`.
-Be sure to clone our coins_auth repo (private) to `/coins/coins_auth`.
-In addition, checkout the **nodeapi** branch of *coins_auth*, grab a copy of
-`coinscredentials.json` from another server, and run **grunt decrypt** in coins_auth/.
+If you do not yet have a coins_auth repo, clone our coins_auth repo (private) to
+`/coins/coins_auth`. Next, grab a copy of `coinscredentials.json` from another
+server and put it in _coins_auth_.
+If you already have a coins_auth repo, be sure to run `git pull`
+Finally, run **grunt decrypt** in coins_auth/ to decrypt the latest dbmap.
+
+### nginx
+The COINS API listens for HTTP on port 8800. If you need to connect using HTTPS,
+you will need to place a reverse proxy in front of the API. This is most easily
+accomplished with nginx. There is an ansible role to install and configure nginx
+as a reverse proxy and SSL terminator for the API. Ask Dylan for more details.
 
 # Usage
 

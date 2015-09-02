@@ -9,13 +9,15 @@
             'hawk',
             'rename-keys',
             './authentication',
-            './scans'
+            './scans',
+            './users'
         ], function(
             ObjectAssign,
             hawk,
             rename,
             authentication,
-            scans
+            scans,
+            users
         ) {
             return factory(
                 ObjectAssign.assign,
@@ -23,7 +25,8 @@
                 rename,
                 localStorage,
                 authentication,
-                scans
+                scans,
+                users
             );
         });
     } else if (typeof module === 'object' && module.exports) {
@@ -46,7 +49,8 @@
             require('rename-keys'),
             storage,
             require('./authentication'),
-            require('./scans')
+            require('./scans'),
+            require('./users')
         );
 
     } else {
@@ -57,7 +61,8 @@
             root.rename,
             root.localStorage,
             root.CoinsApiClient.authentication,
-            root.CoinsApiClient.scans
+            root.CoinsApiClient.scans,
+            root.CoinsApiClient.users
         );
 
     }
@@ -68,7 +73,8 @@
     renameKeys,
     localStorage,
     authentication,
-    scans
+    scans,
+    users
 ) {
     'use strict';
 
@@ -220,6 +226,7 @@
         me.getAuthCredentials = getAuthCredentials;
         me.auth = authentication(me);
         me.scans = scans(me);
+        me.users = users(me);
         return me;
     };
 }));

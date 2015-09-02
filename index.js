@@ -67,7 +67,7 @@ const handleAllPluginsRegistered = () => {
     http.auth.default('default');
 
     // Wrap models with Shield
-    require('./lib/utils/shields-up.js')(server);
+    //require('./lib/utils/shields-up.js')(server);
 
     if (!module.parent) {
         server.start(() => {

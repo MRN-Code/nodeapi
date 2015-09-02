@@ -11,7 +11,11 @@ const expiredCookie = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1v
 /* jscs: enable */
 let apiClient;
 let cookie;
+let parsedCookie;
 let credentials;
+let cookieUtils;
+
+const studyRolesMock = {'2319': ['coordinator', 'pi']};
 
 /**
  * set the apiClient variable inside the parent closure
@@ -56,9 +60,15 @@ describe('Cookies', () => {
                 const rawCookies = response.headers['set-cookie'];
                 cookie = getCasCookieValue(rawCookies[0]);
                 credentials = response.body.data[0];
-                return;
-            });
+                cookieUtils = require('../../lib/utils/cas-cookie-utils.js')(server);
+
+                return cookieUtils.verifyAndParse(cookie,
+                    server.plugins['hapi-redis'].client);
+            }).then((parsed) => {
+                parsedCookie = parsed;
+            }).catch((err) =>{console.dir(err); return err.data;});
     });
+
 
     it('Should respond with 400 for invalid cookies', () => {
         const request = {
@@ -116,6 +126,13 @@ describe('Cookies', () => {
         return apiClient.getAuthCredentials()
             .then(logoutThenResetOldCredentials)
             .then(sendRequest);
+    });
+
+    describe('Test cookie roles', () => {
+        it('Should contain the studyRoles for user mochatest', () => {
+            console.dir(parsedCookie.studyRoles);
+            parsedCookie.studyRoles.should.deep.equal(studyRolesMock);
+        });
     });
 
 });

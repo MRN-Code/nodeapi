@@ -5,9 +5,9 @@
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define([
-            'object-assign',
+            'es6-object-assign',
             'hawk',
-            'renameKeys',
+            'rename-keys',
             './authentication',
             './scans',
             './users',

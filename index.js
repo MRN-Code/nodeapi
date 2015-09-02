@@ -5,7 +5,6 @@ const config = require('config');
 const Bluebird = require('bluebird');
 const _ = require('lodash');
 const connectionConfig = require('./lib/utils/get-connection-options.js')();
-const mcryptAuthKey = require('./lib/utils/get-mcrypt-key.js')();
 const plugins = require('./lib/utils/get-plugins.js')();
 
 // Set up Server
@@ -79,9 +78,6 @@ server.registerThen = Bluebird.promisify(server.register);
 Bluebird.onPossiblyUnhandledRejection((err) => {
     server.log(['error', 'unhandled-rejection'], err);
 });
-
-// Set server-wide authKey
-server.app.authKey = mcryptAuthKey;
 
 // Redirect stderr to server logs
 process.stderr.on('data', (data) => {

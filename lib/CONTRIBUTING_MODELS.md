@@ -7,6 +7,12 @@ Follow the steps below to add new models. The models will be available to you in
 
 - [ ] Copy the `model template` below to a new file in this directory. It will be automatically registered at `server.plugins.bookshelf.models('ModelName')` when the server is restarted.
 
+  - [ ] If it is necessary to define an `initialize` function on your new model, be sure
+  to add `this.on('save', this._utils.saveHist, this)` so that history saving is preserved.
+
+  - [ ] Avoid re-defining `parse` and `format` on your models. These methods are
+  used to convert between snake_case and camelCase.
+
 - [ ] Add `read_<MyModel>`, `create_`, `update_`, and `delete_` verbs to 'lib/permissions/permissions-schema.json' in order to allow different roles to access your model. See `lib/permissions/README.md`
 
 - [ ] Add one or more shieldConfig objects to `config/default.json` that correspond to your model.  Note that most access is governed through the *study* `aclContext`.

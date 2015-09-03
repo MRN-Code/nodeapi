@@ -96,4 +96,31 @@ describe('Coinstac Consortia', () => {
 
     });
 
+    describe('PUT', () => {
+        it('Updates a consortium', () => {
+
+            /**
+             * Modify a consortium retrieved from the API
+             * @param  {object} response apiClient response object
+             * @return {object}          modified consortium object
+             */
+            const modifyConsortium = (response) => {
+                const consortium = response.result.data[0];
+                consortium.description = 'modified during test';
+                return consortium;
+            };
+
+            return apiClient.coinstac.consortia.fetch({ id:'one' })
+                .then(modifyConsortium)
+                .then(apiClient.coinstac.consortia.update)
+                .then((response) => {
+                    const data = response.result.data;
+                    data.should.have.property('length');
+                    data.length.should.equal(1);
+                    data[0].should.have.property('_id');
+                    data[0].description.should.equal('modified during test');
+                });
+        });
+    });
+
 });

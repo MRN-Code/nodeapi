@@ -55,7 +55,7 @@
             },
             "consortia": {
                 "path": "/tmp/coinstac-pouchdb",
-                "name": "consortia"
+                "baseName": "consortia"
             }
         }
     }

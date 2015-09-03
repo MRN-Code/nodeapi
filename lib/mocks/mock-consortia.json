@@ -5,7 +5,8 @@
         "users": [],
         "tags": [],
         "analyses": [],
-        "_id": "one"
+        "_id": "one",
+        "dbUrl": "none"
     },
     {
         "label": "another example consortium",
@@ -13,6 +14,7 @@
         "users": [],
         "tags": [],
         "analyses": [],
-        "_id": "two"
+        "_id": "two",
+        "dbUrl": "none"
     }
 ]

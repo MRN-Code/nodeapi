@@ -32,6 +32,54 @@ eventually use couchdb for this).
 mkdir /tmp/coinstac-pouchdb
 ```
 
+#### CouchDB
+
+1. Install couchdb: `sudo apt-get install couchdb`
+1. Edit couchdb to listen to all IPs:
+  1. Open _/etc/couchdb/default.ini_
+  1. Change `bind_address` to `0.0.0.0`
+  1. Change `enable_cors` to `true`
+  1. Uncomment `[cors]` -> `origins = *`
+1. If on a localcoin, add port forwarding for port 5984 to _/coins/localcoin/Vagrantfile_, **and reload the vagrant VM**
+1. (optional) If you wish to connect to your couchdb via https, edit the nginx config, and then `sudo service nginx reload`:
+  1. Open _/etc/nginx/sites-enabled/default_
+  1. Add the following below the `api location` block:
+  ```
+  location /couchdb {
+    rewrite /couchdb(.*) /$1 break;
+    proxy_set_header        X-Forwarded-Host $host;
+    proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_cache             off;
+    proxy_pass              http://localhost:5984;
+    proxy_redirect          off;
+  }
+  ```
+1. Create a _config/local.json_ file with the following content:
+```
+{
+    "coinstac": {
+        "pouchdb": {
+            "consortiaMeta": {
+                "conn": {
+                    "hostname": "localhost",
+                    "protocol": "http",
+                    "port": 5984,
+                    "pathname": "consortiaMeta"
+                }
+            },
+            "consortia": {
+                "conn": {
+                    "hostname": "localhost",
+                    "protocol": "http",
+                    "port": 5984,
+                    "basePathname": "consortia"
+                }
+            }
+        }
+    }
+}
+```
+
 #### Cloudant
 
 1. Sign up for a Cloudant account (Cloudant.com)

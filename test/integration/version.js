@@ -1,58 +1,52 @@
 'use strict';
 
 const chai = require('chai');
-const server = require('../../');//
+const server = require('../../');
 const pkg = require('../../package.json');
-const baseUrl="https://localhost/api/version";
+const baseUrl = 'https://localhost/api/version';
 
 chai.should();
 
-const myObj = {
-      name: 'testObj'
+const writeResponseCode = (response) => {
+    response.statusCode.should.equal(200);
+};
+
+const checkPackageVersion = (response) => {
+    response.result.data[0].should.have.property('version');
+    response.result.data[0].version.should.equal('v' + pkg.version);
+};
+
+const printError = (error) => {
+    console.dir(error);
+    throw error;
 };
 
 describe('Version', () => {
 
     // Always wait for the server to be ready before beginning any tests
     before('wait for server to be ready', () => {
-        return server.app.pluginsRegistered.catch((error) =>{
-        	console.dir(error);
-        	throw error;
-
+        return server.app.pluginsRegistered.catch((error) => {
+            printError(error);
         });
     });
 
     it('should respond with 200 status code', () => {
-	const request = {
+        const request = {
             method: 'GET',
             url: baseUrl
         };
-        return server.injectThen(request).then((response) => {
-            
-            response.statusCode.should.equal(200);
-         
-        }
-        ).catch((error) =>{
-        	console.dir(error);
-        	throw error;
-
-        });
+        return server.injectThen(request)
+            .then(writeResponseCode)
+            .catch(printError);
     });
 
-    it('Should respond with a version number equal to the package version', () => {
-	const request = {
+    it('Should give version equal to package version', () => {
+        const request = {
             method: 'GET',
             url: baseUrl
         };
-        return server.injectThen(request).then((response) => {
-          response.result.data.should.have.property('version');
-          response.result.data.version.should.equal(pkg.version);
-          
-        }
-        ).catch((error) =>{
-        	console.dir(error);
-        	throw error;
-
-        });
+        return server.injectThen(request)
+            .then(checkPackageVersion)
+            .catch(printError);
     });
 });

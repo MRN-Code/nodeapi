@@ -25,9 +25,7 @@ describe('Version', () => {
 
     // Always wait for the server to be ready before beginning any tests
     before('wait for server to be ready', () => {
-        return server.app.pluginsRegistered.catch((error) => {
-            printError(error);
-        });
+        return server.app.pluginsRegistered.catch(printError);
     });
 
     it('should respond with 200 status code', () => {

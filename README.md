@@ -5,21 +5,77 @@ node based API for COINS
 
 If things aren't working, go down this quick checklist.
 
--[ ] Are you running io.js v2.5? Does not work with v3+ or Node.js
--[ ] Did you install the mcrypt system package (not the npm package)?
--[ ] Is a redis server installed and running locally?
--[ ] Have you pulled the latest changes in coins_auth, and run `grunt build`?
--[ ] Is nginx installed, configured and running locally?
+- [ ] Are you running io.js v2.5? Does not work with v3+ or Node.js
+
+- [ ] Did you install the mcrypt system package (not the npm package)?
+
+- [ ] Is a redis server installed and running locally?
+
+- [ ] Have you pulled the latest changes in coins_auth, and run `grunt build`?
+
+- [ ] Is nginx installed, configured and running locally?
+
+- [ ] Did you create a cloudant account, or `mkdir /tmp/coinstac-pouchdb`?
 
 
 If you miss any of these requirements, remove all node modules and reinstall them
 after installing the requirements.
 
-### pouchdb path
+### *ouchDB
+The COINSTAC services rely on PouchDB, which needs to persist its data somewhere.
+There are two options for Pouch persisence backends currently:
+
+#### PouchDB Leveldown (simplest, but will not work with COINSTAC client)
 It is necessary to make a path to store pouchdb data temporarily (will
 eventually use couchdb for this).
 ```
 mkdir /tmp/coinstac-pouchdb
+```
+
+#### Cloudant
+
+1. Sign up for a Cloudant account (Cloudant.com)
+1. Once logged in, click on `Account->CORS->Enable CORS`, and select **All origin domains**
+1. Create a _config/local.json_ file with the following content:
+```
+{
+    "coinstac": {
+        "pouchdb": {
+            "cloudant": {
+                "key": "${base64 encode username:password}",
+                "hostname": "${USERNAME}.cloudant.com"
+            },
+            "consortiaMeta": {
+                "conn": {
+                    "hostname": "${USERNAME}.cloudant.com",
+                    "protocol": "https",
+                    "pathname": "consortiaMeta"
+                },
+                "pouchConfig": {
+                    "ajax": {
+                        "headers": {
+                            "Authorization": "${base64 encode username:password}"
+                        }
+                    }
+                }
+            },
+            "consortia": {
+                "conn": {
+                    "hostname": "${USERNAME}.cloudant.com",
+                    "protocol": "https",
+                    "basePathname": "consortia"
+                },
+                "pouchConfig": {
+                    "ajax": {
+                        "headers": {
+                            "Authorization": "${base64 encode username:password}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 ```
 
 ### io.js v2.5

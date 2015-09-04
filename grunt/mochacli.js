@@ -11,7 +11,7 @@ module.exports = function() {
         spec: {
             options: {
                 reporter: 'spec',
-                timeout: 15000
+                timeout: 20000
             }
         }
     };

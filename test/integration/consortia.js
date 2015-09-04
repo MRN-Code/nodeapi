@@ -5,6 +5,7 @@ const server = require('../../');
 const PouchW = require('pouchdb-wrapper');
 const _ = require('lodash');
 const Bluebird = require('bluebird');
+const config = require('config');
 const mockConsortia = require('../../lib/mocks/mock-consortia.json');
 const initApiClient = require('../utils/init-api-client.js');
 let apiClient;
@@ -20,14 +21,26 @@ const setApiClient = (client) => {
 };
 
 const mockConsortiaDb = () => {
-    const db = new PouchW({
-        name: 'consortia-test',
-        pouchConfig: { db: require('memdown') }
-    });
-    server.plugins.houchdb.consortiaMeta = db;
+    let db;
+
+    //TODO: this only mocks the consortiaMeta DB, but actual consortium-dbs
+    //TODO: still created on the remote
+
+    // skip if we are configured to use cloudant
+    if (config.has('coinstac.pouchdb.cloudant')) {
+        console.log('Skipping mocking *ouch database');
+        db = server.plugins.houchdb.consortiaMeta;
+    } else {
+        db = new PouchW({
+            name: 'consortia-test',
+            pouchConfig: { db: require('memdown') }
+        });
+        server.plugins.houchdb.consortiaMeta = db;
+    }
+
     return db.clear()
         .then(() => {
-            Bluebird.all(_.map(mockConsortia, db.add, db));
+            return Bluebird.all(_.map(mockConsortia, db.add, db));
         });
 };
 
@@ -71,27 +84,27 @@ describe('Coinstac Consortia', () => {
 
     describe('POST', () => {
         it('Adds a new consortium', () => {
-            const consortia = {
+            const consortium = {
                 label: 'POST test consortium',
                 description: 'added as part of integration tests',
                 users: [],
                 tags: [],
                 analyses: []
             };
-            return apiClient.coinstac.consortia.create(consortia)
+            return apiClient.coinstac.consortia.create(consortium)
                 .then((response) => {
                     const data = response.result.data;
                     data.should.have.property('length');
                     data.length.should.equal(1);
                     data[0].should.have.property('_id');
-                    _.forEach(consortia, (val, key) => {
+                    data[0].should.have.property('dbUrl');
+                    _.forEach(consortium, (val, key) => {
                         data[0].should.have.property(key);
                         data[0][key].should.eql(val);
                     });
                 });
         });
 
-        it('Returns the name/path of the database for the consortium');
         it('Adds a pouch/couch Db for the new consortium');
 
     });

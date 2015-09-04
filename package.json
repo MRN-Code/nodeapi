@@ -10,6 +10,7 @@
     "iojs": "2.5.0"
   },
   "dependencies": {
+    "axios": "0.5.4",
     "bcrypt": "0.8.5",
     "bluebird": "2.9.34",
     "bookshelf": "0.8.1",

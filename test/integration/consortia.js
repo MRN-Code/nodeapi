@@ -83,6 +83,7 @@ describe('Coinstac Consortia', () => {
     });
 
     describe('POST', () => {
+        let consortiumDb;
         it('Adds a new consortium', () => {
             const consortium = {
                 label: 'POST test consortium',
@@ -102,10 +103,87 @@ describe('Coinstac Consortia', () => {
                         data[0].should.have.property(key);
                         data[0][key].should.eql(val);
                     });
+
+                    consortiumDb = new PouchW({
+                        name: 'testConsortium',
+                        url: data[0].dbUrl
+                    });
                 });
         });
 
-        it('Adds a pouch/couch Db for the new consortium');
+        it('Adds a pouch/couch Db for the new consortium', () => {
+            return consortiumDb.info();
+        });
+
+        it('Allows new analyses to be added to consortium', () => {
+            const addAnalysis = () => {
+                const analysis = {
+                    fileSha: 'abc',
+                    result: 2
+                };
+                return consortiumDb.add(analysis);
+            };
+
+            return addAnalysis();
+        });
+
+        it('re-computes average of all analyses', () => {
+            let expectedAverage;
+            const addAnalysis = () => {
+                const analysis = {
+                    fileSha: 'abc',
+                    result: 4
+                };
+                return consortiumDb.add(analysis);
+            };
+
+            const setExpectedAverage = (avg) => {
+                expectedAverage = avg;
+            };
+
+            const getAnalyses = () => {
+                return consortiumDb.all()
+                    .then((docs) => {
+                        return _.filter(docs, (value) => {
+                            return !value.aggregate
+                        });
+                    });
+            };
+
+            const getAggregate = () => {
+                return consortiumDb.all()
+                    .then((docs) => {
+                        return _.find(docs, {aggregate: true});
+                    });
+            };
+
+            const calculateAverage = (analyses) => {
+                const sum = (arr) => {
+                    return _.reduce(arr, (res, val) => {
+                        return res + val;
+                    }, 0);
+                };
+
+                const results = _.map(analyses, 'result');
+                return sum(results) / results.length;
+            };
+
+            const waitForAggregateCalc = (arg) => {
+                return Bluebird.delay(arg, 10);
+            };
+
+            return addAnalysis()
+                .then(getAnalyses)
+                .then(calculateAverage)
+                .then(setExpectedAverage)
+                .then(waitForAggregateCalc)
+                .then(getAggregate)
+                .then(_.property('result'))
+                .then((actualAverage) => {
+                    chai.expect(actualAverage).to.not.be.undefined; //jshint ignore:line
+                    return actualAverage.should.equal(expectedAverage);
+                });
+        });
 
     });
 

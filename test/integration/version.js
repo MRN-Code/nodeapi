@@ -34,7 +34,7 @@ describe('Version', () => {
             url: baseUrl
         };
         return server.injectThen(request)
-            .then(writeResponseCode)
+            .then(checkResponseCode)
             .catch(printError);
     });
 

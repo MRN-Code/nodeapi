@@ -5,7 +5,7 @@ const redis = require('fakeredis');
 const _ = require('lodash');
 const Bluebird = require('bluebird');
 const redisClient = redis.createClient();
-const casCookieUtils = {};
+const casCookieUtils = require('../../lib/utils/cas-cookie-utils.js');
 const credentials = {
     id: 'mochatestId',
     username: 'mochatest',
@@ -20,13 +20,7 @@ chai.should();
 
 describe('casCookieUtils', () => {
     before((done) => {
-        return Bluebird.all([
-            redisClient.hmset(credentials.id, credentials, done),
-            server.app.pluginsRegistered
-            ]).then(() => {
-                casCookieUtils = 
-                    require('../../lib/utils/cas-cookie-utils.js')(server);
-            });
+        return redisClient.hmset(credentials.id, credentials, done);
     });
 
     describe('generate', () => {

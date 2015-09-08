@@ -1,0 +1,18 @@
+[
+    {
+        "label": "example consortium",
+        "description": "This consortium is added by default",
+        "users": [],
+        "tags": [],
+        "analyses": [],
+        "_id": "one"
+    },
+    {
+        "label": "another example consortium",
+        "description": "This consortium is added by default",
+        "users": [],
+        "tags": [],
+        "analyses": [],
+        "_id": "two"
+    }
+]

@@ -6,6 +6,17 @@ Follow these guidelines to create new routes.
 
 - [ ] If creating multiple routes that should exist one-level deep (e.g. `/auth/keys` and `/auth/cookies`), the new file may be placed in a sub-directory. See the `auth` routes for an example.
 
+## Using models
+Models placed in `lib/models` will be available by accessing
+`[request.]server.plugins.bookshelf.model('modelName')`.
+
+These models are all extended from a *base* model found in `lib/utils/get-base-model.js`.
+The base model adds a `parse` method to automatically convert *snake_case* column
+names to *camelCase* on any model that is fetched. Similarly, the base model
+adds a `format` method to convert *camelCase* property names to *snake_case*
+whenever a model is saved. **Consequently, use camelCase to reference
+column names, except when building queries**. 
+
 
 ## plugin template
 

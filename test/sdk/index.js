@@ -5,19 +5,21 @@
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define([
-            'object-assign',
+            'es6-object-assign',
             'hawk',
-            'renameKeys',
+            'rename-keys',
             './authentication',
             './scans',
-            './version'
+            './users',
+            './coinstac/consortia'
         ], function(
             ObjectAssign,
             hawk,
             rename,
             authentication,
             scans,
-            version
+            users,
+            consortia
         ) {
             return factory(
                 ObjectAssign.assign,
@@ -26,7 +28,8 @@
                 localStorage,
                 authentication,
                 scans,
-                version
+                users,
+                consortia
             );
         });
     } else if (typeof module === 'object' && module.exports) {
@@ -50,7 +53,8 @@
             storage,
             require('./authentication'),
             require('./scans'),
-            require('./../../package.json').version
+            require('./users'),
+            require('./coinstac/consortia')
         );
 
     } else {
@@ -62,7 +66,8 @@
             root.localStorage,
             root.CoinsApiClient.authentication,
             root.CoinsApiClient.scans,
-            root.CoinsApiClient.version
+            root.CoinsApiClient.users,
+            root.CoinsApiClient.coinstac.consortia
         );
 
     }
@@ -74,7 +79,8 @@
     localStorage,
     authentication,
     scans,
-    version
+    users,
+    consortia
 ) {
     'use strict';
 
@@ -90,7 +96,7 @@
             uri: 'uri'
         },
         baseUrl: 'https://coins-api.mrn.org/api',
-        version: version,
+        version: null,
         formatRequestHeaders: function(value) {
             return value;
         },
@@ -226,6 +232,10 @@
         me.getAuthCredentials = getAuthCredentials;
         me.auth = authentication(me);
         me.scans = scans(me);
+        me.users = users(me);
+        me.coinstac = {
+            consortia: consortia(me)
+        };
         return me;
     };
 }));

@@ -50,7 +50,7 @@ describe('Scan routes', () => {
             return apiClient.scans.get()
                 .then((response) => {
                     response.result.data.should.have.length.of.at.least(9);
-                    response.result.data[0].should.have.property('scan_id');
+                    response.result.data[0].should.have.property('scanId');
                     should.equal(response.result.error, null);
                 });
         });
@@ -59,7 +59,7 @@ describe('Scan routes', () => {
             return apiClient.scans.get({ ursi: 'M06123761' })
                 .then((response) => {
                     response.result.data.should.have.length.of.at.least(7);
-                    response.result.data[0].should.have.property('scan_id');
+                    response.result.data[0].should.have.property('scanId');
                     should.equal(response.result.error, null);
                 });
         });
@@ -68,7 +68,7 @@ describe('Scan routes', () => {
             return apiClient.scans.get({ studyId: 2319 })
                 .then((response) => {
                     response.result.data.should.have.length.of.at.least(9);
-                    response.result.data[0].should.have.property('scan_id');
+                    response.result.data[0].should.have.property('scanId');
                     should.equal(response.result.error, null);
                 });
         });

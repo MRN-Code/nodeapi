@@ -7,7 +7,7 @@ const baseUrl = 'https://localhost/api/version';
 
 chai.should();
 
-const writeResponseCode = (response) => {
+const checkResponseCode = (response) => {
     response.statusCode.should.equal(200);
 };
 

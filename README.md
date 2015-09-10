@@ -36,7 +36,7 @@ mkdir /tmp/coinstac-pouchdb
 
 1. Install couchdb: `sudo apt-get install couchdb`
 1. Edit couchdb to listen to all IPs:
-  1. Open _/etc/couchdb/default.ini_
+  1. Open _/etc/couchdb/default.ini_ (osx: /usr/local/etc/couchdb/default.ini)
   1. Change `bind_address` to `0.0.0.0`
   1. Change `enable_cors` to `true`
   1. Uncomment `[cors]` -> `origins = *`

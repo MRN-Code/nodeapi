@@ -8,19 +8,13 @@ If things aren't working, go down this quick checklist.
 - [ ] Are you running io.js v2.5? Does not work with v3+ or Node.js
 - [ ] Did you install the mcrypt system package (not the npm package)?
 - [ ] Is a redis server installed and running locally?
+- [ ] Is couchdb running locally? (coinstac only)
 - [ ] Have you pulled the latest changes in coins_auth, and run `grunt build`?
 - [ ] Is nginx installed, configured and running locally?
 
 
 If you miss any of these requirements, remove all node modules and reinstall them
 after installing the requirements.
-
-### pouchdb path
-It is necessary to make a path to store pouchdb data temporarily (will
-eventually use couchdb for this).
-```
-mkdir /tmp/coinstac-pouchdb
-```
 
 ### io.js v2.5
 In order to support ES2015 Specifications, it is best to run this application

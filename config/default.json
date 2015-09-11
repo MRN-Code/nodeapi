@@ -48,13 +48,21 @@
         }
     ],
     "coinstac": {
-        "pouchdb": {
+        "couchdb": {
             "consortiaMeta": {
-                "path": "/tmp/coinstac-pouchdb",
+                "conn": {
+                    "protocol": "http",
+                    "hostname": "localhost",
+                    "port": 5984
+                },
                 "name": "consortiaMeta"
             },
             "consortia": {
-                "path": "/tmp/coinstac-pouchdb",
+                "conn": {
+                    "protocol": "http",
+                    "hostname": "localhost",
+                    "port": 5984
+                },
                 "name": "consortia"
             }
         }

@@ -1,11 +1,10 @@
 'use strict';
-
+const cliOpts = require('./lib/utils/cli-options.js');
 const hapi = require('hapi');
 const config = require('config');
 const Bluebird = require('bluebird');
 const _ = require('lodash');
 const connectionConfig = require('./lib/utils/get-connection-options.js')();
-const mcryptAuthKey = require('./lib/utils/get-mcrypt-key.js')();
 const plugins = require('./lib/utils/get-plugins.js')();
 
 // Set up Server
@@ -56,12 +55,10 @@ const registerPluginThen = (currentPromise, config) => {
  * @return {null} none
  */
 const handleAllPluginsRegistered = () => {
-    const authUtils = require('./lib/utils/authentication.js')(server);
-
     http.auth.strategy(
         'default',
         'hawk',
-        { getCredentialsFunc: authUtils.getHawkCredentials }
+        { getCredentialsFunc: server.plugins.utilities.auth.getHawkCredentials }
     );
 
     http.auth.default('default');
@@ -81,9 +78,6 @@ server.registerThen = Bluebird.promisify(server.register);
 Bluebird.onPossiblyUnhandledRejection((err) => {
     server.log(['error', 'unhandled-rejection'], err);
 });
-
-// Set server-wide authKey
-server.app.authKey = mcryptAuthKey;
 
 // Redirect stderr to server logs
 process.stderr.on('data', (data) => {

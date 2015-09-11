@@ -119,7 +119,7 @@ describe('Coinstac Consortia', () => {
             const addAnalysis = () => {
                 const analysis = {
                     fileSha: 'abc',
-                    result: 2
+                    result: {a: 2, b: 2, c: 2}
                 };
                 return consortiumDb.add(analysis);
             };
@@ -132,7 +132,7 @@ describe('Coinstac Consortia', () => {
             const addAnalysis = () => {
                 const analysis = {
                     fileSha: 'abc',
-                    result: 4
+                    result: {a: 4, b: 4, c: 4}
                 };
                 return consortiumDb.add(analysis);
             };
@@ -145,7 +145,7 @@ describe('Coinstac Consortia', () => {
                 return consortiumDb.all()
                     .then((docs) => {
                         return _.filter(docs, (value) => {
-                            return !value.aggregate
+                            return !value.aggregate;
                         });
                     });
             };
@@ -158,14 +158,40 @@ describe('Coinstac Consortia', () => {
             };
 
             const calculateAverage = (analyses) => {
+                /**
+                 * sum like properties in an array of objects
+                 * @param  {array} arr an array of objects
+                 * @return {object}     the object where each property is the
+                 *                          summed value
+                 */
                 const sum = (arr) => {
-                    return _.reduce(arr, (res, val) => {
-                        return res + val;
-                    }, 0);
+                    return _.reduce(arr, (res, obj) => {
+                        return _.mapValues(obj, (val, key) => {
+                            res[key] = res[key] || 0;
+                            return res[key] + val;
+                        });
+                    }, {});
+                };
+
+                /**
+                 * divide each value of an object by divisor
+                 * @param  {object} obj the obect to operate on
+                 * @param  {int}    divisor the number by which to divide
+                 * @return {object}     a new object where each property is the
+                 *                        result of the division
+                 */
+                const divide = (obj, divisor) => {
+                    return _.mapValues(obj, (val) => {
+                        if (divisor === 0) {
+                            return 0;
+                        }
+
+                        return val / divisor;
+                    });
                 };
 
                 const results = _.map(analyses, 'result');
-                return sum(results) / results.length;
+                return divide(sum(results), results.length);
             };
 
             const waitForAggregateCalc = (arg) => {
@@ -181,7 +207,7 @@ describe('Coinstac Consortia', () => {
                 .then(_.property('result'))
                 .then((actualAverage) => {
                     chai.expect(actualAverage).to.not.be.undefined; //jshint ignore:line
-                    return actualAverage.should.equal(expectedAverage);
+                    return actualAverage.should.eql(expectedAverage);
                 });
         });
 

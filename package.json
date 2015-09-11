@@ -29,6 +29,7 @@
     "hapi-redis": "5.0.0",
     "hapi-relations": "1.0.0",
     "hapi-swagger": "git+https://github.com/MRN-Code/hapi-swagger.git",
+    "coinstac-algorithms": "git+https://github.com/MRN-Code/coinstac-distributed-algorithm-set.git",
     "inert": "3.0.1",
     "joi": "6.6.1",
     "jsonwebtoken": "5.0.4",

@@ -17,7 +17,6 @@ If things aren't working, go down this quick checklist.
 
 - [ ] Did you create a cloudant account, or `mkdir /tmp/coinstac-pouchdb`?
 
-
 If you miss any of these requirements, remove all node modules and reinstall them
 after installing the requirements.
 
@@ -191,6 +190,12 @@ as a reverse proxy and SSL terminator for the API. Ask Dylan for more details.
 To start the server, use the `npm start` command.
 If that fails, look at `package.json` for the command that `npm start` runs,
 and run that manually for a more useful output.
+
+
+## CLI options
+Use `node index --help` to see all available options.
+
+- @flag development/release/production run the server using COINS_ENV of the respective flag. Shorthand --dev/rel/prd are honored.
 
 To start the server as a daemon, use `pm2 start ecosystem.json5`.
 

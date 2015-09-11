@@ -30,3 +30,5 @@ node_modules
 # local config file that contains passwords
 config/local.json
 config/*.local.json
+couchdb.std*
+dump.rdb

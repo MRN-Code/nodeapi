@@ -27,7 +27,7 @@ describe('Scan routes', () => {
             .then(function addScanPrivsToTestUser() {
                 return new Bluebird((res, rej) => {
                     server.plugins.relations.study(
-                        'mochatest is PI of 2319',
+                        'mochatest is pi of 2319',
                         (err) => {
                             if (err) {
                                 rej(err);

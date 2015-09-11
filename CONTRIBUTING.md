@@ -38,7 +38,7 @@ Here is a simple checklist for adding new routes. It explains where new code mus
 - [ ] **Models**: Your new route may need to access tables that have not yet been added to our bookshelf models.
     - [ ] **New models** are added in `lib/models`.
     - [ ] **Access verbs** for those models are added to `lib/permissions/permission-schema.json`
-    - [ ] **shieldConfig** objects must be added to `config/default.json`
+    - [ ] **shieldConfig** models must be added to `config/default.json`
 
 Note that the models are accessed through `bookshelf-shield`, which exposes `create`, `read`, `readAll`, `update`, and `delete` methods instead of the standard bookeshelf `save`, `fetch`, `fetchAll`, `remove`. **See `lib/CONTRIBUTING_MODELS.md`**.
 

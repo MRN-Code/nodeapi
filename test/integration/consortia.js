@@ -69,13 +69,14 @@ describe('Coinstac Consortia', () => {
         });
 
         it('Gets a single consortium', () => {
-            return apiClient.coinstac.consortia.fetch({ id:'one' })
+            return apiClient.coinstac.consortia.fetch({ id: mockConsortia[0]._id })
                 .then((response) => {
                     const data = response.result.data;
+                    console.dir(data[0]);
                     data.should.have.property('length');
                     data.length.should.equal(1);
                     data[0].should.have.property('_id');
-                    data[0]._id.should.equal('one');
+                    data[0]._id.should.equal( mockConsortia[0]._id);
                 });
 
         });
@@ -227,7 +228,7 @@ describe('Coinstac Consortia', () => {
                 return consortium;
             };
 
-            return apiClient.coinstac.consortia.fetch({ id:'one' })
+            return apiClient.coinstac.consortia.fetch({ id: mockConsortia[0]._id })
                 .then(modifyConsortium)
                 .then(apiClient.coinstac.consortia.update)
                 .then((response) => {

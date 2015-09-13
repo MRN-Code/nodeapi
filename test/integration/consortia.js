@@ -2,12 +2,11 @@
 
 const chai = require('chai');
 const server = require('../../');
-const PouchW = require('pouchdb-wrapper');
 const _ = require('lodash');
 const Bluebird = require('bluebird');
-const config = require('config');
 const mockConsortia = require('../../lib/mocks/mock-consortia.json');
 const initApiClient = require('../utils/init-api-client.js');
+const controller = require('../../lib/controllers/coinstac/consortia.js');
 let apiClient;
 
 /**
@@ -20,30 +19,6 @@ const setApiClient = (client) => {
     return client;
 };
 
-const mockConsortiaDb = () => {
-    let db;
-
-    //TODO: this only mocks the consortiaMeta DB, but actual consortium-dbs
-    //TODO: still created on the remote
-
-    // skip if we are configured to use cloudant
-    if (config.has('coinstac.pouchdb.cloudant')) {
-        console.log('Skipping mocking *ouch database');
-        db = server.plugins.houchdb.consortiaMeta;
-    } else {
-        db = new PouchW({
-            name: 'consortia-test',
-            pouchConfig: { db: require('memdown') }
-        });
-        server.plugins.houchdb.consortiaMeta = db;
-    }
-
-    return db.clear()
-        .then(() => {
-            return Bluebird.all(_.map(mockConsortia, db.add, db));
-        });
-};
-
 // Set should property of all objects for BDD assertions
 chai.should();
 
@@ -53,8 +28,7 @@ describe('Coinstac Consortia', () => {
     before('wait for server to be ready', () => {
         return server.app.pluginsRegistered
             .then(initApiClient)
-            .then(setApiClient)
-            .then(mockConsortiaDb);
+            .then(setApiClient);
     });
 
     describe('GET', () => {
@@ -69,14 +43,14 @@ describe('Coinstac Consortia', () => {
         });
 
         it('Gets a single consortium', () => {
-            return apiClient.coinstac.consortia.fetch({ id: mockConsortia[0]._id })
+            return apiClient.coinstac.consortia
+                .fetch({ id: mockConsortia[0]._id })
                 .then((response) => {
                     const data = response.result.data;
-                    console.dir(data[0]);
                     data.should.have.property('length');
                     data.length.should.equal(1);
                     data[0].should.have.property('_id');
-                    data[0]._id.should.equal( mockConsortia[0]._id);
+                    data[0]._id.should.equal(mockConsortia[0]._id);
                 });
 
         });
@@ -96,59 +70,53 @@ describe('Coinstac Consortia', () => {
             return apiClient.coinstac.consortia.create(consortium)
                 .then((response) => {
                     const data = response.result.data;
+                    let id;
                     data.should.have.property('length');
                     data.length.should.equal(1);
                     data[0].should.have.property('_id');
+                    id = data[0]._id;
                     data[0].should.have.property('dbUrl');
                     _.forEach(consortium, (val, key) => {
                         data[0].should.have.property(key);
                         data[0][key].should.eql(val);
                     });
 
-                    consortiumDb = new PouchW({
-                        name: 'testConsortium',
-                        url: data[0].dbUrl
-                    });
+                    return controller.getConsortiumDb(id, server)
+                        .then((result) => {
+                            consortiumDb = result;
+                        });
                 });
         });
 
         it('Adds a pouch/couch Db for the new consortium', () => {
+            chai.expect(consortiumDb).to.exist; //jshint ignore:line
+            consortiumDb.should.have.property('info');
             return consortiumDb.info();
         });
 
         it('Allows new analyses to be added to consortium', () => {
             const addAnalysis = () => {
                 const analysis = {
-                    fileSha: 'abc',
-                    result: {a: 2, b: 2, c: 2}
+                    _id: 'analysis01',
+                    files: ['cde'],
+                    result: {CortexVol: 500000},
+                    owner: 'mocha2'
                 };
-                return consortiumDb.add(analysis);
+                return consortiumDb.save(analysis);
             };
 
             return addAnalysis();
         });
 
         it('re-computes average of all analyses', () => {
-            let expectedAverage;
             const addAnalysis = () => {
                 const analysis = {
-                    fileSha: 'abc',
-                    result: {a: 4, b: 4, c: 4}
+                    _id: 'analysis02',
+                    files: ['abc'],
+                    result: {CortexVol: 400000},
+                    owner: 'mocha'
                 };
-                return consortiumDb.add(analysis);
-            };
-
-            const setExpectedAverage = (avg) => {
-                expectedAverage = avg;
-            };
-
-            const getAnalyses = () => {
-                return consortiumDb.all()
-                    .then((docs) => {
-                        return _.filter(docs, (value) => {
-                            return !value.aggregate;
-                        });
-                    });
+                return consortiumDb.save(analysis);
             };
 
             const getAggregate = () => {
@@ -158,57 +126,25 @@ describe('Coinstac Consortia', () => {
                     });
             };
 
-            const calculateAverage = (analyses) => {
-                /**
-                 * sum like properties in an array of objects
-                 * @param  {array} arr an array of objects
-                 * @return {object}     the object where each property is the
-                 *                          summed value
-                 */
-                const sum = (arr) => {
-                    return _.reduce(arr, (res, obj) => {
-                        return _.mapValues(obj, (val, key) => {
-                            res[key] = res[key] || 0;
-                            return res[key] + val;
-                        });
-                    }, {});
-                };
-
-                /**
-                 * divide each value of an object by divisor
-                 * @param  {object} obj the obect to operate on
-                 * @param  {int}    divisor the number by which to divide
-                 * @return {object}     a new object where each property is the
-                 *                        result of the division
-                 */
-                const divide = (obj, divisor) => {
-                    return _.mapValues(obj, (val) => {
-                        if (divisor === 0) {
-                            return 0;
-                        }
-
-                        return val / divisor;
-                    });
-                };
-
-                const results = _.map(analyses, 'result');
-                return divide(sum(results), results.length);
-            };
-
             const waitForAggregateCalc = (arg) => {
-                return Bluebird.delay(arg, 10);
+                return Bluebird.delay(arg, 100);
             };
 
             return addAnalysis()
-                .then(getAnalyses)
-                .then(calculateAverage)
-                .then(setExpectedAverage)
                 .then(waitForAggregateCalc)
                 .then(getAggregate)
-                .then(_.property('result'))
-                .then((actualAverage) => {
-                    chai.expect(actualAverage).to.not.be.undefined; //jshint ignore:line
-                    return actualAverage.should.eql(expectedAverage);
+                .then((average) => {
+                    average.should.have.property('result');
+                    average.should.have.property('files');
+                    average.should.have.property('error');
+                    average.should.have.property('sampleSize');
+                    average.should.have.property('aggregate');
+                    average.result.should.have.property('CortexVol');
+                    average.sampleSize.should.equal(2);
+                    average.aggregate.should.equal(true);
+                    average.files.should.include('abc');
+                    average.files.should.include('cde');
+                    return chai.expect(average.error).to.be.null;
                 });
         });
 
@@ -228,7 +164,8 @@ describe('Coinstac Consortia', () => {
                 return consortium;
             };
 
-            return apiClient.coinstac.consortia.fetch({ id: mockConsortia[0]._id })
+            return apiClient.coinstac.consortia
+                .fetch({ id: mockConsortia[0]._id })
                 .then(modifyConsortium)
                 .then(apiClient.coinstac.consortia.update)
                 .then((response) => {

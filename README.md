@@ -197,6 +197,8 @@ Use `node index --help` to see all available options.
 
 - @flag development/release/production run the server using COINS_ENV of the respective flag. Shorthand --dev/rel/prd are honored.
 
+- @flag coinstac start the server with COINSTAC routes. Defaults to false.
+
 To start the server as a daemon, use `pm2 start ecosystem.json5`.
 
 Logs are written to the `logs/` directory in this repo.

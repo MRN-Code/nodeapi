@@ -1,5 +1,5 @@
 'use strict';
-const cliOpts = require('./lib/utils/cli-options.js');
+require('./lib/utils/cli-options.js');
 const hapi = require('hapi');
 const config = require('config');
 const Bluebird = require('bluebird');

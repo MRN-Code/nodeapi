@@ -2,9 +2,10 @@ Contributing new routes
 ======
 Follow these guidelines to create new routes.
 
-- [ ] Create a new file in `lib/app-routes` with the content of the `plugin template` below. All js files in `lib/app-routes` are automatically registered to the server at startup.
+- [ ] Create a new file in `lib/app-routes` with the content of the `plugin template` below. JS files in `lib/app-routes` are *no longer* automatically registered.
 
-- [ ] If creating multiple routes that should exist one-level deep (e.g. `/auth/keys` and `/auth/cookies`), the new file may be placed in a sub-directory. See the `auth` routes for an example.
+- [ ] Include your new route file in `/lib/utils/get-plugins.js`. Look for how existing
+routes are registered for an example.
 
 ## Using models
 Models placed in `lib/models` will be available by accessing
@@ -15,7 +16,7 @@ The base model adds a `parse` method to automatically convert *snake_case* colum
 names to *camelCase* on any model that is fetched. Similarly, the base model
 adds a `format` method to convert *camelCase* property names to *snake_case*
 whenever a model is saved. **Consequently, use camelCase to reference
-column names, except when building queries**. 
+column names, except when building queries**.
 
 
 ## plugin template

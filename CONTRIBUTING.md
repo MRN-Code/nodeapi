@@ -42,7 +42,7 @@ Here is a simple checklist for adding new routes. It explains where new code mus
 
 Note that the models are accessed through `bookshelf-shield`, which exposes `create`, `read`, `readAll`, `update`, and `delete` methods instead of the standard bookeshelf `save`, `fetch`, `fetchAll`, `remove`. **See `lib/CONTRIBUTING_MODELS.md`**.
 
-- [ ] **Routes**: Routes are defined in `lib/app-routes`. To add a completely new route, simply add a new file that exports a hapi plugin registration object. **See `lib/app-routes/CONTRIBUTING.md`**.
+- [ ] **Routes**: Routes are defined in `lib/app-routes`. To add a completely new route, simply add a new file that exports a hapi plugin registration object, then add the path to that file in `lib/utils/get-plugins.js` **See `lib/app-routes/CONTRIBUTING.md`**.
 
 # Adding other functionality
 

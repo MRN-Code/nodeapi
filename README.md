@@ -15,12 +15,12 @@ If things aren't working, go down this quick checklist.
 
 - [ ] Is nginx installed, configured and running locally?
 
-- [ ] Did you create a cloudant account, or `mkdir /tmp/coinstac-pouchdb`?
+- [ ] (only if running in COINSTAC mode) Did you create a cloudant account, or `mkdir /tmp/coinstac-pouchdb`?
 
 If you miss any of these requirements, remove all node modules and reinstall them
 after installing the requirements.
 
-### *ouchDB
+### *ouchDB (only if running in COINSTAC mode)
 The COINSTAC services rely on PouchDB, which needs to persist its data somewhere.
 There are two options for Pouch persisence backends currently:
 

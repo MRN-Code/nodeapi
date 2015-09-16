@@ -33,7 +33,7 @@ describe('Coinstac Consortia', () => {
 
     describe('GET', () => {
         it('Gets all consortia', () => {
-            return apiClient.coinstac.consortia.fetch()
+            return apiClient.coinstac.consortia.get()
                 .then((response) => {
                     const data = response.result.data;
                     data.should.have.property('length');
@@ -44,7 +44,7 @@ describe('Coinstac Consortia', () => {
 
         it('Gets a single consortium', () => {
             return apiClient.coinstac.consortia
-                .fetch({ id: mockConsortia[0]._id })
+                .get({ id: mockConsortia[0]._id })
                 .then((response) => {
                     const data = response.result.data;
                     data.should.have.property('length');
@@ -67,7 +67,7 @@ describe('Coinstac Consortia', () => {
                 tags: [],
                 analyses: []
             };
-            return apiClient.coinstac.consortia.create(consortium)
+            return apiClient.coinstac.consortia.post(consortium)
                 .then((response) => {
                     const data = response.result.data;
                     let id;
@@ -165,9 +165,9 @@ describe('Coinstac Consortia', () => {
             };
 
             return apiClient.coinstac.consortia
-                .fetch({ id: mockConsortia[0]._id })
+                .get({ id: mockConsortia[0]._id })
                 .then(modifyConsortium)
-                .then(apiClient.coinstac.consortia.update)
+                .then(apiClient.coinstac.consortia.put)
                 .then((response) => {
                     const data = response.result.data;
                     data.should.have.property('length');

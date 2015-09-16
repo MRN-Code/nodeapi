@@ -56,7 +56,7 @@
     function init(base) {
         me = base;
         return {
-            create: createUser
+            post: createUser
         };
     }
 

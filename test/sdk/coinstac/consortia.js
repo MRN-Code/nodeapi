@@ -111,9 +111,9 @@
     function init(base) {
         me = base;
         return {
-            fetch: fetchConsortia,
-            create: createConsortium,
-            update: updateConsortium
+            get: fetchConsortia,
+            post: createConsortium,
+            put: updateConsortium
         };
     }
 

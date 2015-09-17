@@ -9,6 +9,6 @@ module.exports = function(grunt) {
     grunt.registerTask('test', ['mochacli']);
     grunt.registerTask('default', ['lint', 'test']);
     grunt.registerTask('build', function() {
-        grunt.log.warn('No build task configured');
+        grunt.log.ok('No build task configured');
     });
 };

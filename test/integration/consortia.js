@@ -98,9 +98,9 @@ describe('Coinstac Consortia', () => {
             const addAnalysis = () => {
                 const analysis = {
                     _id: 'analysis01',
-                    files: ['cde'],
+                    fileShas: ['cde'],
                     result: {CortexVol: 500000},
-                    owner: 'mocha2'
+                    username: 'mocha2'
                 };
                 return consortiumDb.save(analysis);
             };
@@ -112,9 +112,9 @@ describe('Coinstac Consortia', () => {
             const addAnalysis = () => {
                 const analysis = {
                     _id: 'analysis02',
-                    files: ['abc'],
+                    fileShas: ['abc'],
                     result: {CortexVol: 400000},
-                    owner: 'mocha'
+                    username: 'mocha'
                 };
                 return consortiumDb.save(analysis);
             };
@@ -139,11 +139,14 @@ describe('Coinstac Consortia', () => {
                     average.should.have.property('error');
                     average.should.have.property('sampleSize');
                     average.should.have.property('aggregate');
+                    average.should.have.property('contributors');
                     average.result.should.have.property('CortexVol');
                     average.sampleSize.should.equal(2);
                     average.aggregate.should.equal(true);
                     average.files.should.include('abc');
                     average.files.should.include('cde');
+                    average.contributors.should.include('mocha');
+                    average.contributors.should.include('mocha2');
                     return chai.expect(average.error).to.be.null;
                 });
         });

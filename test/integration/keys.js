@@ -68,6 +68,7 @@ describe('POST keys (login)', () => {
                     credentials.should.to.have.property('algorithm');
                     credentials.should.to.have.property('issueTime');
                     credentials.should.to.have.property('expireTime');
+                    console.dir(credentials);
                     return response;
                 });
         });
@@ -104,6 +105,7 @@ describe('DELETE keys (logout)', () => {
             return responsePromise
                 .then((response) => {
                     response.statusCode.should.equal(200);
+                    console.dir(response);
                     return response;
                 });
 

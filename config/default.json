@@ -50,12 +50,14 @@
     "coinstac": {
         "pouchdb": {
             "consortiaMeta": {
+                "conn": false, //necessary to override default
                 "path": "/tmp/coinstac-pouchdb",
                 "name": "consortiaMeta"
             },
             "consortia": {
+                "conn": false, //necessary to override default
                 "path": "/tmp/coinstac-pouchdb",
-                "name": "consortia"
+                "baseName": "consortia"
             }
         }
     }

@@ -3,6 +3,8 @@ Contributing to the SDK
 
 The SDK utilizes [UMD wrappers](https://github.com/umdjs/umd) so that it works in AMD, CommonJS and browser environments. Refer to the [return exports template](https://github.com/umdjs/umd/blob/master/returnExports.js) for notes on use.
 
+**Note, the SDK should use REST verbs, (`get`, `put`, `post`, `delete`) as method names.**
+
 Follow these steps to add a new sub-library to the SDK:
 
 - [ ] Create a new file in `test/sdk/` named after the routes that you will be testing.

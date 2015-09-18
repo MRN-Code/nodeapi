@@ -79,6 +79,31 @@
     }
 
     /**
+     * update consortium
+     * @param  {options} options is the consortium properties. see swagger docs
+     * @return {Promise}         a promise that resolves to server response
+     */
+    function updateConsortium(options) {
+        var request = {
+            method: 'PUT',
+            uri: baseUri + '/' + options._id,
+            body: options
+        };
+
+        return me.makeRequest(request, false)
+            .then(function(response) {
+                var err;
+                if (response.statusCode !== 200) {
+                    err = new Error(response.body.error.message);
+                    err.data = response;
+                    throw err;
+                }
+
+                return response;
+            });
+    }
+
+    /**
      * initialize the internals with the config from index.js
      * @param  {object} config the config object from index.js
      * @return {null}        nothing
@@ -86,8 +111,9 @@
     function init(base) {
         me = base;
         return {
-            fetch: fetchConsortia,
-            create: createConsortium
+            get: fetchConsortia,
+            post: createConsortium,
+            put: updateConsortium
         };
     }
 

@@ -99,7 +99,7 @@ describe('Coinstac Consortia', () => {
                 const analysis = {
                     _id: 'analysis01',
                     fileShas: ['cde'],
-                    result: {CortexVol: 500000},
+                    data: {CortexVol: 500000},
                     username: 'mocha2'
                 };
                 return consortiumDb.save(analysis);
@@ -113,7 +113,7 @@ describe('Coinstac Consortia', () => {
                 const analysis = {
                     _id: 'analysis02',
                     fileShas: ['abc'],
-                    result: {CortexVol: 400000},
+                    data: {CortexVol: 400000},
                     username: 'mocha'
                 };
                 return consortiumDb.save(analysis);
@@ -134,13 +134,13 @@ describe('Coinstac Consortia', () => {
                 .then(waitForAggregateCalc)
                 .then(getAggregate)
                 .then((average) => {
-                    average.should.have.property('result');
+                    average.should.have.property('data');
                     average.should.have.property('files');
                     average.should.have.property('error');
                     average.should.have.property('sampleSize');
                     average.should.have.property('aggregate');
                     average.should.have.property('contributors');
-                    average.result.should.have.property('CortexVol');
+                    average.data.should.have.property('CortexVol');
                     average.sampleSize.should.equal(2);
                     average.aggregate.should.equal(true);
                     average.files.should.include('abc');

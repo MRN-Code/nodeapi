@@ -56,8 +56,7 @@
             },
             "consortia": {
                 "conn": false, //necessary to override default
-                "path": "/tmp/coinstac-pouchdb",
-                "baseName": "consortium"
+                "path": "/tmp/coinstac-pouchdb"
             }
         }
     }

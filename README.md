@@ -70,8 +70,7 @@ mkdir /tmp/coinstac-pouchdb
                 "conn": {
                     "hostname": "localhost",
                     "protocol": "http",
-                    "port": 5984,
-                    "baseName": "consortia"
+                    "port": 5984
                 }
             }
         }
@@ -109,8 +108,7 @@ mkdir /tmp/coinstac-pouchdb
             "consortia": {
                 "conn": {
                     "hostname": "${USERNAME}.cloudant.com",
-                    "protocol": "https",
-                    "baseName": "consortia"
+                    "protocol": "https"
                 },
                 "pouchConfig": {
                     "ajax": {

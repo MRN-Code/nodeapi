@@ -7,8 +7,6 @@ If things aren't working, go down this quick checklist.
 
 - [ ] Are you running io.js v2.5? Does not work with v3+ or Node.js
 
-- [ ] Did you install the mcrypt system package (not the npm package)?
-
 - [ ] Is a redis server installed and running locally?
 
 - [ ] Have you pulled the latest changes in coins_auth, and run `grunt build`?
@@ -26,6 +24,9 @@ In order to support ES2015 Specifications, it is best to run this application
 with io.js. If you don't have io.js installed, we recommend using the `n`
 package to manage your node versions:
 
+P.S. We hope to move to node 4.x soon, but are waiting on node-mcrypt to become
+compatible first (see https://github.com/tugrul/node-mcrypt/issues/31)
+
 ```
 npm i -g n
 ```
@@ -34,20 +35,6 @@ Then install io.js
 
 ```
 n io 2.5
-```
-
-### mcrypt
-This package uses the [mcrypt](https://github.com/tugrul/node-mcrypt) package,
-which relies on some system-level dependencies.
-
-On Linux:
-```
-apt-get install libmcrypt4 libmcrypt-dev
-```
-
-On Mac:
-```
-brew install mcrypt
 ```
 
 ### redis
@@ -126,7 +113,7 @@ mkdir /tmp/coinstac-pouchdb
                     "hostname": "localhost",
                     "protocol": "http",
                     "port": 5984,
-                    "pathname": "consortiaMeta"
+                    "pathname": "consortiameta"
                 }
             },
             "consortia": {
@@ -158,7 +145,7 @@ mkdir /tmp/coinstac-pouchdb
                 "conn": {
                     "hostname": "${USERNAME}.cloudant.com",
                     "protocol": "https",
-                    "pathname": "consortiaMeta"
+                    "pathname": "consortiameta"
                 },
                 "pouchConfig": {
                     "ajax": {

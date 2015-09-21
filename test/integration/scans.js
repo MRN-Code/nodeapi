@@ -52,6 +52,7 @@ describe('Scan routes', () => {
                     response.result.data.should.have.length.of.at.least(9);
                     response.result.data[0].should.have.property('scanId');
                     should.equal(response.result.error, null);
+                    console.dir(response.result);
                 });
         });
 
@@ -61,6 +62,7 @@ describe('Scan routes', () => {
                     response.result.data.should.have.length.of.at.least(7);
                     response.result.data[0].should.have.property('scanId');
                     should.equal(response.result.error, null);
+                    console.dir(response.result);
                 });
         });
 
@@ -70,6 +72,7 @@ describe('Scan routes', () => {
                     response.result.data.should.have.length.of.at.least(9);
                     response.result.data[0].should.have.property('scanId');
                     should.equal(response.result.error, null);
+                    console.dir(response.result);
                 });
         });
 

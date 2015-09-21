@@ -15,7 +15,7 @@ let cookie;
 let parsedCookie;
 let credentials;
 
-const studyRolesMock = {'2319': ['pi', 'coordinator']};
+const studyRolesMock = ['pi', 'coordinator'];
 
 /**
  * set the apiClient variable inside the parent closure
@@ -64,10 +64,10 @@ describe('Cookies', () => {
                 return cookieUtils.verifyAndParse(cookie,
                     server.plugins['hapi-redis'].client);
             }).then((parsed) => {
-                parsedCookie = parsed;
-            }).catch((err) =>{console.dir(err); return err.data;});
-    });
 
+                parsedCookie = parsed;
+            });
+    });
 
     it('Should respond with 400 for invalid cookies', () => {
         const request = {
@@ -130,7 +130,8 @@ describe('Cookies', () => {
     describe('Test cookie roles', () => {
         it('Should contain the studyRoles for user mochatest', () => {
             parsedCookie.should.have.property('studyRoles');
-            parsedCookie.studyRoles.should.deep.equal(studyRolesMock);
+            parsedCookie.studyRoles.should.have.property(2319);
+            parsedCookie.studyRoles[2319].should.have.members(studyRolesMock);
         });
     });
 

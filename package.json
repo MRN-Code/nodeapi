@@ -72,7 +72,8 @@
   },
   "scripts": {
     "test": "grunt test; grunt lint",
-    "start": "node --harmony-arrow-functions index.js"
+    "start": "node --harmony-arrow-functions index.js",
+    "startdev": "iojs --harmony-arrow-functions index.js --development -c"
   },
   "repository": {
     "type": "git",

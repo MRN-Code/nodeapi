@@ -5,27 +5,27 @@ node based API for COINS
 
 If things aren't working, go down this quick checklist.
 
--[ ] Are you running io.js v2.5? Does not work with v3+ or Node.js
--[ ] Did you install the mcrypt system package (not the npm package)?
--[ ] Is a redis server installed and running locally?
--[ ] Have you pulled the latest changes in coins_auth, and run `grunt build`?
--[ ] Is nginx installed, configured and running locally?
+- [ ] Are you running io.js v2.5? Does not work with v3+ or Node.js
 
+- [ ] Is a redis server installed and running locally?
+
+- [ ] Have you pulled the latest changes in coins_auth, and run `grunt build`?
+
+- [ ] Is nginx installed, configured and running locally?
+
+- [ ] (only if running in COINSTAC mode) Did you create a cloudant account, or `mkdir /tmp/coinstac-pouchdb`?
 
 If you miss any of these requirements, remove all node modules and reinstall them
 after installing the requirements.
 
-### pouchdb path
-It is necessary to make a path to store pouchdb data temporarily (will
-eventually use couchdb for this).
-```
-mkdir /tmp/coinstac-pouchdb
-```
 
 ### io.js v2.5
 In order to support ES2015 Specifications, it is best to run this application
 with io.js. If you don't have io.js installed, we recommend using the `n`
 package to manage your node versions:
+
+P.S. We hope to move to node 4.x soon, but are waiting on node-mcrypt to become
+compatible first (see https://github.com/tugrul/node-mcrypt/issues/31)
 
 ```
 npm i -g n
@@ -35,20 +35,6 @@ Then install io.js
 
 ```
 n io 2.5
-```
-
-### mcrypt
-This package uses the [mcrypt](https://github.com/tugrul/node-mcrypt) package,
-which relies on some system-level dependencies.
-
-On Linux:
-```
-apt-get install libmcrypt4 libmcrypt-dev
-```
-
-On Mac:
-```
-brew install mcrypt
 ```
 
 ### redis
@@ -80,15 +66,137 @@ Finally, run **grunt decrypt** in coins_auth/ to decrypt the latest dbmap.
 The COINS API listens for HTTP on port 8800. If you need to connect using HTTPS,
 you will need to place a reverse proxy in front of the API. This is most easily
 accomplished with nginx. There is an ansible role to install and configure nginx
-as a reverse proxy and SSL terminator for the API. Ask Dylan for more details.
+as a reverse proxy and SSL terminator for the API. **All development servers
+which are configured with Ansible should listen for HTTPS connections on port
+8443.** Ask Dylan for more details.
 
+### *ouchDB (only if running in COINSTAC mode)
+The COINSTAC services rely on PouchDB, which needs to persist its data somewhere.
+There are two options for Pouch persisence backends currently:
+
+#### PouchDB Leveldown (simplest, but will not work with COINSTAC client)
+It is necessary to make a path to store pouchdb data temporarily (will
+eventually use couchdb for this).
+```
+mkdir /tmp/coinstac-pouchdb
+```
+
+#### CouchDB
+
+1. Install couchdb: `sudo apt-get install couchdb`
+1. Edit couchdb to listen to all IPs:
+  1. Open _/etc/couchdb/default.ini_ (osx: /usr/local/etc/couchdb/default.ini)
+  1. Change `bind_address` to `0.0.0.0`
+  1. Change `enable_cors` to `true`
+  1. Uncomment `[cors]` -> `origins = *`
+1. If on a localcoin, add port forwarding for port 5984 to _/coins/localcoin/Vagrantfile_, **and reload the vagrant VM**
+1. (optional) If you wish to connect to your couchdb via https, edit the nginx config, and then `sudo service nginx reload`:
+  1. Open _/etc/nginx/sites-enabled/default_
+  1. Add the following below the `api location` block:
+  ```
+  location /couchdb {
+    rewrite /couchdb(.*) /$1 break;
+    proxy_set_header        X-Forwarded-Host $host;
+    proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_cache             off;
+    proxy_pass              http://localhost:5984;
+    proxy_redirect          off;
+  }
+  ```
+1. Create a _config/local.json_ file with the following content:
+```
+{
+    "coinstac": {
+        "pouchdb": {
+            "consortiaMeta": {
+                "conn": {
+                    "hostname": "localhost",
+                    "protocol": "http",
+                    "port": 5984,
+                    "pathname": "consortiameta"
+                }
+            },
+            "consortia": {
+                "conn": {
+                    "hostname": "localhost",
+                    "protocol": "http",
+                    "port": 5984
+                }
+            }
+        }
+    }
+}
+```
+
+#### Cloudant
+
+1. Sign up for a Cloudant account (Cloudant.com)
+1. Once logged in, click on `Account->CORS->Enable CORS`, and select **All origin domains**
+1. Create a _config/local.json_ file with the following content:
+```
+{
+    "coinstac": {
+        "pouchdb": {
+            "cloudant": {
+                "key": "${base64 encode username:password}",
+                "hostname": "${USERNAME}.cloudant.com"
+            },
+            "consortiaMeta": {
+                "conn": {
+                    "hostname": "${USERNAME}.cloudant.com",
+                    "protocol": "https",
+                    "pathname": "consortiameta"
+                },
+                "pouchConfig": {
+                    "ajax": {
+                        "headers": {
+                            "Authorization": "${base64 encode username:password}"
+                        }
+                    }
+                }
+            },
+            "consortia": {
+                "conn": {
+                    "hostname": "${USERNAME}.cloudant.com",
+                    "protocol": "https"
+                },
+                "pouchConfig": {
+                    "ajax": {
+                        "headers": {
+                            "Authorization": "${base64 encode username:password}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
 # Usage
 
-To start the server, use the `npm start` command.
+## Starting the server
+The simplest way to start the server is to use the `npm start` command.
 If that fails, look at `package.json` for the command that `npm start` runs,
 and run that manually for a more useful output.
 
-To start the server as a daemon, use `pm2 start ecosystem.json5`.
+If you wish to pass CLI options to the startup process, you will need to start
+the server using the full command (see _package.json_ for the command which is
+run by `npm start`).
+
+To start the server as a Daemon, all Ansible-provisioned servers should have an
+upstart script: `sudo start coinsnodeapi`.
+
+To start the server with auto-restart, try using monit: `monit [re]start coinsnodeapi`.
+
+Unfortunately, **pm2** does not play well with our monitoring strategy, so we
+do not recommend using pm2 to run the API as a daemon. 
+
+## CLI options
+Use `node index --help` to see all available options.
+
+- @flag development/release/production run the server using COINS_ENV of the respective flag. Shorthand --dev/rel/prd are honored.
+
+- @flag coinstac start the server with COINSTAC routes. Defaults to false.
 
 Logs are written to the `logs/` directory in this repo.
 
@@ -129,12 +237,10 @@ The one exception to the above rule is `GET /api/version`, which can be used to
 retrieve the version via the API itself.
 
 ### protocol
-By default, this server starts accepting `HTTP` connections on port 3000.
-To use HTTPS, place a reverse proxy server in front of this service.
-
-TODO:
-In production and staging environments, this server will accept `HTTP` connections
-on port 8080.
+By default, this server starts accepting `HTTP` connections on port 8080.
+To use HTTPS, place a reverse proxy server in front of this service. production
+and staging environments should listen for HTTPS connections on port 443, while
+development systems should listen on port 8443.
 
 ### other endpoints
 Please refer to the swagger documentation that is auto-generated by this repo.

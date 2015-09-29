@@ -48,7 +48,7 @@ describe('Users', () => {
     describe('POST /users', () => {
         const userData = getUserData();
         it('Posts a new user', () => {
-            return apiClient.users.create(userData)
+            return apiClient.users.post(userData)
                 .then((response) => {
                     const result = response.result;
                     result.data[0].should.have.property('username');
@@ -61,7 +61,7 @@ describe('Users', () => {
         it('Prevents a user with an existing username', () => {
             const tmpUserData = getUserData();
             tmpUserData.username = userData.username;
-            return apiClient.users.create(tmpUserData)
+            return apiClient.users.post(tmpUserData)
                 .catch(handleAuthError)
                 .then((result) => {
                     const expectedDebugData = { username: userData.username };
@@ -74,7 +74,7 @@ describe('Users', () => {
         it('Prevents a new user with an existing email', () => {
             const tmpUserData = getUserData();
             tmpUserData.email = userData.email;
-            return apiClient.users.create(tmpUserData)
+            return apiClient.users.post(tmpUserData)
                 .catch(handleAuthError)
                 .then((result) => {
                     const expectedDebugData = { email: userData.email };
@@ -87,7 +87,7 @@ describe('Users', () => {
         it('Prevents a new user with an empty password', () => {
             const tmpUserData = getUserData();
             tmpUserData.password = '';
-            return apiClient.users.create(tmpUserData)
+            return apiClient.users.post(tmpUserData)
                 .catch(handleAuthError)
                 .then((result) => {
                     result.statusCode.should.equal(400);

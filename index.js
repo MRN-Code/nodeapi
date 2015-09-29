@@ -1,8 +1,9 @@
 'use strict';
-
+require('./lib/utils/cli-options.js');
 const hapi = require('hapi');
 const config = require('config');
 const Bluebird = require('bluebird');
+require('./lib/utils/promise-uncaught-polyfill.js');
 const _ = require('lodash');
 const connectionConfig = require('./lib/utils/get-connection-options.js')();
 const plugins = require('./lib/utils/get-plugins.js')();

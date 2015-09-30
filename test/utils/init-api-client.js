@@ -31,6 +31,9 @@ const onPreFormatRequestOptions = (request) => {
         }
     }
 
+    //Add fake remote IP address
+    request.remoteAddress = 'mochatest';
+
     return request;
 };
 

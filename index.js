@@ -12,7 +12,9 @@ const plugins = require('./lib/utils/get-plugins.js')();
 const server = new hapi.Server({
     connections: {
         routes: {
-            cors: true
+            cors: {
+                credentials: true
+            }
         }
     }
 });
@@ -56,10 +58,17 @@ const registerPluginThen = (currentPromise, config) => {
  * @return {null} none
  */
 const handleAllPluginsRegistered = () => {
+    const getCredentialsFunc = server.plugins.utilities.auth.getHawkCredentials;
+
     http.auth.strategy(
         'default',
         'hawk',
-        { getCredentialsFunc: server.plugins.utilities.auth.getHawkCredentials }
+        {
+            getCredentialsFunc: getCredentialsFunc,
+            hawk: {
+                hostHeaderName: 'x-forwarded-host'
+            }
+        }
     );
 
     http.auth.default('default');

@@ -65,7 +65,6 @@
                 if (response.statusCode !== 200) {
                     err = new Error(response.body.error.message);
                     err.data = response;
-                    console.log(err.data);
                     throw err;
                 } else {
                     return me.setAuthCredentials(response.body.data[0])

@@ -68,7 +68,6 @@ describe('POST keys (login)', () => {
                     credentials.should.to.have.property('algorithm');
                     credentials.should.to.have.property('issueTime');
                     credentials.should.to.have.property('expireTime');
-                    console.dir(response.result);
                     return response;
                 });
         });

@@ -99,7 +99,7 @@ describe('Coinstac Consortia', () => {
                 const analysis = {
                     _id: 'analysis01',
                     fileShas: ['cde'],
-                    data: {Left-Hippocampus: 500000},
+                    data: {'Left-Hippocampus': 500000},
                     username: 'mocha2'
                 };
                 return consortiumDb.save(analysis);
@@ -113,7 +113,7 @@ describe('Coinstac Consortia', () => {
                 const analysis = {
                     _id: 'analysis02',
                     fileShas: ['abc'],
-                    data: {Left-Hippocampus: 400000},
+                    data: {'Left-Hippocampus': 400000},
                     username: 'mocha'
                 };
                 return consortiumDb.save(analysis);

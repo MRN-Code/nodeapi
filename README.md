@@ -89,8 +89,7 @@ mkdir /tmp/coinstac-pouchdb
   1. Change `bind_address` to `0.0.0.0`
   1. Change `enable_cors` to `true`
   1. Uncomment `[cors]` -> `origins = *`
-1. If on a localcoin, add port forwarding for port 5984 to _/coins/localcoin/Vagrantfile_, **and reload the vagrant VM**
-1. (optional) If you wish to connect to your couchdb via https, edit the nginx config, and then `sudo service nginx reload`:
+1. (No longer optional) If on a localcoin, edit the nginx config, and then `sudo service nginx reload`:
   1. Open _/etc/nginx/sites-enabled/default_
   1. Add the following below the `api location` block:
   ```
@@ -110,18 +109,19 @@ mkdir /tmp/coinstac-pouchdb
         "pouchdb": {
             "consortiaMeta": {
                 "conn": {
-                    "hostname": "localhost",
-                    "protocol": "http",
-                    "port": 5984,
+                    "hostname": "localcoin.mrn.og",
+                    "protocol": "https",
+                    "port": 8443,
                     "pathname": "consortiameta"
                 }
             },
             "consortia": {
                 "conn": {
-                    "hostname": "localhost",
-                    "protocol": "http",
-                    "port": 5984
-                }
+                    "hostname": "localcoin.mrn.org",
+                    "protocol": "https",
+                    "port": 8443
+                },
+                "basePathname": "couchdb"
             }
         }
     }

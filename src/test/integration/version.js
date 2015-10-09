@@ -2,7 +2,8 @@
 
 const chai = require('chai');
 const server = require('../../index.js');
-const pkg = require('../../package.json');
+const path = require('path');
+const pkg = require(path.join(process.cwd(), 'package.json'));
 const baseUrl = 'https://localhost/api/version';
 
 chai.should();

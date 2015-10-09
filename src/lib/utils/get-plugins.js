@@ -1,6 +1,5 @@
 'use strict';
 const Bluebird = require('bluebird');
-const fs = require('fs');
 const config = require('config');
 const path = require('path');
 const pkg = require(path.join(process.cwd(), 'package.json'));
@@ -9,8 +8,8 @@ const chalk = require('chalk');
 const baseRoutePrefix = '/api/v' + pkg.version;
 const baseRoutePath = path.join(__dirname, '../app-routes/');
 
-const schema = JSON.parse(
-    fs.readFileSync(config.get('permissionsSchemaPath'), 'utf8')
+const schema = require(
+    path.join(__dirname, '../../', config.get('permissionsSchemaPath'))
 );
 
 const getAppRouteConfig = (relPath, prefix) => {

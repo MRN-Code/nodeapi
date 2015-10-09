@@ -69,9 +69,9 @@
     "time-grunt": "1.2.1"
   },
   "scripts": {
-    "build": "babel --out-dir=dist index.js 'lib/**/*.js'",
+    "build": "cp -r lib dist && babel --out-dir=dist index.js 'lib/**/*.js'",
     "test": "grunt test",
-    "start": "babel-node index.js",
+    "start": "node dist/index.js",
     "startdev": "babel-node index.js --development -c",
     "lint": "grunt jshint",
     "validate": "npm ls",

@@ -75,7 +75,8 @@
     "start": "babel-node index.js",
     "startdev": "babel-node index.js --development -c",
     "lint": "grunt jshint",
-    "validate": "npm ls"
+    "validate": "npm ls",
+    "postinstall": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -90,8 +91,6 @@
   "pre-commit": [
     "lint",
     "validate",
-    "test",
-    "build",
-    "commit-dist"
+    "test"
   ]
 }

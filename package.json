@@ -16,7 +16,7 @@
     "boom": "2.8.0",
     "chai": "3.2.0",
     "chalk": "1.1.1",
-    "coinstac-algorithms": "git+https://github.com/MRN-Code/coinstac-distributed-algorithm-set.git",
+    "coinstac-distributed-algorithm-set": "git+https://github.com/MRN-Code/coinstac-distributed-algorithm-set.git",
     "config": "1.16.0",
     "glob": "5.0.14",
     "good": "6.3.0",
@@ -71,10 +71,10 @@
   "scripts": {
     "build": "babel --out-dir=dist index.js 'lib/**/*.js'",
     "commit-dist": "git add dist/*",
-    "test": "grunt test; grunt lint",
+    "test": "grunt test",
     "start": "babel-node index.js",
     "startdev": "babel-node index.js --development -c",
-    "lint": "jshint .",
+    "lint": "grunt jshint",
     "validate": "npm ls"
   },
   "repository": {

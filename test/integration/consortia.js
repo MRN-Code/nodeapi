@@ -1,7 +1,7 @@
 'use strict';
 
 const chai = require('chai');
-const server = require('../../');
+const server = require('../../index.js');
 const _ = require('lodash');
 const Bluebird = require('bluebird');
 const mockConsortia = require('../../lib/mocks/mock-consortia.json');

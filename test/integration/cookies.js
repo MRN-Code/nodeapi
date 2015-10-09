@@ -2,7 +2,7 @@
 
 const chai = require('chai');
 const config = require('config');
-const server = require('../../');
+const server = require('../../index.js');
 const initApiClient = require('../utils/init-api-client.js');
 const pkg = require('../../package.json');
 const baseUrl = 'http://localhost/api/v' + pkg.version + '/auth/cookies';

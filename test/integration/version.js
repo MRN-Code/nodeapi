@@ -1,7 +1,7 @@
 'use strict';
 
 const chai = require('chai');
-const server = require('../../');
+const server = require('../../index.js');
 const pkg = require('../../package.json');
 const baseUrl = 'https://localhost/api/version';
 

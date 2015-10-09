@@ -2,7 +2,7 @@
 
 const chai = require('chai');
 const Bluebird = require('bluebird');
-const server = require('../../');
+const server = require('../../index.js');
 const initApiClient = require('../utils/init-api-client.js');
 let apiClient;
 let credentials;

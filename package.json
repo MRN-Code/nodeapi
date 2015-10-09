@@ -70,7 +70,6 @@
   },
   "scripts": {
     "build": "babel --out-dir=dist index.js 'lib/**/*.js'",
-    "commit-dist": "git add dist/*",
     "test": "grunt test",
     "start": "babel-node index.js",
     "startdev": "babel-node index.js --development -c",

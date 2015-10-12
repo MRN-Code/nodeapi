@@ -37,6 +37,48 @@
         ],
         "datacontributor": [
             "exists"
+        ],
+        "admin": [
+            "exists"
+        ],
+        "radlettersallstudies": [
+            "exists"
+        ],
+        "radletters": [
+            "exists"
+        ],
+        "radiologist": [
+            "exists"
+        ],
+        "querysuper": [
+            "exists"
+        ],
+        "projectmanager": [
+            "exists"
+        ],
+        "olinadmin": [
+            "exists"
+        ],
+        "mrtech": [
+            "exists"
+        ],
+        "internalreporting": [
+            "exists"
+        ],
+        "guest": [
+            "exists"
+        ],
+        "everybody": [
+            "exists"
+        ],
+        "acctmanagement": [
+            "exists"
+        ],
+        "accountant": [
+            "exists"
+        ],
+        "super": [
+            "exists"
         ]
     },
     "site": {
@@ -82,7 +124,7 @@
         "olinadmin": [
             "exists"
         ],
-        "radletersallstudies": [
+        "radlettersallstudies": [
             "exists"
         ],
         "querysuper": [

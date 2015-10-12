@@ -9,7 +9,7 @@ const baseRoutePrefix = '/api/v' + pkg.version;
 const baseRoutePath = path.join(__dirname, '../app-routes/');
 
 const schema = require(
-    path.join(__dirname, '../../', config.get('permissionsSchemaPath'))
+    path.join(process.cwd(), config.get('permissionsSchemaPath'))
 );
 
 const getAppRouteConfig = (relPath, prefix) => {

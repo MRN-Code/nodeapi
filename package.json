@@ -40,7 +40,7 @@
     "moment": "2.10.6",
     "nomnom": "1.8.1",
     "numeric": "1.2.6",
-    "pouchdb-wrapper": "2.0.1",
+    "pouchy": "2.0.0",
     "qs": "5.1.0",
     "redis": "1.0.0",
     "relations": "0.5.0",

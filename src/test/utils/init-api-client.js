@@ -2,6 +2,8 @@
 
 const _ = require('lodash');
 const qs = require('qs');
+const path = require('path');
+const pkg = require(path.join(process.cwd(), 'package.json'));
 const server = require('../../index.js');
 const formatResponseCallback = (response) => {
     response.body = response.result;
@@ -56,7 +58,7 @@ module.exports = function initApiClient() {
         formatResponseCallback: formatResponseCallback,
         formatRequestHeaders: formatRequestHeaders,
         onPreFormatRequestOptions: onPreFormatRequestOptions,
-        version: require('../../package.json').version,
+        version: pkg.version
     };
     return require('../sdk/index.js')(apiClientOptions);
 };

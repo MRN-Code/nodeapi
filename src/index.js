@@ -3,6 +3,7 @@ require('./lib/utils/cli-options.js');
 const hapi = require('hapi');
 const config = require('config');
 const Bluebird = require('bluebird');
+const path = require('path');
 require('./lib/utils/promise-uncaught-polyfill.js');
 const _ = require('lodash');
 const connectionConfig = require('./lib/utils/get-connection-options.js')();
@@ -74,7 +75,7 @@ const handleAllPluginsRegistered = () => {
     http.auth.default('default');
 
     // Wrap models with Shield
-    require('./lib/utils/shields-up.js')(server);
+    require(path.join(__dirname, 'lib/utils/shields-up.js'))(server);
 
     if (!module.parent) {
         server.start(() => {

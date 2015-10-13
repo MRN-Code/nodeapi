@@ -2,9 +2,10 @@
 
 const chai = require('chai');
 const config = require('config');
-const server = require('../../');
+const path = require('path');
+const server = require('../../index.js');
 const initApiClient = require('../utils/init-api-client.js');
-const pkg = require('../../package.json');
+const pkg = require(path.join(process.cwd(), 'package.json'));
 const cookieUtils = require('../../lib/utils/cas-cookie-utils.js');
 const baseUrl = 'http://localhost/api/v' + pkg.version + '/auth/cookies';
 /* jscs: disable */

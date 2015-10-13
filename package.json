@@ -2,23 +2,21 @@
   "name": "nodeapi",
   "version": "1.3.0",
   "description": "node api for COINS",
-  "main": "index.js",
+  "main": "dist/index.js",
   "directories": {
     "test": "test"
   },
-  "engines": {
-    "iojs": "2.5.0"
-  },
   "dependencies": {
     "axios": "0.5.4",
+    "babel": "5.8.23",
     "bcrypt": "0.8.5",
     "bluebird": "2.10.0",
     "bookshelf": "0.8.2",
-    "bookshelf-shield": "2.0.0",
+    "bookshelf-shield": "2.1.1",
     "boom": "2.8.0",
     "chai": "3.2.0",
     "chalk": "1.1.1",
-    "coinstac-algorithms": "git+https://github.com/MRN-Code/coinstac-distributed-algorithm-set.git",
+    "coinstac-distributed-algorithm-set": "git+https://github.com/MRN-Code/coinstac-distributed-algorithm-set.git",
     "config": "1.16.0",
     "glob": "5.0.14",
     "good": "6.3.0",
@@ -36,7 +34,7 @@
     "jsonwebtoken": "5.0.5",
     "knex": "0.8.6",
     "lodash": "3.10.1",
-    "mcrypt": "0.1.3",
+    "mcrypt": "0.0.15",
     "moment": "2.10.6",
     "nomnom": "1.8.1",
     "numeric": "1.2.6",
@@ -55,8 +53,12 @@
     "es6-object-assign": "1.0.1",
     "fakeredis": "0.3.2",
     "grunt": "0.4.5",
+    "grunt-babel": "5.0.3",
+    "grunt-contrib-clean": "0.6.0",
+    "grunt-contrib-copy": "0.8.1",
     "grunt-contrib-jshint": "0.11.3",
     "grunt-env": "0.4.4",
+    "grunt-exec": "0.4.6",
     "grunt-jscs": "2.1.0",
     "grunt-mocha-cli": "1.14.0",
     "hawk": "3.1.0",
@@ -71,9 +73,13 @@
     "time-grunt": "1.2.1"
   },
   "scripts": {
-    "test": "grunt test; grunt lint",
-    "start": "node --harmony-arrow-functions index.js",
-    "startdev": "iojs --harmony-arrow-functions index.js --development -c"
+    "build": "grunt build",
+    "test": "grunt test",
+    "start": "node dist/index.js",
+    "startdev": "babel-node src/index.js --development -c",
+    "lint": "grunt lint",
+    "validate": "npm ls",
+    "postinstall": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -84,5 +90,10 @@
   "bugs": {
     "url": "https://github.com/MRN-Code/nodeapi/issues"
   },
-  "homepage": "https://github.com/MRN-Code/nodeapi"
+  "homepage": "https://github.com/MRN-Code/nodeapi",
+  "pre-commit": [
+    "lint",
+    "validate",
+    "test"
+  ]
 }

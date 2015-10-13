@@ -1,11 +1,16 @@
 # nodeapi
 node based API for COINS
 
-# Requirements
+# usage
+```bash
+$ npm run startdev # or...
+$ npm run build && node dist/index.js # build the app, then run the built copy, or...
+$ babel-node index.js # es6 ify the app on-the-fly. `npm i -g babel` to get the babel-node binary
+```
+
+# requirements
 
 If things aren't working, go down this quick checklist.
-
-- [ ] Are you running io.js v2.5? Does not work with v3+ or Node.js
 
 - [ ] Is a redis server installed and running locally?
 
@@ -18,24 +23,6 @@ If things aren't working, go down this quick checklist.
 If you miss any of these requirements, remove all node modules and reinstall them
 after installing the requirements.
 
-
-### io.js v2.5
-In order to support ES2015 Specifications, it is best to run this application
-with io.js. If you don't have io.js installed, we recommend using the `n`
-package to manage your node versions:
-
-P.S. We hope to move to node 4.x soon, but are waiting on node-mcrypt to become
-compatible first (see https://github.com/tugrul/node-mcrypt/issues/31)
-
-```
-npm i -g n
-```
-
-Then install io.js
-
-```
-n io 2.5
-```
 
 ### redis
 Authentication credentials and ACL permissions are stored in
@@ -189,7 +176,7 @@ upstart script: `sudo start coinsnodeapi`.
 To start the server with auto-restart, try using monit: `monit [re]start coinsnodeapi`.
 
 Unfortunately, **pm2** does not play well with our monitoring strategy, so we
-do not recommend using pm2 to run the API as a daemon. 
+do not recommend using pm2 to run the API as a daemon.
 
 ## CLI options
 Use `node index --help` to see all available options.

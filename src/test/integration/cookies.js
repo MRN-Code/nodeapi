@@ -6,13 +6,17 @@ const path = require('path');
 const server = require('../../index.js');
 const initApiClient = require('../utils/init-api-client.js');
 const pkg = require(path.join(process.cwd(), 'package.json'));
+const cookieUtils = require('../../lib/utils/cas-cookie-utils.js');
 const baseUrl = 'http://localhost/api/v' + pkg.version + '/auth/cookies';
 /* jscs: disable */
 const expiredCookie = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1vY2hhdGVzdCIsImlkIjoiNDY4NmQxZTYtOGZkYS00NjhiLTg0MDUtMDQzNmU2NTljMWNhIiwiaWF0IjoxNDM3OTQ3MTIyLCJleHAiOjE0Mzc5NDg5MjJ9.O8HCYEe0S5lQ5dZPNoEcrrr3yFpyXUN3Mm7BJbxeaYI'; //jshint ignore:line
 /* jscs: enable */
 let apiClient;
 let cookie;
+let parsedCookie;
 let credentials;
+
+const studyRolesMock = ['pi', 'coordinator'];
 
 /**
  * set the apiClient variable inside the parent closure
@@ -57,7 +61,12 @@ describe('Cookies', () => {
                 const rawCookies = response.headers['set-cookie'];
                 cookie = getCasCookieValue(rawCookies[0]);
                 credentials = response.body.data[0];
-                return;
+
+                return cookieUtils.verifyAndParse(cookie,
+                    server.plugins['hapi-redis'].client);
+            }).then((parsed) => {
+
+                parsedCookie = parsed;
             });
     });
 
@@ -117,6 +126,14 @@ describe('Cookies', () => {
         return apiClient.getAuthCredentials()
             .then(logoutThenResetOldCredentials)
             .then(sendRequest);
+    });
+
+    describe('Test cookie roles', () => {
+        it('Should contain the studyRoles for user mochatest', () => {
+            parsedCookie.should.have.property('studyRoles');
+            parsedCookie.studyRoles.should.have.property(2319);
+            parsedCookie.studyRoles[2319].should.have.members(studyRolesMock);
+        });
     });
 
 });

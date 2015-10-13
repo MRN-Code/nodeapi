@@ -99,7 +99,7 @@ describe('Coinstac Consortia', () => {
                 const analysis = {
                     _id: 'analysis01',
                     fileShas: ['cde'],
-                    data: {'Left-Hippocampus': 500000},
+                    data: {'Left-Hippocampus': 500000, r2: 1},
                     username: 'mocha2'
                 };
                 return consortiumDb.save(analysis);
@@ -113,7 +113,7 @@ describe('Coinstac Consortia', () => {
                 const analysis = {
                     _id: 'analysis02',
                     fileShas: ['abc'],
-                    data: {'Left-Hippocampus': 400000},
+                    data: {'Left-Hippocampus': 400000, r2: 0},
                     username: 'mocha'
                 };
                 return consortiumDb.save(analysis);
@@ -141,6 +141,7 @@ describe('Coinstac Consortia', () => {
                     average.should.have.property('aggregate');
                     average.should.have.property('contributors');
                     average.data.should.have.property('Left-Hippocampus');
+                    average.data.should.have.property('r2');
                     average.sampleSize.should.equal(2);
                     average.aggregate.should.equal(true);
                     average.files.should.include('abc');

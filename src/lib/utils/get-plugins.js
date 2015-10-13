@@ -61,6 +61,11 @@ var plugins = [
             client: 'hapi-redis',
             clientType: 'redis',
             pluginClient: true
+        },
+        afterRegistration: function promisifyRelations(server) {
+            var relations = server.plugins.relations;
+            Bluebird.promisifyAll(relations);
+            return;
         }
     },
     {

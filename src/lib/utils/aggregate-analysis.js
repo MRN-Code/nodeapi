@@ -10,6 +10,10 @@ internals.roiMeta = {
     'Left-Hippocampus': {
         max: 1,
         min: 0
+    },
+    r2: {
+        max: 1,
+        min: 0
     }
 };
 

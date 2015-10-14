@@ -2,6 +2,8 @@
 
 const _ = require('lodash');
 const qs = require('qs');
+const path = require('path');
+const pkg = require(path.join(process.cwd(), 'package.json'));
 const server = require('../../index.js');
 const formatResponseCallback = (response) => {
     response.body = response.result;
@@ -9,10 +11,15 @@ const formatResponseCallback = (response) => {
 };
 
 const formatRequestHeaders = (headers) => {
+    headers = headers || [];
+
+    // HAWK auth relies on x-forwarded-host headers...
+    headers.push({name: 'x-forwarded-host', value:'localhost:8800' });
     return headers.reduce((target, header) => {
         target[header.name] = header.value;
         return target;
     }, {});
+
 };
 
 /**
@@ -54,7 +61,7 @@ module.exports = function initApiClient() {
         formatResponseCallback: formatResponseCallback,
         formatRequestHeaders: formatRequestHeaders,
         onPreFormatRequestOptions: onPreFormatRequestOptions,
-        version: require('../../package.json').version,
+        version: pkg.version
     };
     return require('../sdk/index.js')(apiClientOptions);
 };

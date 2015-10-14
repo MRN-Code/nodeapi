@@ -3,6 +3,7 @@ require('./lib/utils/cli-options.js');
 const hapi = require('hapi');
 const config = require('config');
 const Bluebird = require('bluebird');
+const path = require('path');
 require('./lib/utils/promise-uncaught-polyfill.js');
 const _ = require('lodash');
 const connectionConfig = require('./lib/utils/get-connection-options.js')();
@@ -12,7 +13,9 @@ const plugins = require('./lib/utils/get-plugins.js')();
 const server = new hapi.Server({
     connections: {
         routes: {
-            cors: true
+            cors: {
+                credentials: true
+            }
         }
     }
 });
@@ -56,16 +59,23 @@ const registerPluginThen = (currentPromise, config) => {
  * @return {null} none
  */
 const handleAllPluginsRegistered = () => {
+    const getCredentialsFunc = server.plugins.utilities.auth.getHawkCredentials;
+
     http.auth.strategy(
         'default',
         'hawk',
-        { getCredentialsFunc: server.plugins.utilities.auth.getHawkCredentials }
+        {
+            getCredentialsFunc: getCredentialsFunc,
+            hawk: {
+                hostHeaderName: 'x-forwarded-host'
+            }
+        }
     );
 
     http.auth.default('default');
 
     // Wrap models with Shield
-    require('./lib/utils/shields-up.js')(server);
+    require(path.join(__dirname, 'lib/utils/shields-up.js'))(server);
 
     if (!module.parent) {
         server.start(() => {

@@ -7,9 +7,13 @@ const laplace = coinstacAlgorithms.laplace;
 
 const internals = {};
 internals.roiMeta = {
-    CortexVol: {
-        max: 500000,
-        min: 400000
+    'Left-Hippocampus': {
+        max: 1,
+        min: 0
+    },
+    r2: {
+        max: 1,
+        min: 0
     }
 };
 
@@ -100,7 +104,9 @@ internals.calculateLaplaceScale = (value, roi, sampleSize) => {
  */
 internals.addNoise =  (value, roi, sampleSize) => {
     const scale = internals.calculateLaplaceScale(value, roi, sampleSize);
-    return value + laplace.noise(scale);
+    return value; //@TODO: removing noise for testing purposes
+    return value + laplace.noise(scale); //jshint ignore:line
+
 };
 
 /**

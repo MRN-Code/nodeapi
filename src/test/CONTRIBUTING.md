@@ -40,7 +40,7 @@ Follow the steps below to write a new integration test.
 'use strict';
 
 const chai = require('chai');
-const server = require('../../');
+const server = require('../../index.js');
 const initApiClient = require('../utils/init-api-client.js');
 let apiClient;
 let credentials;

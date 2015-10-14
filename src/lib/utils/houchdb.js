@@ -1,6 +1,6 @@
 'use strict';
 
-const PouchW = require('pouchdb-wrapper');
+const Pouchy = require('pouchy');
 const _ = require('lodash');
 const defaultOptions = {
     name: 'default',
@@ -13,19 +13,19 @@ const defaultOptions = {
 };
 
 const register = function(server, options, next) {
-    options = _.defaults(options, defaultOptions);
+    options = _.cloneDeep(_.defaults(options, defaultOptions));
 
     // register PouchDB plugins
     // this appears safe to do repeatedly, every time we call this function
     _.forEach(options.plugins, (plugin) => {
-        PouchW.PouchDB.plugin(plugin);
+        Pouchy.PouchDB.plugin(plugin);
     });
 
-    const db = new PouchW(options);
+    const db = new Pouchy(options);
     const pluginName = module.exports.attributes.name;
     const exposableObj = {};
     exposableObj[options.name] = db;
-    exposableObj.constructor = PouchW;
+    exposableObj.constructor = Pouchy;
 
     // throw error if name already exists
     if (

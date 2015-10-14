@@ -1,16 +1,15 @@
 'use strict';
 const Bluebird = require('bluebird');
-const fs = require('fs');
 const config = require('config');
-const pkg = require('./../../package.json');
-const cliOpts = require('./cli-options.js');
 const path = require('path');
+const pkg = require(path.join(process.cwd(), 'package.json'));
+const cliOpts = require('./cli-options.js');
 const chalk = require('chalk');
 const baseRoutePrefix = '/api/v' + pkg.version;
-const baseRoutePath = './lib/app-routes/';
+const baseRoutePath = path.join(__dirname, '../app-routes/');
 
-const schema = JSON.parse(
-    fs.readFileSync(config.get('permissionsSchemaPath'), 'utf8')
+const schema = require(
+    path.join(process.cwd(), config.get('permissionsSchemaPath'))
 );
 
 const getAppRouteConfig = (relPath, prefix) => {
@@ -20,7 +19,7 @@ const getAppRouteConfig = (relPath, prefix) => {
     }
 
     return {
-        register: require(path.join(process.cwd(), baseRoutePath, relPath)),
+        register: require(path.join(baseRoutePath, relPath)),
         registrationOptions: {
             routes: {
                 prefix: routePrefix
@@ -52,7 +51,7 @@ var plugins = [
             knex: require('./get-knex-config.js')(),
             plugins: ['registry'],
             base: require('./get-base-model.js'),
-            models: './lib/models/' //relative to root, not this dir
+            models: path.resolve(__dirname, '../models/')
         }
     },
     {
@@ -62,6 +61,11 @@ var plugins = [
             client: 'hapi-redis',
             clientType: 'redis',
             pluginClient: true
+        },
+        afterRegistration: function promisifyRelations(server) {
+            var relations = server.plugins.relations;
+            Bluebird.promisifyAll(relations);
+            return;
         }
     },
     {

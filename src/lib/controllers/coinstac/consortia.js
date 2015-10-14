@@ -69,7 +69,7 @@ internals.addSeedData = (db, server) => {
 /**
  * Set the security on the consortiaDB to be more relaxed
  * Only takes action when config.coinstac.pouchdb.cloudant is defined
- * @param  {object} db the pouch-wrapper instance
+ * @param  {object} db the pouchy instance
  * @return {Promise}    Resolves to the response from the cloudant API
  */
 internals.setConsortiumDbSecurity = (db) => {
@@ -181,7 +181,12 @@ internals.getConsortiumDb = (name, server) => {
 
     pouchWConfig.name = name;
     if (consortiaDbOptions.conn) {
-        pouchWConfig.conn.pathname = name;
+        pouchWConfig.conn.pathname = '';
+        if (pouchWConfig.basePathname) {
+            pouchWConfig.conn.pathname = pouchWConfig.basePathname;
+        }
+
+        pouchWConfig.conn.pathname += '/' + name;
     }
 
     // create new db

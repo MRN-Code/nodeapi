@@ -7,6 +7,23 @@ const joi = require('joi');
 
 const baseUrl = '/keys';
 
+const internals = {};
+
+internals.credentialSchema = joi.object().keys({
+    username: joi.string().required(),
+    user: require('../../../controllers/users.js').userSchema,
+    id: joi.string().required(),
+    key: joi.string().required(),
+    algorithm: joi.string().required(),
+    issueTime: joi.number().required(),
+    expireTime: joi.number().required(),
+    studyRoles: joi.object().required()
+});
+
+internals.logOutSuccessObj = {
+  message:'You are logged out.'
+};
+
 exports.register = function(server, options, next) {
     // Private route to get new hawk credentials
     // Requests must authenticate with a username and password
@@ -52,6 +69,9 @@ exports.register = function(server, options, next) {
                     username: joi.binary().encoding('base64').required(),
                     password: joi.binary().encoding('base64').required()
                 }
+            },
+            response: {
+                schema: internals.credentialSchema
             },
             handler: function(request, reply) {
                 const data = request.payload;
@@ -105,6 +125,9 @@ exports.register = function(server, options, next) {
                 'or the `id param` and your HAWK signature do not match.'
             ].join('<br>'),
             description: 'Logout: Remove API key from auth DB',
+            response: {
+              schema: joi.compile(internals.logOutSuccessObj)
+            },
             handler: (request, reply) => {
                 const username = request.auth.credentials.username;
                 const id = request.auth.credentials.id;
@@ -140,7 +163,7 @@ exports.register = function(server, options, next) {
                  * @return {object} response, or whatever reply() returns
                  */
                 const replySuccess = () => {
-                    return reply('You are logged out.')
+                    return reply(internals.logOutSuccessObj)
                         .code(200)
                         .state(
                             config.get('casCookieName'),

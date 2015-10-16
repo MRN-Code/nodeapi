@@ -6,6 +6,18 @@ const moment = require('moment');
 
 const internals = {};
 
+internals.userSchema = joi.object().keys({
+    username: joi.string().min(3).max(20).required(),
+    email: joi.string().email().required(),
+    label: joi.string().required(),
+    siteId: joi.string().required(),
+    activeFlag: joi.string().required(),
+    passwordExpDate: joi.date().required(),
+    acctExpDate: joi.date().required(),
+    isSiteAdmin: joi.string().required(),
+    emailUnsubscribed: joi.boolean().required()
+});
+
 /**
  * Test whether a user with at least one of the properties exists
  * @param  {object} authUtils an instance of the authentication utilities
@@ -114,17 +126,7 @@ module.exports.post = {
         })
     },
     response: {
-        schema: joi.object().keys({
-            username: joi.string().min(3).max(20).required(),
-            email: joi.string().email().required(),
-            label: joi.string().required(),
-            siteId: joi.string().required(),
-            activeFlag: joi.string().required(),
-            passwordExpDate: joi.date().required(),
-            acctExpDate: joi.date().required(),
-            isSiteAdmin: joi.string().required(),
-            emailUnsubscribed: joi.boolean().required()
-        })
+        schema: internals.userSchema
     },
     handler: (request, reply) => {
         const authUtils = request.server.plugins.utilities.auth;
@@ -179,3 +181,4 @@ module.exports.post = {
 };
 
 module.exports.sanitize = internals.sanitize;
+module.exports.userSchema = internals.userSchema;

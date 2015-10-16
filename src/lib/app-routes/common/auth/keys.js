@@ -11,22 +11,13 @@ const internals = {};
 
 internals.credentialSchema = joi.object().keys({
     username: joi.string().required(),
-    user: {
-        username: joi.string().min(3).max(20).required(),
-        email: joi.string().email().required(),
-        label: joi.string().required(),
-        siteId: joi.string().required(),
-        activeFlag: joi.string().required(),
-        passwordExpDate: joi.date().required(),
-        acctExpDate: joi.date().required(),
-        isSiteAdmin: joi.string().required(),
-        emailUnsubscribed: joi.boolean().required()
-    },
+    user: require('../../../controllers/users.js').userSchema,
     id: joi.string().required(),
     key: joi.string().required(),
     algorithm: joi.string().required(),
     issueTime: joi.number().required(),
-    expireTime: joi.number().required()
+    expireTime: joi.number().required(),
+    studyRoles: joi.object().required()
 });
 
 exports.register = function(server, options, next) {

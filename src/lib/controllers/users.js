@@ -181,3 +181,4 @@ module.exports.post = {
 };
 
 module.exports.sanitize = internals.sanitize;
+module.exports.userSchema = internals.userSchema;

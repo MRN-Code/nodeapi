@@ -95,26 +95,69 @@ describe('Coinstac Consortia', () => {
         });
 
         it('Allows new analyses to be added to consortium', () => {
-            const addAnalysis = () => {
-                const analysis = {
-                    _id: 'analysis01',
-                    fileShas: ['cde'],
-                    data: {'Left-Hippocampus': 500000, r2: 1},
-                    username: 'mocha2'
-                };
-                return consortiumDb.save(analysis);
+            const analysisResults1 = {
+                _id: 'analysis01',
+                fileShas: ['cde'],
+                data: {
+                    objective: 1,
+                    gradient: {
+                        'Left-Hippocampus': 1
+                    },
+                    r2: 0.1
+                },
+                history: [],
+                username: 'mocha1'
+            };
+            const analysisResults2 = {
+                _id: 'analysis02',
+                fileShas: ['efg'],
+                data: {
+                    objective: 2,
+                    gradient: {
+                        'Left-Hippocampus': 2
+                    },
+                    r2: 0.2
+                },
+                history: [],
+                username: 'mocha2'
+            };
+            return Bluebird.all([
+                consortiumDb.save(analysisResults1),
+                consortiumDb.save(analysisResults2),
+                Bluebird.delay(1000)
+            ]);
+        });
+
+        it('Adds the usernames of contributors to aggregate', () => {
+            const getAggregate = () => {
+                return consortiumDb.all()
+                    .then((docs) => {
+                        return _.find(docs, {aggregate: true});
+                    });
             };
 
-            return addAnalysis();
+                getAggregate()
+                .then((aggregate) => {
+                    aggregate.should.have.property('contributors');
+                    aggregate.contributors.should.include('mocha1');
+                    aggregate.contributors.should.include('mocha2');
+                });
         });
 
         it('re-computes average of all analyses', () => {
             const addAnalysis = () => {
                 const analysis = {
-                    _id: 'analysis02',
-                    fileShas: ['abc'],
-                    data: {'Left-Hippocampus': 400000, r2: 0},
-                    username: 'mocha'
+                    _id: 'analysis03',
+                    fileShas: ['ghi'],
+                    data: {
+                        objective: 3,
+                        gradient: {
+                            'Left-Hippocampus': 3
+                        },
+                        r2: 0.3
+                    },
+                    history: [],
+                    username: 'mocha3'
                 };
                 return consortiumDb.save(analysis);
             };
@@ -126,28 +169,33 @@ describe('Coinstac Consortia', () => {
                     });
             };
 
-            const waitForAggregateCalc = (arg) => {
-                return Bluebird.delay(arg, 100);
+            const waitForAggregateCalc = () => {
+                return Bluebird.delay(100);
             };
 
             return addAnalysis()
                 .then(waitForAggregateCalc)
                 .then(getAggregate)
                 .then((average) => {
+                    console.log(average);
                     average.should.have.property('data');
                     average.should.have.property('files');
                     average.should.have.property('error');
                     average.should.have.property('sampleSize');
                     average.should.have.property('aggregate');
                     average.should.have.property('contributors');
-                    average.data.should.have.property('Left-Hippocampus');
+                    average.data.should.have.property('objective');
+                    average.data.should.have.property('gradient');
+                    average.data.should.have.property('mVals');
                     average.data.should.have.property('r2');
-                    average.sampleSize.should.equal(2);
+                    average.sampleSize.should.equal(3);
                     average.aggregate.should.equal(true);
-                    average.files.should.include('abc');
                     average.files.should.include('cde');
-                    average.contributors.should.include('mocha');
+                    average.files.should.include('efg');
+                    average.files.should.include('ghi');
+                    average.contributors.should.include('mocha1');
                     average.contributors.should.include('mocha2');
+                    average.contributors.should.include('mocha3');
                     return chai.expect(average.error).to.be.null;
                 });
         });

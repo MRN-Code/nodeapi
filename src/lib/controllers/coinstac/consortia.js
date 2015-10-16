@@ -7,9 +7,11 @@ const _ = require('lodash');
 const Bluebird = require('bluebird');
 const consortiaDbOptions = config.get('coinstac.pouchdb.consortia');
 const cloudantClient = require('../../utils/cloudant-client.js');
-const aggregateAnalysis = require('../../utils/aggregate-analysis.js');
+const aggregateAnalysis = require('../../utils/aggregate-analysis.js')
+    .multiShot;
 const mockConsortia = require('../../mocks/mock-consortia.json');
 let isCloudant;
+const lock = require('lock')();
 
 if (config.has('coinstac.pouchdb.cloudant')) {
     isCloudant = true;
@@ -52,6 +54,7 @@ internals.addSeedData = (db, server) => {
                 );
                 addPromises = _.map(mockConsortia, (consortium) => {
                     return internals.getConsortiumDb(consortium._id, server)
+                        .then(internals.addInitialAggregate)
                         .then((consortiumDb) => {
                             const path = consortiumDb.url || consortiumDb.path;
                             consortium.dbUrl = path;
@@ -67,11 +70,78 @@ internals.addSeedData = (db, server) => {
 };
 
 /**
- * Set the security on the consortiaDB to be more relaxed
- * Only takes action when config.coinstac.pouchdb.cloudant is defined
- * @param  {object} db the pouchy instance
- * @return {Promise}    Resolves to the response from the cloudant API
+ * Add the initial aggregate document to the DB
+ * @param  {pouchy} consortiumDb pouchy-wrapped pouchdb instance
+ * @return {Promise}              Resolves to the same pouchdb instance
  */
+internals.addInitialAggregate = (consortiumDb) => {
+    const initialAggregate = {
+        history: [],
+        aggregate: true,
+        data: {
+            mVals: {
+                'Left-Hippocampus': 0//Wc
+            },
+            r2: 0,
+            objective: Infinity, //F(Wc)
+            gradient: { //dF(Wc-1)
+                'Left-Hippocampus': 0
+            },
+            learningRate: 0.5 //n
+        },
+        lambda: 0.7,
+        maxIterations: 10, //T
+        contributors: [],
+        clientCount: 3 //N
+    };
+
+    return consortiumDb.save(initialAggregate)
+        .then(() => { return consortiumDb; });
+};
+
+/**
+ * Add the current state of the aggregate to the history stack
+ * @param  {object} aggregate the aggregate object
+ * @return {object}           the aggregate object with updated history prop
+ */
+internals.saveInHist = (obj) => {
+    const copy = _.cloneDeep(obj);
+    delete copy.history;
+    obj.history.push(copy);
+    return obj;
+};
+
+internals.getAnalyses = (docs) => {
+    return _.filter(docs, (val) => {
+        return !val.aggregate;
+    });
+};
+
+internals.getAggregate = (docs) => {
+    return _.find(docs, {aggregate: true}) || {};
+};
+
+/**
+ * get all analyses that have contributed to the current iteration
+ * @param  {array} docs array of documents from consortiumDB
+ * @return {array} array of analysis documents
+ */
+internals.getContributingAnalyses = (docs) => {
+    const analyses = internals.getAnalyses(docs);
+    const aggregate = internals.getAggregate(docs);
+    const aggregateIterations = aggregate.history.length;
+
+    return _.filter(analyses, (analysis) => {
+        return analysis.history.length === aggregateIterations + 1;
+    });
+};
+
+/**
+* Set the security on the consortiaDB to be more relaxed
+* Only takes action when config.coinstac.pouchdb.cloudant is defined
+* @param  {object} db the pouchy instance
+* @return {Promise}    Resolves to the response from the cloudant API
+*/
 internals.setConsortiumDbSecurity = (db) => {
     const security = {
         nobody: [
@@ -87,34 +157,51 @@ internals.setConsortiumDbSecurity = (db) => {
     }
 };
 
-/**
- * Add listeners to newly created consortiumDb
- * @param  {object} db     pouchDB or pouchWrapper insance
- * @param  {server} server server instance
- * @return {null}           nothing
- */
-internals.watchConsortiumDb = (db, server) => {
-    const getAnalyses = (docs) => {
-        return _.filter(docs, (val) => {
-            return !val.aggregate;
-        });
-    };
+internals.historyUpdatedTable = {};
 
-    const getAggregate = (docs) => {
-        return _.find(docs, {aggregate: true}) || {};
-    };
+internals.updateDocHist = (doc, db) => {
+    const rev = doc._rev;
+    const id = doc._id;
+    if (internals.historyUpdatedTable[id] !== rev) {
+        internals.saveInHist(doc);
+        return db.save(doc)
+            .then((newDoc) => {
+                internals.historyUpdatedTable[id] = newDoc._rev;
+            });
+
+    }
+
+    return Bluebird.resolve();
+};
+
+/**
+* Add listeners to newly created consortiumDb
+* @param  {object} db     pouchDB or pouchWrapper insance
+* @param  {server} server server instance
+* @return {null}           nothing
+*/
+internals.watchConsortiumDb = (db, server) => {
 
     const recalcAggregate = (docs) => {
-        const aggregate = getAggregate(docs);
-        const analyses = getAnalyses(docs);
-        aggregate.sampleSize = analyses.length;
+        const aggregate = internals.getAggregate(docs);
+        const contributingAnalyses = internals.getContributingAnalyses(docs);
+        const currentIteration = aggregate.history.length + 1;
+        aggregate.contributors = _.pluck(contributingAnalyses, 'username');
+        if (aggregate.clientCount > contributingAnalyses.length) {
+            const diff = aggregate.clientCount - contributingAnalyses.length;
+            aggregate.status = `waiting for ${diff} contributors`;
+            return aggregate;
+        }
+
+        aggregate.status = 'recalculating aggregate';
+        internals.saveInHist(aggregate);
+        aggregate.sampleSize = contributingAnalyses.length;
         aggregate.error = null;
-        aggregate.files = _.flatten(_.pluck(analyses, 'fileShas'));
-        aggregate.contributors = _.pluck(analyses, 'username');
-        aggregate.aggregate = true;
-        if (analyses.length) {
+        aggregate.files = _.flatten(_.pluck(contributingAnalyses, 'fileShas'));
+        aggregate.status = `waiting on iteration ${currentIteration} results`;
+        if (contributingAnalyses.length) {
             try {
-                aggregate.data = aggregateAnalysis(analyses);
+                aggregateAnalysis(contributingAnalyses, aggregate);
             } catch (err) {
                 server.log(
                     ['error', 'aggregate-analysis', 'coinstac'],
@@ -137,14 +224,22 @@ internals.watchConsortiumDb = (db, server) => {
     }).on('change', (info) => {
         server.log(
             ['info', 'coinstac', 'aggregate-anlysis'],
-            'Change detected in consortiumDb `' + db.name + '`'
+            'Changes detected in consortiumDb `' + db.name + '`'
         );
-        if (!info.doc.aggregate) {
+        lock(db.name, (releaseLock) => {
             server.log(
                 ['info', 'coinstac', 'aggregate-anlysis'],
-                'Recalculating aggreagate in consortiumDb `' + db.name + '`'
+                'Acquired aggregate lock for `' + db.name + '`'
             );
-            db.all()
+
+            if (!info.doc.aggregate) {
+                server.log(
+                    ['info', 'coinstac', 'aggregate-anlysis'],
+                    'Recalculating aggreagate in consortiumDb `' + db.name + '`'
+                );
+                internals.updateDocHist(info.doc, db)
+                .then(_.noop)
+                .then(_.bind(db.all, db))
                 .then(recalcAggregate)
                 .then(_.bind(db.save, db))
                 .catch((err) => {
@@ -152,18 +247,22 @@ internals.watchConsortiumDb = (db, server) => {
                         ['error', 'aggregate-anlysis', 'coinstac'],
                         err.message
                     );
-                });
-        }
+                })
+                .then(releaseLock());
+            } else {
+                releaseLock()();
+            }
+        });
     });
 };
 
 /**
- * get a consortia PouchDB client from existing store or by creating one
- * also calls setConsortiaDbSecurity
- * @param  {string} name   the consortia id
- * @param  {object} server the hapi server instance
- * @return {Promise}        resolves to the newly created DB
- */
+* get a consortia PouchDB client from existing store or by creating one
+* also calls setConsortiaDbSecurity
+* @param  {string} name   the consortia id
+* @param  {object} server the hapi server instance
+* @return {Promise}        resolves to the newly created DB
+*/
 internals.getConsortiumDb = (name, server) => {
     const PouchW = server.plugins.houchdb.constructor;
     const pouchWConfig = _.clone(consortiaDbOptions);
@@ -195,11 +294,11 @@ internals.getConsortiumDb = (name, server) => {
     // add consortiaDB to list of internal databases
     internals.consortiumDbClients.push({ name: name, db: newDb });
     return newDb.info()
-        .then(_.partial(internals.setConsortiumDbSecurity, newDb))
-        .then(internals.watchConsortiumDb(newDb, server))
-        .then(() => {
-            return newDb;
-        });
+    .then(_.partial(internals.setConsortiumDbSecurity, newDb))
+    .then(internals.watchConsortiumDb(newDb, server))
+    .then(() => {
+        return newDb;
+    });
 };
 
 module.exports.getAll = {
@@ -221,15 +320,15 @@ module.exports.getAll = {
     handler: (request, reply) => {
         const db = request.server.plugins.houchdb.consortiameta;
         db.all()
-            .then(reply)
-            .catch((err) => {
-                request.log(
-                    ['error', 'coinstac', 'consortia'],
-                    err.message,
-                    err
-                );
-                reply(boom.wrap(err));
-            });
+        .then(reply)
+        .catch((err) => {
+            request.log(
+                ['error', 'coinstac', 'consortia'],
+                err.message,
+                err
+            );
+            reply(boom.wrap(err));
+        });
     }
 };
 
@@ -256,19 +355,19 @@ module.exports.getOne = {
         queryOptions['include_docs'] = true; //jshint ignore:line
         /* jscs:enable */
         db.get(request.params.id, queryOptions)
-            .then(reply)
-            .catch((err) => {
-                request.log(
-                    ['error', 'coinstac', 'consortia'],
-                    err.message,
-                    err
-                );
-                if (err.status === 404) {
-                    return reply(boom.wrap(err, 404));
-                }
+        .then(reply)
+        .catch((err) => {
+            request.log(
+                ['error', 'coinstac', 'consortia'],
+                err.message,
+                err
+            );
+            if (err.status === 404) {
+                return reply(boom.wrap(err, 404));
+            }
 
-                reply(boom.wrap(err));
-            });
+            reply(boom.wrap(err));
+        });
     }
 };
 
@@ -291,10 +390,10 @@ module.exports.post = {
         const db = request.server.plugins.houchdb.consortiameta;
 
         /**
-         * fetch a consortia using the _id of the document
-         * @param  {object} doc consortia doc returned by add
-         * @return {Promise}    resolves to `get` result
-         */
+        * fetch a consortia using the _id of the document
+        * @param  {object} doc consortia doc returned by add
+        * @return {Promise}    resolves to `get` result
+        */
         const fetchNewConsortia = (doc) => {
             const queryOptions = {};
             /* jscs:disable */
@@ -304,33 +403,34 @@ module.exports.post = {
         };
 
         /**
-         * call getConsortiaDb with the _id of the consortia
-         * @param  {object} consortia
-         * @return {object} the same as the input, but with the db URL added
-         */
+        * call getConsortiumDb with the _id of the consortia
+        * @param  {object} consortia
+        * @return {object} the same as the input, but with the db URL added
+        */
         const callGetConsortiumDb = (consortium) => {
             const id = consortium._id;
             return internals.getConsortiumDb(id, request.server)
-                .then((newDb) => {
-                    const dbUrl = newDb.url || newDb.path;
-                    consortium.dbUrl = dbUrl;
-                    return consortium;
-                });
+            .then(internals.addInitialAggregate)
+            .then((newDb) => {
+                const dbUrl = newDb.url || newDb.path;
+                consortium.dbUrl = dbUrl;
+                return consortium;
+            });
         };
 
         db.save(request.payload)
-            .then(fetchNewConsortia)
-            .then(callGetConsortiumDb)
-            .then(_.bind(db.save, db))
-            .then(reply)
-            .catch((err) => {
-                request.log(
-                    ['error', 'coinstac', 'consortia'],
-                    err.message,
-                    err
-                );
-                reply(boom.wrap(err));
-            });
+        .then(fetchNewConsortia)
+        .then(callGetConsortiumDb)
+        .then(_.bind(db.save, db))
+        .then(reply)
+        .catch((err) => {
+            request.log(
+                ['error', 'coinstac', 'consortia'],
+                err.message,
+                err
+            );
+            reply(boom.wrap(err));
+        });
     }
 };
 
@@ -357,25 +457,25 @@ module.exports.put = {
         // Validate that the URL id matches the payload
         if (request.payload._id !== request.params.id) {
             const errorMsg = ['Illegal attempt to PUT consortium with id = `',
-                request.payload._id,
-                '` using URL with id = `',
-                request.params.id,
-                '`'
+            request.payload._id,
+            '` using URL with id = `',
+            request.params.id,
+            '`'
             ].join('');
             reply(boom.badRequest(errorMsg));
             return;
         }
 
         db.update(request.payload)
-            .then(reply)
-            .catch((err) => {
-                request.log(
-                    ['error', 'coinstac', 'consortia'],
-                    err.message,
-                    err
-                );
-                reply(boom.wrap(err));
-            });
+        .then(reply)
+        .catch((err) => {
+            request.log(
+                ['error', 'coinstac', 'consortia'],
+                err.message,
+                err
+            );
+            reply(boom.wrap(err));
+        });
     }
 };
 

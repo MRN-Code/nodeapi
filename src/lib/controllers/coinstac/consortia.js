@@ -107,6 +107,7 @@ internals.addInitialAggregate = (consortiumDb) => {
 internals.appendToHist = (obj) => {
     const copy = _.cloneDeep(obj);
     delete copy.history;
+    obj.history = object.history || [];
     obj.history.push(copy);
     return obj;
 };

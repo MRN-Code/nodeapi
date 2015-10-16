@@ -20,6 +20,10 @@ internals.credentialSchema = joi.object().keys({
     studyRoles: joi.object().required()
 });
 
+internals.logOutSuccessObj = {
+  message:'You are logged out.'
+};
+
 exports.register = function(server, options, next) {
     // Private route to get new hawk credentials
     // Requests must authenticate with a username and password
@@ -121,9 +125,9 @@ exports.register = function(server, options, next) {
                 'or the `id param` and your HAWK signature do not match.'
             ].join('<br>'),
             description: 'Logout: Remove API key from auth DB',
-
-            //hapi js says it cannot validate non-object response.
-
+            response: {
+              schema: joi.compile(internals.logOutSuccessObj)
+            },
             handler: (request, reply) => {
                 const username = request.auth.credentials.username;
                 const id = request.auth.credentials.id;
@@ -159,7 +163,7 @@ exports.register = function(server, options, next) {
                  * @return {object} response, or whatever reply() returns
                  */
                 const replySuccess = () => {
-                    return reply('You are logged out.')
+                    return reply(internals.logOutSuccessObj)
                         .code(200)
                         .state(
                             config.get('casCookieName'),

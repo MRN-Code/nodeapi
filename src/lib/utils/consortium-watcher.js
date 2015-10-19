@@ -11,6 +11,7 @@ class ConsortiumWatcher extends EventEmitter {
      * @return {ConsortiumWatcher}         event emitter for the pouchdb
      */
     constructor(pouchDb) {
+        super();
         this.db = pouchDb;
         this.watchDb();
     }

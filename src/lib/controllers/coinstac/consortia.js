@@ -4,10 +4,11 @@ const joi = require('joi');
 const config = require('config'); // jshint ignore:line
 const _ = require('lodash');
 const Bluebird = require('bluebird');
-const EventEmitter = require('events').EventEmitter;
 const consortiaDbOptions = config.get('coinstac.pouchdb.consortia');
+const ConsortiumWatcher = require('../../utils/consortium-watcher.js');
 const cloudantClient = require('../../utils/cloudant-client.js');
-const aggregateAnalysis = require('../../utils/aggregate-analysis.js').multiShot;
+const aggregateAnalysis = require('../../utils/aggregate-analysis.js')
+    .multiShot;
 const mockConsortia = require('../../mocks/mock-consortia.json');
 let isCloudant;
 const lock = require('lock')();
@@ -19,7 +20,6 @@ if (config.has('coinstac.pouchdb.cloudant')) {
 
 const internals = {};
 
-internals.docChanges = new EventEmitter();
 internals.consortiumDbClients = [];
 
 internals.dbBaseName = 'consortium';
@@ -53,7 +53,10 @@ internals.addSeedData = (db, server) => {
                     'Adding seed data to consortiameta DB'
                 );
                 addPromises = _.map(mockConsortia, (consortium) => {
-                    return internals.getConsortiumDb({ name: consortium._id, server })
+                    return internals.getConsortiumDb({
+                            name: consortium._id,
+                            server
+                        })
                         .then(internals.addInitialAggregate)
                         .then((consortiumDb) => {
                             const path = consortiumDb.url || consortiumDb.path;
@@ -112,19 +115,8 @@ internals.appendToHist = (obj) => {
     return obj;
 };
 
-internals.getAnalyses = (docs) => {
-    return _.filter(docs, (val) => {
-        return !val.aggregate;
-    });
-};
-
-internals.getAggregate = (docs) => {
-    return _.find(docs, {aggregate: true}) || {};
-};
-
-
 internals.handleDocChange = (info, db, server) => {
-    const { doc } = info;
+    const doc = info.doc;
     server.log(
         ['info', 'coinstac', 'aggregate-anlysis'],
         'Changes detected in consortiumDb `' + db.name + '`'
@@ -135,7 +127,7 @@ internals.handleDocChange = (info, db, server) => {
             'Acquired aggregate lock for `' + db.name + '`'
         );
 
-        if (info.doc.aggregate) {
+        if (doc.aggregate) {
             return releaseLock()();
         }
 
@@ -161,25 +153,7 @@ internals.handleDocChange = (info, db, server) => {
                 err.message
             );
         })
-        .then((doc) => {
-            internals.docChanges.emit('change:aggregate', doc);
-        })
         .then(releaseLock());
-    });
-};
-
-/**
- * get all analyses that have contributed to the current iteration
- * @param  {array} docs array of documents from consortiumDB
- * @return {array} array of analysis documents
- */
-internals.getContributingAnalyses = (docs) => {
-    const analyses = internals.getAnalyses(docs);
-    const aggregate = internals.getAggregate(docs);
-    const aggregateIterations = aggregate.history.length;
-
-    return _.filter(analyses, (analysis) => {
-        return analysis.history.length === aggregateIterations + 1;
     });
 };
 
@@ -190,35 +164,29 @@ internals.getContributingAnalyses = (docs) => {
  * @param {Hapi} server
  * @return {object} aggregrated result
  */
-internals.recalcAggregate = (docs, server) => {
-    const aggregate = internals.getAggregate(docs);
-    const contributingAnalyses = internals.getContributingAnalyses(docs);
-    const currentIteration = aggregate.history.length + 1;
-    aggregate.contributors = _.pluck(contributingAnalyses, 'username');
+internals.recalcAggregate = (classifiedDocs, server) => {
+    const aggregate = classifiedDocs.aggregate;
+    const contributingAnalyses = classifiedDocs.contributingAnalyses;
     if (aggregate.clientCount > contributingAnalyses.length) {
-        const diff = aggregate.clientCount - contributingAnalyses.length;
-        aggregate.status = `waiting for ${diff} contributors`;
-        return aggregate;
+        const errMsg = 'Attempt to recalculate aggregate without all analyses';
+        return Bluebird.reject(new Error(errMsg));
     }
 
-    internals.appendToHist(aggregate);
     aggregate.sampleSize = contributingAnalyses.length;
     aggregate.error = null;
     aggregate.files = _.flatten(_.pluck(contributingAnalyses, 'fileShas'));
-    aggregate.status = `waiting on iteration ${currentIteration} results`;
-    if (contributingAnalyses.length) {
-        try {
-            aggregateAnalysis(contributingAnalyses, aggregate);
-        } catch (err) {
-            server.log(
-                ['error', 'aggregate-analysis', 'coinstac'],
-                err.message
-            );
-            aggregate.error = err.message;
-            aggregate.result = null;
-        }
+    try {
+        aggregateAnalysis(contributingAnalyses, aggregate); //mutates aggregate
+    } catch (err) {
+        server.log(
+            ['error', 'aggregate-analysis', 'coinstac'],
+            err.message
+        );
+        aggregate.error = err.message;
+        aggregate.result = null;
     }
 
+    internals.appendToHist(aggregate);
     return aggregate;
 };
 
@@ -243,30 +211,69 @@ internals.setConsortiumDbSecurity = (db) => {
     }
 };
 
+internals.getAnalyses = (docs) => {
+    return _.filter(docs, (val) => {
+        return !val.aggregate;
+    });
+};
+
+internals.getAggregate = (docs) => {
+    return _.find(docs, {aggregate: true}) || {};
+};
+
 /**
- * The analysis history cache maintains a set of k-v pairs where the keys
- * are analysis doc _ids and values are doc _revs.  Analyses are generally
- * synced _one-way_, client => server.  However, this controller updates the
- * history on Analyses documents.  To prevent the re-computation of aggregrates
- * after updating the analysis history, the cache informs the db change handler
- * that no recomputation is required.
+ * Update the contributors list for the current iteration
+ * @param  {object} classifiedDocs an object with `aggregate`, `analyses`,
+ *                                 and `contributingAnalyses` properties
+ * @param  {pouchy} db             the consortiumDb in which to save the updated
+ *                                 aggregate
+ * @return {object}                the classifiedDocs object with the aggregate
+ *                                     updated
  */
-internals.analysisHistoryUpdateCache = {};
+internals.updateAggregateContributors = (classifiedDocs) => {
+    const aggregate = classifiedDocs.aggregate;
+    const contributingAnalyses = classifiedDocs.contributingAnalyses;
+    aggregate.contributors = _.pluck(contributingAnalyses, 'username');
+    return aggregate;
+};
 
-internals.updateAnalysisHistory = (doc, db) => {
-    const rev = doc._rev;
-    const id = doc._id;
-    if (internals.analysisHistoryUpdateCache[id] !== rev) {
-        internals.appendToHist(doc);
-        return db.save(doc)
-            .then((newDoc) => {
-                internals.analysisHistoryUpdateCache[id] = newDoc._rev;
-                internals.docChanges.emit('change:analysis', newDoc);
-            });
+/**
+ * get all analyses that have contributed to the current iteration
+ * @param  {array} docs array of documents from consortiumDB
+ * @return {array} array of analysis documents
+ */
+internals.getContributingAnalyses = (analyses, aggregate) => {
+    const currentIteration = aggregate.history.length + 1;
 
-    }
+    return _.filter(analyses, (analysis) => {
+        return analysis.history.length === currentIteration;
+    });
+};
 
-    return Bluebird.resolve();
+/**
+ * Split docs into their categories: aggregate, analyses and
+ * contributingAnalyses
+ * @param  {array} docs an array of documents
+ * @return {object}      an object of the following form:
+ *                          {
+ *                          aggregate {object}: the aggregate object,
+ *                          analyses {array}: all the analysis objects,
+ *                          contributingAnalyses {array}: all analyses that have
+ *                          	data for the current iteration
+ *                          }
+ */
+internals.classifyDocs = (docs) => {
+    const analyses = internals.getAnalyses(docs);
+    const aggregate = internals.getAggregate(docs);
+    const contributingAnalyses = internals.getContributingAnalyses(
+        analyses,
+        aggregate
+    );
+    return {
+        aggregate: aggregate,
+        analyses: analyses,
+        contributingAnalyses: contributingAnalyses
+    };
 };
 
 /**
@@ -277,16 +284,60 @@ internals.updateAnalysisHistory = (doc, db) => {
 * @return {null}           nothing
 */
 internals.watchConsortiumDb = (db, server) => {
-    db.changes({
-        live: true,
-        since: 'now',
-        /*jscs:disable*/
-        include_docs: true //jshint ignore:line
-        /*jscs:enable*/
-    }).on(
-        'change',
-        _.partialRight(internals.handleDocChange, db, server)
-    );
+    const dbWatcher = new ConsortiumWatcher(db);
+    const log = (message) => {
+        return server.log(['info', 'coinstac', 'ConsortiumWatcher'], message);
+    };
+
+    dbWatcher.on('change', () => {
+        log('change detected in consortiumDb: ' + db.name);
+    });
+
+    dbWatcher.on('change:analysis', () => {
+        log('analysis updated in consortiumDb: ' + db.name);
+        return db.all()
+            .then(internals.classifyDocs)
+            .then(_.partialRight(internals.updateAggregateContributors))
+            .then(_.partial(db.save, db))
+            .catch((err) => {
+                server.log(
+                    ['error', 'coinstac', 'handleAnalysisChange'],
+                    err.message
+                );
+            });
+    });
+
+    dbWatcher.on('change:aggregate', () => {
+        log('aggregate updated in consortiumDb: ' + db.name);
+    });
+
+    dbWatcher.on('error', (err) => {
+        server.log(
+            ['error', 'coinstac', 'consortiumWatcher'],
+            err.message
+        );
+    });
+
+    dbWatcher.on('allAnalysesSubmitted', (aggregate) => {
+        const logMessage = [
+            'processing analyses for iteration',
+            aggregate.history.length + 1,
+            'in consortiumDb:',
+            db.name
+        ];
+        log(logMessage);
+
+        db.all()
+            .then(internals.classifyDocs)
+            .then(_.partialRight(server, internals.recalcAggregate))
+            .then(_.bind(db.save, db))
+            .catch((err) => {
+                server.log(
+                    ['error', 'coinstac', 'handleAllAnalysesSubmitted'],
+                    err.message
+                );
+            });
+    });
 };
 
 /**
@@ -330,9 +381,15 @@ internals.getConsortiumDb = (opts) => {
     internals.consortiumDbClients.push({ name: name, db: newDb });
     return newDb.info()
     .then(_.partial(internals.setConsortiumDbSecurity, newDb))
-    .then(internals.watchConsortiumDb(newDb, server))
-    .then(() => {
-        return newDb;
+    .then(_.noop)
+    .then(_.partial(internals.watchConsortiumDb, newDb, server))
+    .then(_.noop)
+    .then(_.partial(_.identity, newDb))
+    .catch((err) => {
+        server.log(
+            ['error', 'coinstac', 'getConsortiumDb'],
+            err.message
+        );
     });
 };
 
@@ -444,7 +501,10 @@ module.exports.post = {
         */
         const callGetConsortiumDb = (consortium) => {
             const id = consortium._id;
-            return internals.getConsortiumDb({ name: id, server: request.server })
+            return internals.getConsortiumDb({
+                name: id,
+                server: request.server
+            })
             .then(internals.addInitialAggregate)
             .then((newDb) => {
                 const dbUrl = newDb.url || newDb.path;

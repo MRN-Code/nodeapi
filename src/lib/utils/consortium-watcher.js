@@ -14,8 +14,12 @@ class ConsortiumWatcher extends EventEmitter {
         super();
         this.db = pouchDb;
         this.watchDb();
+        this.bindEvents();
     }
 
+    bindEvents() {
+        this.on('changed:aggregate', this.handleAggregateChange.bind(this));
+    }
     /**
      * Watch this db: should only be called by contsructor after setting this.db
      * @return {null}
@@ -41,12 +45,13 @@ class ConsortiumWatcher extends EventEmitter {
      * @param  {object} newDoc the new/changed document
      * @return {null}
      */
-    handleDocChange(newDoc) {
+    handleDocChange(info) {
+        const newDoc = info.doc;
         this.emit('changed', newDoc);
         if (newDoc.aggregate === true) {
-            this.emit('change:aggregate', newDoc);
+            this.emit('changed:aggregate', newDoc);
         } else {
-            this.emit('change:analysis', newDoc);
+            this.emit('changed:analysis', newDoc);
         }
     }
 
@@ -70,7 +75,7 @@ class ConsortiumWatcher extends EventEmitter {
          const contributorCount = newDoc.contributors.length;
          const missingAnalysisCount = newDoc.clientCount - contributorCount;
          if (missingAnalysisCount === 0) {
-             this.emit('allAnalysesSubmitted');
+             this.emit('allAnalysesSubmitted', newDoc);
          } else {
              this.emit('waitingOnAnalyses', {count: missingAnalysisCount});
          }

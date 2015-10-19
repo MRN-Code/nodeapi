@@ -94,16 +94,25 @@ describe('Coinstac Consortia', () => {
             return consortiumDb.info();
         });
 
-        it('Allows new analyses to be added to consortium', (done) => {
+        it('Allows new analyses to be added to consortium', () => {
+            /*
             let aggCount = 0;
             const consortiumChangeListener = (doc) => {
                 ++aggCount;
                 if (aggCount == 2) {
-                    controller.docChanges.removeListener('change:aggregate', consortiumChangeListener);
+                    controller.docChanges.removeListener(
+                        'change:aggregate',
+                        consortiumChangeListener
+                    );
                     done();
                 }
-            }
-            controller.docChanges.on('change:aggregate', consortiumChangeListener);
+            };
+
+            controller.docChanges.on(
+                'change:aggregate',
+                consortiumChangeListener
+            );
+            */
 
             const analysisResults1 = {
                 _id: 'analysis01',
@@ -115,7 +124,7 @@ describe('Coinstac Consortia', () => {
                     },
                     r2: 0.1
                 },
-                history: [],
+                history: [{test: true}],
                 username: 'mocha1'
             };
             const analysisResults2 = {
@@ -128,12 +137,13 @@ describe('Coinstac Consortia', () => {
                     },
                     r2: 0.2
                 },
-                history: [],
+                history: [{test: true}],
                 username: 'mocha2'
             };
-            Bluebird.all([
+            return Bluebird.all([
                 consortiumDb.save(analysisResults1),
-                consortiumDb.save(analysisResults2)
+                consortiumDb.save(analysisResults2),
+                Bluebird.delay(null, 100)
             ]);
         });
 
@@ -152,7 +162,14 @@ describe('Coinstac Consortia', () => {
             });
         });
 
-        it('re-computes average of all analyses', (done) => {
+        it('re-computes average of all analyses', () => {
+            const getAggregate = () => {
+                return consortiumDb.all()
+                    .then((docs) => {
+                        return _.find(docs, {aggregate: true});
+                    });
+            };
+
             const consortiumChangeListener = (average) => {
                 average.should.have.property('data');
                 average.should.have.property('files');
@@ -169,13 +186,19 @@ describe('Coinstac Consortia', () => {
                 average.files.should.include('cde');
                 average.files.should.include('efg');
                 average.files.should.include('ghi');
-                average.contributors.should.include('mocha1');
-                average.contributors.should.include('mocha2');
-                average.contributors.should.include('mocha3');
-                chai.expect(average.error).to.be.null;
-                done();
+                average.contributors.length.should.equal(0);
+                average.history[1].contributors.should.include('mocha1');
+                average.history[1].contributors.should.include('mocha2');
+                average.history[1].contributors.should.include('mocha3');
+                return chai.expect(average.error).to.be.null;
             };
-            controller.docChanges.once('change:aggregate', consortiumChangeListener);
+
+            /**
+            controller.docChanges.once(
+                'change:aggregate',
+                consortiumChangeListener
+            );
+            */
 
             const addAnalysis = () => {
                 const analysis = {
@@ -188,13 +211,17 @@ describe('Coinstac Consortia', () => {
                         },
                         r2: 0.3
                     },
-                    history: [],
+                    history: [{test: true}],
                     username: 'mocha3'
                 };
                 return consortiumDb.save(analysis);
             };
 
-            addAnalysis();
+            return addAnalysis()
+                .then(_.noop)
+                .then(_.bind(Bluebird.delay, Bluebird, 1000))
+                .then(getAggregate)
+                .then(consortiumChangeListener);
         });
 
     });

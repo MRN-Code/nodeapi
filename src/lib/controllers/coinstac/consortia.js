@@ -11,7 +11,6 @@ const aggregateAnalysis = require('../../utils/aggregate-analysis.js')
     .multiShot;
 const mockConsortia = require('../../mocks/mock-consortia.json');
 let isCloudant;
-const lock = require('lock')();
 
 if (config.has('coinstac.pouchdb.cloudant')) {
     isCloudant = true;
@@ -95,8 +94,10 @@ internals.addInitialAggregate = (consortiumDb) => {
         lambda: 0.7,
         maxIterations: 10, //T
         contributors: [],
-        clientCount: 3 //N
+        clientCount: 3, //N
+        files: []
     };
+    internals.prepareForNextIteration(initialAggregate);
 
     return consortiumDb.save(initialAggregate)
         .then(() => { return consortiumDb; });
@@ -107,59 +108,18 @@ internals.addInitialAggregate = (consortiumDb) => {
  * @param  {object} aggregate the aggregate object
  * @return {object}           the aggregate object with updated history prop
  */
-internals.appendToHist = (obj) => {
+internals.prepareForNextIteration = (obj) => {
     const copy = _.cloneDeep(obj);
     delete copy.history;
     obj.history = obj.history || [];
     obj.history.push(copy);
+    obj.contributors = [];
     return obj;
-};
-
-internals.handleDocChange = (info, db, server) => {
-    const doc = info.doc;
-    server.log(
-        ['info', 'coinstac', 'aggregate-anlysis'],
-        'Changes detected in consortiumDb `' + db.name + '`'
-    );
-    return lock(db.name, (releaseLock) => {
-        server.log(
-            ['info', 'coinstac', 'aggregate-anlysis'],
-            'Acquired aggregate lock for `' + db.name + '`'
-        );
-
-        if (doc.aggregate) {
-            return releaseLock()();
-        }
-
-        // check if we _just_ updated an analysis documents history
-        // if so, no the db-change response should be ~noop
-        if (internals.analysisHistoryUpdateCache[doc._id] === doc._rev) {
-            delete internals.analysisHistoryUpdateCache[doc._id];
-            return releaseLock()();
-        }
-
-        server.log(
-            ['info', 'coinstac', 'aggregate-anlysis'],
-            'Recalculating aggreagate in consortiumDb `' + db.name + '`'
-        );
-        return internals.updateAnalysisHistory(doc, db)
-        .then(_.noop)
-        .then(_.bind(db.all, db))
-        .then(internals.recalcAggregate)
-        .then(_.bind(db.save, db))
-        .catch((err) => {
-            server.log(
-                ['error', 'aggregate-anlysis', 'coinstac'],
-                err.message
-            );
-        })
-        .then(releaseLock());
-    });
 };
 
 /**
  * Provided a list of consortium documents, including analysis results and
- * an aggreate, computes a new aggregrated result
+ * an aggregate, computes a new aggregrated result
  * @param {array} set of consortium-associated docs
  * @param {Hapi} server
  * @return {object} aggregrated result
@@ -186,7 +146,7 @@ internals.recalcAggregate = (classifiedDocs, server) => {
         aggregate.result = null;
     }
 
-    internals.appendToHist(aggregate);
+    internals.prepareForNextIteration(aggregate);
     return aggregate;
 };
 
@@ -243,7 +203,7 @@ internals.updateAggregateContributors = (classifiedDocs) => {
  * @return {array} array of analysis documents
  */
 internals.getContributingAnalyses = (analyses, aggregate) => {
-    const currentIteration = aggregate.history.length + 1;
+    const currentIteration = aggregate.history.length;
 
     return _.filter(analyses, (analysis) => {
         return analysis.history.length === currentIteration;
@@ -289,16 +249,16 @@ internals.watchConsortiumDb = (db, server) => {
         return server.log(['info', 'coinstac', 'ConsortiumWatcher'], message);
     };
 
-    dbWatcher.on('change', () => {
+    dbWatcher.on('changed', () => {
         log('change detected in consortiumDb: ' + db.name);
     });
 
-    dbWatcher.on('change:analysis', () => {
+    dbWatcher.on('changed:analysis', () => {
         log('analysis updated in consortiumDb: ' + db.name);
         return db.all()
             .then(internals.classifyDocs)
             .then(_.partialRight(internals.updateAggregateContributors))
-            .then(_.partial(db.save, db))
+            .then(_.bind(db.save, db))
             .catch((err) => {
                 server.log(
                     ['error', 'coinstac', 'handleAnalysisChange'],
@@ -307,7 +267,7 @@ internals.watchConsortiumDb = (db, server) => {
             });
     });
 
-    dbWatcher.on('change:aggregate', () => {
+    dbWatcher.on('changed:aggregate', () => {
         log('aggregate updated in consortiumDb: ' + db.name);
     });
 
@@ -321,7 +281,7 @@ internals.watchConsortiumDb = (db, server) => {
     dbWatcher.on('allAnalysesSubmitted', (aggregate) => {
         const logMessage = [
             'processing analyses for iteration',
-            aggregate.history.length + 1,
+            aggregate.history.length,
             'in consortiumDb:',
             db.name
         ];
@@ -329,7 +289,7 @@ internals.watchConsortiumDb = (db, server) => {
 
         db.all()
             .then(internals.classifyDocs)
-            .then(_.partialRight(server, internals.recalcAggregate))
+            .then(_.partialRight(internals.recalcAggregate, server))
             .then(_.bind(db.save, db))
             .catch((err) => {
                 server.log(

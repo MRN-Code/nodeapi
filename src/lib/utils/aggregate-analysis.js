@@ -163,13 +163,11 @@ const runMultiShot = (analyses, aggregate) => {
     const previousAgg = aggregate.history[aggregate.history.length - 1];
     const objectiveValues = internals.getObjectiveValues(analyses);
     const gradientValues = internals.getGradientValues(analyses);
-    console.log(gradientValues);
     const r2Values = _.pluck(analyses, 'data.r2');
     const aggregateR2 = internals.mean(r2Values);
     const aggregateObjective = internals.mean(objectiveValues);
     const aggregateGradient = coinstacAlgorithms
         .utils.columnWiseAverage(gradientValues);
-    console.log(aggregateGradient);
     let newMValArray;
 
     if (

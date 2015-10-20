@@ -10,6 +10,8 @@ const cloudantClient = require('../../utils/cloudant-client.js');
 const aggregateAnalysis = require('../../utils/aggregate-analysis.js')
     .multiShot;
 const mockConsortia = require('../../mocks/mock-consortia.json');
+const lock = require('lock')();
+
 let isCloudant;
 
 if (config.has('coinstac.pouchdb.cloudant')) {
@@ -95,7 +97,8 @@ internals.addInitialAggregate = (consortiumDb) => {
         maxIterations: 10, //T
         contributors: [],
         clientCount: 3, //N
-        files: []
+        files: [],
+        error: null
     };
     internals.prepareForNextIteration(initialAggregate);
 
@@ -193,7 +196,16 @@ internals.getAggregate = (docs) => {
 internals.updateAggregateContributors = (classifiedDocs) => {
     const aggregate = classifiedDocs.aggregate;
     const contributingAnalyses = classifiedDocs.contributingAnalyses;
-    aggregate.contributors = _.pluck(contributingAnalyses, 'username');
+    const prevContributors = aggregate.conctributors;
+    const contributors = _.pluck(contributingAnalyses, 'username');
+    const contributorDiff = _.difference(prevContributors, contributors)
+        .concat(_.difference(contributors, prevContributors));
+    if (contributorDiff.length === 0) {
+        aggregate.unchanged = true;
+    } else {
+        aggregate.contributors = contributors;
+    }
+
     return aggregate;
 };
 
@@ -253,18 +265,38 @@ internals.watchConsortiumDb = (db, server) => {
         log('change detected in consortiumDb: ' + db.name);
     });
 
-    dbWatcher.on('changed:analysis', () => {
+    dbWatcher.on('changed:analysis', (analysis) => {
         log('analysis updated in consortiumDb: ' + db.name);
-        return db.all()
-            .then(internals.classifyDocs)
-            .then(_.partialRight(internals.updateAggregateContributors))
-            .then(_.bind(db.save, db))
-            .catch((err) => {
-                server.log(
-                    ['error', 'coinstac', 'handleAnalysisChange'],
-                    err.message
-                );
-            });
+        const saveNewAggregate = (newAggregate) => {
+            if (newAggregate.unchanged) {
+                const msg = [
+                    'contributors list unchanged after processing new analysis',
+                    'contributors: ',
+                    newAggregate.contributors.join(','),
+                    'new analysis ID: ',
+                    analysis._id
+                ].join(' ');
+                log(msg);
+                return;
+            } else {
+                return db.save(newAggregate);
+            }
+        };
+
+        lock(db.name, (releaseLock) => {
+            return db.all()
+                .then(internals.classifyDocs)
+                .then(internals.updateAggregateContributors)
+                .then(saveNewAggregate)
+                .catch((err) => {
+                    server.log(
+                        ['error', 'coinstac', 'handleAnalysisChange'],
+                        err.stack
+                    );
+                })
+                .then(() => { console.log('all done.'); })
+                .then(releaseLock());
+        });
     });
 
     dbWatcher.on('changed:aggregate', () => {
@@ -287,17 +319,22 @@ internals.watchConsortiumDb = (db, server) => {
         ];
         log(logMessage);
 
-        db.all()
-            .then(internals.classifyDocs)
-            .then(_.partialRight(internals.recalcAggregate, server))
-            .then(_.bind(db.save, db))
-            .catch((err) => {
-                server.log(
-                    ['error', 'coinstac', 'handleAllAnalysesSubmitted'],
-                    err.message
-                );
-            });
+        lock(db.name, (releaseLock) => {
+            db.all()
+                .then(internals.classifyDocs)
+                .then(_.partialRight(internals.recalcAggregate, server))
+                .then(_.bind(db.save, db))
+                .catch((err) => {
+                    server.log(
+                        ['error', 'coinstac', 'handleAllAnalysesSubmitted'],
+                        err.message
+                    );
+                })
+                .then(releaseLock());
+        });
     });
+
+    return dbWatcher;
 };
 
 /**
@@ -336,13 +373,20 @@ internals.getConsortiumDb = (opts) => {
 
     // create new db
     const newDb = new PouchW(pouchWConfig);
+    const saveInConsortiumDbClients = (dbWatcher) => {
+        internals.consortiumDbClients.push({
+            name: name,
+            db: newDb,
+            watcher: dbWatcher
+        });
+    };
 
     // add consortiaDB to list of internal databases
-    internals.consortiumDbClients.push({ name: name, db: newDb });
     return newDb.info()
     .then(_.partial(internals.setConsortiumDbSecurity, newDb))
     .then(_.noop)
     .then(_.partial(internals.watchConsortiumDb, newDb, server))
+    .then(saveInConsortiumDbClients)
     .then(_.noop)
     .then(_.partial(_.identity, newDb))
     .catch((err) => {
@@ -538,3 +582,4 @@ module.exports.getConsortiumDb = internals.getConsortiumDb;
 module.exports.addSeedData = internals.addSeedData;
 module.exports.consortiumDbClients = internals.consortiumDbClients;
 module.exports.docChanges = internals.docChanges;
+module.exports.consortiumDbClients = internals.consortiumDbClients;

@@ -94,13 +94,17 @@ describe('Coinstac Consortia', () => {
             return consortiumDb.info();
         });
 
-        it('Allows new analyses to be added to consortium', () => {
-            /*
-            let aggCount = 0;
-            const consortiumChangeListener = (doc) => {
-                ++aggCount;
-                if (aggCount == 2) {
-                    controller.docChanges.removeListener(
+        it('Allows new analyses to be added to consortium', (done) => {
+            let complete = false;
+            const watcher = _.filter(
+                controller.consortiumDbClients,
+                { name: consortiumDb.name }
+            )[0].watcher;
+
+            const consortiumChangeListener = (aggregate) => {
+                if (!complete && aggregate.contributors.length === 2) {
+                    complete = true;
+                    watcher.removeListener(
                         'change:aggregate',
                         consortiumChangeListener
                     );
@@ -108,11 +112,10 @@ describe('Coinstac Consortia', () => {
                 }
             };
 
-            controller.docChanges.on(
-                'change:aggregate',
+            watcher.on(
+                'changed:aggregate',
                 consortiumChangeListener
             );
-            */
 
             const analysisResults1 = {
                 _id: 'analysis01',
@@ -142,8 +145,7 @@ describe('Coinstac Consortia', () => {
             };
             return Bluebird.all([
                 consortiumDb.save(analysisResults1),
-                consortiumDb.save(analysisResults2),
-                Bluebird.delay(null, 100)
+                consortiumDb.save(analysisResults2)
             ]);
         });
 
@@ -162,43 +164,41 @@ describe('Coinstac Consortia', () => {
             });
         });
 
-        it('re-computes average of all analyses', () => {
-            const getAggregate = () => {
-                return consortiumDb.all()
-                    .then((docs) => {
-                        return _.find(docs, {aggregate: true});
-                    });
+        it('re-computes aggregate of all analyses', (done) => {
+            const consortiumChangeListener = (event) => {
+                const aggregate = event.aggregate;
+                aggregate.should.have.property('data');
+                aggregate.should.have.property('files');
+                aggregate.should.have.property('error');
+                aggregate.should.have.property('sampleSize');
+                aggregate.should.have.property('aggregate');
+                aggregate.should.have.property('contributors');
+                aggregate.data.should.have.property('objective');
+                aggregate.data.should.have.property('gradient');
+                aggregate.data.should.have.property('mVals');
+                aggregate.data.should.have.property('r2');
+                aggregate.sampleSize.should.equal(3);
+                aggregate.aggregate.should.equal(true);
+                aggregate.files.should.include('cde');
+                aggregate.files.should.include('efg');
+                aggregate.files.should.include('ghi');
+                aggregate.contributors.length.should.equal(0);
+                aggregate.history[1].contributors.should.include('mocha1');
+                aggregate.history[1].contributors.should.include('mocha2');
+                aggregate.history[1].contributors.should.include('mocha3');
+                chai.expect(aggregate.error).to.be.null; //jshint ignore:line
+                done();
             };
 
-            const consortiumChangeListener = (average) => {
-                average.should.have.property('data');
-                average.should.have.property('files');
-                average.should.have.property('error');
-                average.should.have.property('sampleSize');
-                average.should.have.property('aggregate');
-                average.should.have.property('contributors');
-                average.data.should.have.property('objective');
-                average.data.should.have.property('gradient');
-                average.data.should.have.property('mVals');
-                average.data.should.have.property('r2');
-                average.sampleSize.should.equal(3);
-                average.aggregate.should.equal(true);
-                average.files.should.include('cde');
-                average.files.should.include('efg');
-                average.files.should.include('ghi');
-                average.contributors.length.should.equal(0);
-                average.history[1].contributors.should.include('mocha1');
-                average.history[1].contributors.should.include('mocha2');
-                average.history[1].contributors.should.include('mocha3');
-                return chai.expect(average.error).to.be.null;
-            };
+            const watcher = _.filter(
+                controller.consortiumDbClients,
+                { name: consortiumDb.name }
+            )[0].watcher;
 
-            /**
-            controller.docChanges.once(
-                'change:aggregate',
+            watcher.once(
+                'waitingOnAnalyses',
                 consortiumChangeListener
             );
-            */
 
             const addAnalysis = () => {
                 const analysis = {
@@ -217,11 +217,7 @@ describe('Coinstac Consortia', () => {
                 return consortiumDb.save(analysis);
             };
 
-            return addAnalysis()
-                .then(_.noop)
-                .then(_.bind(Bluebird.delay, Bluebird, 1000))
-                .then(getAggregate)
-                .then(consortiumChangeListener);
+            addAnalysis();
         });
 
     });

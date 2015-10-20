@@ -77,7 +77,10 @@ class ConsortiumWatcher extends EventEmitter {
          if (missingAnalysisCount === 0) {
              this.emit('allAnalysesSubmitted', newDoc);
          } else {
-             this.emit('waitingOnAnalyses', {count: missingAnalysisCount});
+             this.emit(
+                 'waitingOnAnalyses',
+                 { aggregate: newDoc, count: missingAnalysisCount }
+             );
          }
      }
 }

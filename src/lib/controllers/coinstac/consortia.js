@@ -84,7 +84,7 @@ internals.addInitialAggregate = (consortiumDb) => {
         aggregate: true,
         data: {
             mVals: {
-                'Left-Hippocampus': 0//Wc
+                'Left-Hippocampus': Math.random()//Wc
             },
             r2: 0,
             objective: Infinity, //F(Wc)

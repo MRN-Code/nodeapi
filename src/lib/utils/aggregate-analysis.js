@@ -20,10 +20,16 @@ internals.mean = (values) => {
         return 0;
     }
 
+    const sum = internals.sum(values);
+    return sum / values.length;
+};
+
+internals.sum =  (values) => {
     const sum = _.reduce(values, (target, value) => {
         return target + value;
     }, 0);
-    return sum / values.length;
+
+    return sum;
 };
 
 /**
@@ -165,9 +171,9 @@ const runMultiShot = (analyses, aggregate) => {
     const gradientValues = internals.getGradientValues(analyses);
     const r2Values = _.pluck(analyses, 'data.r2');
     const aggregateR2 = internals.mean(r2Values);
-    const aggregateObjective = internals.mean(objectiveValues);
+    const aggregateObjective = internals.sum(objectiveValues);
     const aggregateGradient = coinstacAlgorithms
-        .utils.columnWiseAverage(gradientValues);
+        .utils.columnWiseSum(gradientValues);
     let newMValArray;
 
     if (

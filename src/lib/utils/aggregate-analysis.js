@@ -175,6 +175,7 @@ const runMultiShot = (analyses, aggregate) => {
     const aggregateGradient = coinstacAlgorithms
         .utils.columnWiseSum(gradientValues);
     let newMValArray;
+    let overshot;
 
     if (
         previousAgg.data.objective !== null &&
@@ -182,6 +183,8 @@ const runMultiShot = (analyses, aggregate) => {
     ) {
         //adjust learningRate only: gradient stays unchanged
         aggregate.data.learningRate = aggregate.data.learningRate / 2;
+        overshot = true;
+        aggregate.data.previousMVals = aggregate.mVals;
     } else {
         //update gradient and objective
         aggregate.data.gradient = internals.zipRoiKeyPairs(aggregateGradient);
@@ -190,11 +193,15 @@ const runMultiShot = (analyses, aggregate) => {
 
     newMValArray = ridgeRegression.recalculateMVals(
         aggregate.data.learningRate,
-        internals.unzipRoiKeyPairs(previousAgg.data.mVals),
+        internals.unzipRoiKeyPairs(previousAgg.data.previousMVals),
         internals.unzipRoiKeyPairs(aggregate.data.gradient)
     );
 
     aggregate.data.mVals = internals.zipRoiKeyPairs(newMValArray);
+    if (!overshot) {
+        aggregate.data.previousMVals = aggregate.data.mVals;
+    }
+    
     aggregate.data.r2 = aggregateR2;
 
     return aggregate;

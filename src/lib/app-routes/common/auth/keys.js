@@ -23,7 +23,7 @@ internals.credentialSchema = joi.object().keys({
 });
 
 internals.logOutSuccessObj = {
-  message:'You are logged out.'
+    message:'You are logged out.'
 };
 
 exports.register = function(server, options, next) {
@@ -100,6 +100,9 @@ exports.register = function(server, options, next) {
                     success: 1
                 };
 
+                /**
+                 * log error and inserts record to db for login failure
+                 */
                 const logError = (err)=> {
                     server.log(['error', 'login'], err.message);
                     recordObj.success = 0;

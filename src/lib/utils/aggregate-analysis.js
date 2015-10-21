@@ -144,6 +144,20 @@ internals.addNoise =  (value, roi, sampleSize) => {
 };
 
 /**
+ * Add the current state of the aggregate to the history stack
+ * @param  {object} aggregate the aggregate object
+ * @return {object}           the aggregate object with updated history prop
+ */
+internals.prepareForNextIteration = (obj) => {
+    const copy = _.cloneDeep(obj);
+    delete copy.history;
+    obj.history = obj.history || [];
+    obj.history.push(copy);
+    obj.contributors = [];
+    return obj;
+};
+
+/**
  * run a differentially private average of the analyses
  * @param  {array} analyses all analyses to be averaged
  * @return {object}      an object containing the differentially private average
@@ -166,7 +180,6 @@ const runSingleShot = (analyses) => {
  *                       of all ROIs in each analysis result
  */
 const runMultiShot = (analyses, aggregate) => {
-    const previousAgg = aggregate.history[aggregate.history.length - 1];
     const objectiveValues = internals.getObjectiveValues(analyses);
     const gradientValues = internals.getGradientValues(analyses);
     const r2Values = _.pluck(analyses, 'data.r2');
@@ -174,40 +187,46 @@ const runMultiShot = (analyses, aggregate) => {
     const aggregateObjective = internals.sum(objectiveValues);
     const aggregateGradient = coinstacAlgorithms
         .utils.columnWiseSum(gradientValues);
+    const previousBestObjective = aggregate.previousBestFit.objective;
     let newMValArray;
-    let overshot;
+
+    aggregate.data.gradient = internals.zipRoiKeyPairs(aggregateGradient);
+    aggregate.data.objective = aggregateObjective;
+    aggregate.data.r2 = aggregateR2;
+
+    // preserve iteration in history
+    internals.prepareForNextIteration(aggregate);
 
     if (
-        previousAgg.data.objective !== null &&
-        aggregateObjective > previousAgg.data.objective
+        previousBestObjective !== null &&
+        aggregateObjective > previousBestObjective
     ) {
         //adjust learningRate only: gradient stays unchanged
         aggregate.data.learningRate = aggregate.data.learningRate / 2;
-        overshot = true;
-        aggregate.data.previousMVals = aggregate.mVals;
     } else {
-        //update gradient and objective
-        aggregate.data.gradient = internals.zipRoiKeyPairs(aggregateGradient);
-        aggregate.data.objective = aggregateObjective;
+        //we have a new best-fit
+        aggregate.previousBestFit = _.cloneDeep(aggregate.data);
     }
 
+    //@TODO: remove debug statements
     console.log('recalculating MVals');
-    console.log('learningRate: ', aggregate.data.learningRate); 
-    console.log('previousMVals: ', internals.unzipRoiKeyPairs(previousAgg.data.mVals));
-    console.log('previousgradient: ', internals.unzipRoiKeyPairs(aggregate.data.gradient));
+    console.log('learningRate: ', aggregate.data.learningRate);
+    console.log(
+        'previousMVals: ',
+        internals.unzipRoiKeyPairs(aggregate.previousBestFit.mVals)
+    );
+    console.log(
+        'previousgradient: ',
+        internals.unzipRoiKeyPairs(aggregate.previousBestFit.gradient)
+    );
 
     newMValArray = ridgeRegression.recalculateMVals(
         aggregate.data.learningRate,
-        internals.unzipRoiKeyPairs(previousAgg.data.previousMVals),
-        internals.unzipRoiKeyPairs(aggregate.data.gradient)
+        internals.unzipRoiKeyPairs(aggregate.previousBestFit.mVals),
+        internals.unzipRoiKeyPairs(aggregate.previousBestFit.gradient)
     );
 
     aggregate.data.mVals = internals.zipRoiKeyPairs(newMValArray);
-    if (!overshot) {
-        aggregate.data.previousMVals = aggregate.data.mVals;
-    }
-    
-    aggregate.data.r2 = aggregateR2;
 
     return aggregate;
 };

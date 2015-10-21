@@ -63,6 +63,9 @@ internals.addSeedData = (db, server) => {
                             const path = consortiumDb.url || consortiumDb.path;
                             consortium.dbUrl = path;
                             return db.save(consortium);
+                        })
+                        .catch((e) => {
+                            console.log(e);
                         });
                 });
 
@@ -93,6 +96,7 @@ internals.addInitialAggregate = (consortiumDb) => {
             },
             learningRate: 0.5 //n
         },
+        previousBestFit: {},
         lambda: 0.7,
         maxIterations: 10, //T
         contributors: [],
@@ -100,24 +104,9 @@ internals.addInitialAggregate = (consortiumDb) => {
         files: [],
         error: null
     };
-    internals.prepareForNextIteration(initialAggregate);
-
+    initialAggregate.previousBestFit = _.cloneDeep(initialAggregate.data);
     return consortiumDb.save(initialAggregate)
         .then(() => { return consortiumDb; });
-};
-
-/**
- * Add the current state of the aggregate to the history stack
- * @param  {object} aggregate the aggregate object
- * @return {object}           the aggregate object with updated history prop
- */
-internals.prepareForNextIteration = (obj) => {
-    const copy = _.cloneDeep(obj);
-    delete copy.history;
-    obj.history = obj.history || [];
-    obj.history.push(copy);
-    obj.contributors = [];
-    return obj;
 };
 
 /**
@@ -149,7 +138,6 @@ internals.recalcAggregate = (classifiedDocs, server) => {
         aggregate.result = null;
     }
 
-    internals.prepareForNextIteration(aggregate);
     return aggregate;
 };
 
@@ -215,7 +203,7 @@ internals.updateAggregateContributors = (classifiedDocs) => {
  * @return {array} array of analysis documents
  */
 internals.getContributingAnalyses = (analyses, aggregate) => {
-    const currentIteration = aggregate.history.length;
+    const currentIteration = aggregate.history.length + 1;
 
     return _.filter(analyses, (analysis) => {
         return analysis.history.length === currentIteration;
@@ -294,7 +282,6 @@ internals.watchConsortiumDb = (db, server) => {
                         err.stack
                     );
                 })
-                .then(() => { console.log('all done.'); })
                 .then(releaseLock());
         });
     });

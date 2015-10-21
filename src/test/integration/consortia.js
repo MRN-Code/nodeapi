@@ -167,25 +167,24 @@ describe('Coinstac Consortia', () => {
         it('re-computes aggregate of all analyses', (done) => {
             const consortiumChangeListener = (event) => {
                 const aggregate = event.aggregate;
+                console.log(aggregate.history);
                 aggregate.should.have.property('data');
                 aggregate.should.have.property('files');
                 aggregate.should.have.property('error');
-                aggregate.should.have.property('sampleSize');
                 aggregate.should.have.property('aggregate');
                 aggregate.should.have.property('contributors');
                 aggregate.data.should.have.property('objective');
                 aggregate.data.should.have.property('gradient');
                 aggregate.data.should.have.property('mVals');
                 aggregate.data.should.have.property('r2');
-                aggregate.sampleSize.should.equal(3);
                 aggregate.aggregate.should.equal(true);
-                aggregate.files.should.include('cde');
-                aggregate.files.should.include('efg');
-                aggregate.files.should.include('ghi');
+                aggregate.history[0].files.should.include('cde');
+                aggregate.history[0].files.should.include('efg');
+                aggregate.history[0].files.should.include('ghi');
                 aggregate.contributors.length.should.equal(0);
-                aggregate.history[1].contributors.should.include('mocha1');
-                aggregate.history[1].contributors.should.include('mocha2');
-                aggregate.history[1].contributors.should.include('mocha3');
+                aggregate.history[0].contributors.should.include('mocha1');
+                aggregate.history[0].contributors.should.include('mocha2');
+                aggregate.history[0].contributors.should.include('mocha3');
                 chai.expect(aggregate.error).to.be.null; //jshint ignore:line
                 done();
             };

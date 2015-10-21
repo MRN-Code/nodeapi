@@ -69,8 +69,7 @@ exports.register = function(server, options, next) {
                 const username = data.username.toString();
                 const password = data.password.toString();
 
-
-                 /**
+                /**
                  * set recordObj attributes/values
                  */
                 const  recordObj = {
@@ -80,15 +79,6 @@ exports.register = function(server, options, next) {
                     errorCode: 0,
                     success: 1
                 };
-
-                //Helper functions
-                /**
-                 * generate fn to call getHawkCredentials with `username`
-                 */
-                const getHawkCredentials = _.partial(
-                    authUtils.generateHawkCredentials,
-                    username
-                );
 
                 const logError = (err)=> {
                     server.log(['error', 'login'], err.message);
@@ -120,7 +110,7 @@ exports.register = function(server, options, next) {
                 };
 
                 return authUtils.validateUser(username, password)
-                        .then(getHawkCredentials)
+                        .then(authUtils.generateHawkCredentials)
                         .then(serveHawkCredentials)
                         .then(_.noop)
                         .then(_.partial(saveRecordObj, recordObj))

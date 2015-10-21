@@ -191,6 +191,11 @@ const runMultiShot = (analyses, aggregate) => {
         aggregate.data.objective = aggregateObjective;
     }
 
+    console.log('recalculating MVals');
+    console.log('learningRate: ', aggregate.data.learningRate); 
+    console.log('previousMVals: ', internals.unzipRoiKeyPairs(previousAgg.data.mVals));
+    console.log('previousgradient: ', internals.unzipRoiKeyPairs(aggregate.data.gradient));
+
     newMValArray = ridgeRegression.recalculateMVals(
         aggregate.data.learningRate,
         internals.unzipRoiKeyPairs(previousAgg.data.previousMVals),

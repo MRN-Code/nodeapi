@@ -98,7 +98,7 @@ internals.addInitialAggregate = (consortiumDb) => {
         },
         previousBestFit: {},
         lambda: 0.7,
-        maxIterations: 10, //T
+        maxIterations: 20, //T
         contributors: [],
         clientCount: 3, //N
         files: [],

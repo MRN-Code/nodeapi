@@ -167,7 +167,6 @@ describe('Coinstac Consortia', () => {
         it('re-computes aggregate of all analyses', (done) => {
             const consortiumChangeListener = (event) => {
                 const aggregate = event.aggregate;
-                console.log(aggregate.history);
                 aggregate.should.have.property('data');
                 aggregate.should.have.property('files');
                 aggregate.should.have.property('error');

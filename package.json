@@ -16,7 +16,7 @@
     "boom": "2.8.0",
     "chai": "3.2.0",
     "chalk": "1.1.1",
-    "coinstac-distributed-algorithm-set": "git+https://github.com/MRN-Code/coinstac-distributed-algorithm-set.git#multi-shot",
+    "coinstac-distributed-algorithm-set": "git+https://github.com/MRN-Code/coinstac-distributed-algorithm-set.git",
     "config": "1.16.0",
     "glob": "5.0.14",
     "good": "6.3.0",

@@ -87,18 +87,18 @@ internals.addInitialAggregate = (consortiumDb) => {
         aggregate: true,
         data: {
             mVals: {
-                'Left-Hippocampus': Math.random()//Wc
+                'Left-Hippocampus': Math.random() / 100//Wc
             },
             r2: 0,
             objective: Infinity, //F(Wc)
             gradient: { //dF(Wc-1)
                 'Left-Hippocampus': 0
             },
-            learningRate: 0.5 //n
+            learningRate: 1e-10 //n
         },
         previousBestFit: {},
         lambda: 0.7,
-        maxIterations: 20, //T
+        maxIterations: 100, //T
         contributors: [],
         clientCount: 3, //N
         files: [],

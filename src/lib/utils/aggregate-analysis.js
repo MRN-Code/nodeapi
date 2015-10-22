@@ -158,7 +158,7 @@ internals.prepareForNextIteration = (obj) => {
     obj.history.push(copy);
     obj.contributors = [];
 
-    if (n.norm2(gradientArr) > internals.tolerance) {
+    if (n.norm2(gradientArr) < internals.tolerance) {
         obj.iterate = false;
     }
 

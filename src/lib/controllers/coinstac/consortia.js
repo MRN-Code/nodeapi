@@ -87,14 +87,14 @@ internals.addInitialAggregate = (consortiumDb) => {
         aggregate: true,
         data: {
             mVals: {
-                'Left-Hippocampus': Math.random() / 100//Wc
+                'Left-Hippocampus': Math.random() //Wc
             },
             r2: 0,
             objective: Infinity, //F(Wc)
             gradient: { //dF(Wc-1)
                 'Left-Hippocampus': 0
             },
-            learningRate: 1e-10 //n
+            learningRate: 1e-8 //n
         },
         previousBestFit: {},
         lambda: 0.7,
@@ -102,6 +102,7 @@ internals.addInitialAggregate = (consortiumDb) => {
         contributors: [],
         clientCount: 3, //N
         files: [],
+        iterate: true,
         error: null
     };
     initialAggregate.previousBestFit = _.cloneDeep(initialAggregate.data);

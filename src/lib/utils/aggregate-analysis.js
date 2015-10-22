@@ -4,6 +4,7 @@ const _ = require('lodash');
 const coinstacAlgorithms = require('coinstac-distributed-algorithm-set');
 const ridgeRegression = coinstacAlgorithms.ridgeRegression;
 const laplace = coinstacAlgorithms.laplace;
+const n = require('numeric');
 
 const internals = {};
 internals.roiMeta = {
@@ -14,6 +15,7 @@ internals.roiMeta = {
 };
 
 internals.epsilon = 1;
+internals.tolerance = 1e-5;
 
 internals.mean = (values) => {
     if (values.length === 0) {
@@ -150,10 +152,16 @@ internals.addNoise =  (value, roi, sampleSize) => {
  */
 internals.prepareForNextIteration = (obj) => {
     const copy = _.cloneDeep(obj);
+    const gradientArr = internals.unzipRoiKeyPairs(obj.data.gradient);
     delete copy.history;
     obj.history = obj.history || [];
     obj.history.push(copy);
     obj.contributors = [];
+
+    if (n.norm2(gradientArr) > internals.tolerance) {
+        obj.iterate = false;
+    }
+
     return obj;
 };
 

@@ -12,7 +12,7 @@ function getKnexConfig() {
         client: 'pg',
         connection: {
             host: dbConfig.host,
-            port: 5432,
+            port: dbConfig.port,
             user: dbConfig.username,
             password: dbConfig.password,
             database: dbConfig.db

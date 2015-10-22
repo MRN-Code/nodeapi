@@ -1,4 +1,5 @@
 'use strict';
+require('newrelic');
 require('./lib/utils/cli-options.js');
 const hapi = require('hapi');
 const config = require('config');
@@ -19,7 +20,7 @@ const server = new hapi.Server({
     }
 });
 
-const http = server.connection(connectionConfig.http);
+server.connection(connectionConfig.http);
 
 const registerPluginThen = (currentPromise, config) => {
     const plugin = {
@@ -60,7 +61,9 @@ const registerPluginThen = (currentPromise, config) => {
 const handleAllPluginsRegistered = () => {
     const getCredentialsFunc = server.plugins.utilities.auth.getHawkCredentials;
 
-    http.auth.strategy(
+    const httpConnection = server.connections[0];
+
+    httpConnection.auth.strategy(
         'default',
         'hawk',
         {
@@ -71,7 +74,7 @@ const handleAllPluginsRegistered = () => {
         }
     );
 
-    http.auth.default('default');
+    httpConnection.auth.default('default');
 
     // Wrap models with Shield
     require('./lib/utils/shields-up.js')(server);

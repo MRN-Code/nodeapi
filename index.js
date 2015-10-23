@@ -1,6 +1,17 @@
 'use strict';
-require('newrelic');
-require('./lib/utils/cli-options.js');
+const chalk = require('chalk');
+const cliOpts = require('./lib/utils/cli-options.js');
+let newrelic;
+if (!cliOpts['without-new-relic']) {
+    console.log(chalk.blue('Including New Relic agent'));
+    newrelic = require('newrelic');
+    if (newrelic.agent) {
+        console.log(chalk.blue('New Relic agent reporting enabled'));
+    } else {
+        console.log(chalk.blue('New Relic agent reporting disabled'));
+    }
+}
+
 const hapi = require('hapi');
 const config = require('config');
 const Bluebird = require('bluebird');

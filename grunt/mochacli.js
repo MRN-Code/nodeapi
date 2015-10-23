@@ -3,7 +3,10 @@ module.exports = function() {
     return {
         options: {
             files: ['test/integration/*.js', 'test/unit/*.js'],
-            require: ['test/utils/mock-coinstac-pouch-config.js'],
+            require: [
+                'test/utils/override-cli-opts.js',
+                'test/utils/mock-coinstac-pouch-config.js'
+            ],
             harmony: true,
             /* jscs:disable */
             harmony_arrow_functions: true //jshint ignore:line

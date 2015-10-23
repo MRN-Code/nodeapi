@@ -189,16 +189,29 @@ upstart script: `sudo start coinsnodeapi`.
 To start the server with auto-restart, try using monit: `monit [re]start coinsnodeapi`.
 
 Unfortunately, **pm2** does not play well with our monitoring strategy, so we
-do not recommend using pm2 to run the API as a daemon. 
+do not recommend using pm2 to run the API as a daemon.
 
 ## CLI options
 Use `node index --help` to see all available options.
 
 - @flag development/release/production run the server using COINS_ENV of the respective flag. Shorthand --dev/rel/prd are honored.
 
-- @flag coinstac start the server with COINSTAC routes. Defaults to false.
+- @flag coinstac start the server with COINSTAC routes. Shorthand -c Defaults to false.
+
+- @flag without-new-relic start the server without including the New Relic agent. Shorthand -w. Defaults to false.
 
 Logs are written to the `logs/` directory in this repo.
+
+# New Relic
+The New Relic agent is `require()`ed on startup by default, however, it does not
+report to New Relic's servers by default. To turn on reporting, the environment
+variable `NEW_RELIC_ENABLED` must be set to `'true'`. This should be configured
+automatically on servers by Ansible: production and staging servers will enable
+reporting.
+
+When tests are run, the New Relic agent is not `require()`ed at all. This is
+accomplished by overriding the cli-options in
+_src/test/utils/override-cli-opts.js_.
 
 # Design Specifications
 

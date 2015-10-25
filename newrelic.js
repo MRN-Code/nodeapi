@@ -15,7 +15,7 @@ exports.config = {
     /**
     * Array of application names.
     */
-    app_name: ['COINS3.0API'],
+    app_name: ['COINS3.0API-' + process.env.COINS_ENV, 'COINS3.0API'],
     logging: {
         /**
         * Level at which to log. 'trace' is most useful to New Relic when diagnosing

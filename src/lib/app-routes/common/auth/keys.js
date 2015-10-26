@@ -135,11 +135,11 @@ exports.register = function(server, options, next) {
                 };
 
                 return authUtils.validateUser(username, password)
-                        .then(authUtils.generateHawkCredentials)
-                        .then(serveHawkCredentials)
-                        .then(_.noop)
-                        .then(_.partial(saveRecordObj, recordObj))
-                        .catch(logError);
+                    .then(authUtils.generateHawkCredentials)
+                    .then(serveHawkCredentials)
+                    .then(_.noop)
+                    .then(_.partial(saveRecordObj, recordObj))
+                    .catch(logError);
             }
         }
     });

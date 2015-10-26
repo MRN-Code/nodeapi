@@ -11,7 +11,7 @@ function getIpAddress(request) {
 
     // get left-most IP if forwardedFor is defined
     if (forwardedFor) {
-        return forwardedFor.split(',').unshift().trim();
+        return forwardedFor.split(',')[0].trim();
     }
 
     return remoteAddress;

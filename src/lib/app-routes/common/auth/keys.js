@@ -41,7 +41,9 @@ exports.register = function(server, options, next) {
     });
 
     /**
-     * log login records in both success / failure
+     * save a new LoginRecord model with `properties`
+     * @param {object} properties contains props to assign to new LoginRecordObject before saving
+     * @return {Promise}          resolves to result of save operation
      */
     const saveRecordObj = (properties)=> {
         return LoginRecord.forge(properties).save(null, {method:'insert'});

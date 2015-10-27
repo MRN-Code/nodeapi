@@ -102,7 +102,7 @@ describe('Coinstac Consortia', () => {
             )[0].watcher;
 
             const consortiumChangeListener = (aggregate) => {
-                if (!complete && aggregate.contributors.length === 2) {
+                if (!complete && aggregate.contributors.length === 1) {
                     complete = true;
                     watcher.removeListener(
                         'change:aggregate',
@@ -130,23 +130,7 @@ describe('Coinstac Consortia', () => {
                 history: [{test: true}],
                 username: 'mocha1'
             };
-            const analysisResults2 = {
-                _id: 'analysis02',
-                fileShas: ['efg'],
-                data: {
-                    objective: 2,
-                    gradient: {
-                        'Left-Hippocampus': 2
-                    },
-                    r2: 0.2
-                },
-                history: [{test: true}],
-                username: 'mocha2'
-            };
-            return Bluebird.all([
-                consortiumDb.save(analysisResults1),
-                consortiumDb.save(analysisResults2)
-            ]);
+            consortiumDb.save(analysisResults1)
         });
 
         it('Adds the usernames of contributors to aggregate', () => {
@@ -160,7 +144,6 @@ describe('Coinstac Consortia', () => {
             return getAggregate().then((aggregate) => {
                 aggregate.should.have.property('contributors');
                 aggregate.contributors.should.include('mocha1');
-                aggregate.contributors.should.include('mocha2');
             });
         });
 
@@ -178,11 +161,9 @@ describe('Coinstac Consortia', () => {
                 aggregate.data.should.have.property('r2');
                 aggregate.aggregate.should.equal(true);
                 aggregate.history[0].files.should.include('cde');
-                aggregate.history[0].files.should.include('efg');
                 aggregate.history[0].files.should.include('ghi');
                 aggregate.contributors.length.should.equal(0);
                 aggregate.history[0].contributors.should.include('mocha1');
-                aggregate.history[0].contributors.should.include('mocha2');
                 aggregate.history[0].contributors.should.include('mocha3');
                 chai.expect(aggregate.error).to.be.null; //jshint ignore:line
                 done();

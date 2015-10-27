@@ -23,7 +23,7 @@ const loadConsortiaDbs = (db, server) => {
         .then((docs) => {
             const dbPromises = _.map(docs, (consortium) => {
                 const id = consortium._id;
-                return controller.getConsortiumDb(id, server);
+                return controller.getConsortiumDb({ name: id, server });
             });
 
             if (dbPromises.length) {

@@ -100,7 +100,7 @@ internals.addInitialAggregate = (consortiumDb) => {
         lambda: 0.7,
         maxIterations: 200, //T
         contributors: [],
-        clientCount: 3, //N
+        clientCount: 2, //N
         files: [],
         iterate: true,
         error: null

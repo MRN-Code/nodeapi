@@ -1,10 +1,10 @@
 'use strict';
 
-var config = require('config');
-var dbMap = require(config.get('dbMapPath'));
-var dbConfig;
+const config = require('config');
+const dbMap = require(config.get('dbMapPath'));
+const _ = require('lodash');
 
-var envMap = {
+const envMap = {
     production: 'prd',
     staging: 'training',
     development: 'dev'
@@ -15,17 +15,25 @@ var envMap = {
  * @return {object} DB connection parameters
  */
 function getDbConfig() {
+    let dbConfig;
+    let dbDefaults;
+    const env = envMap[process.env.COINS_ENV];
     if (dbConfig === undefined) {
+        dbDefaults = dbMap.default;
         if (envMap[process.env.COINS_ENV] !== undefined) {
-            dbConfig = dbMap[envMap[process.env.COINS_ENV]].nodeApi;
+            dbConfig = dbMap[env].nodeApi;
+            return _.defaults(dbConfig, dbDefaults);
         } else {
             throw new Error(
                 `unrecognised database environment: '${process.env.COINS_ENV}'`
             );
         }
+    } else {
+        throw new Error(
+            `could not load database config at '${config.get('dbMapPath')}'`
+        );
     }
 
-    return dbConfig;
 }
 
 module.exports = getDbConfig;

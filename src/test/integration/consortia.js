@@ -81,7 +81,7 @@ describe('Coinstac Consortia', () => {
                         data[0][key].should.eql(val);
                     });
 
-                    return controller.getConsortiumDb(id, server)
+                    return controller.getConsortiumDb({ name: id, server })
                         .then((result) => {
                             consortiumDb = result;
                         });
@@ -94,31 +94,46 @@ describe('Coinstac Consortia', () => {
             return consortiumDb.info();
         });
 
-        it('Allows new analyses to be added to consortium', () => {
-            const addAnalysis = () => {
-                const analysis = {
-                    _id: 'analysis01',
-                    fileShas: ['cde'],
-                    data: {'Left-Hippocampus': 500000, r2: 1},
-                    username: 'mocha2'
-                };
-                return consortiumDb.save(analysis);
+        it('Allows new analyses to be added to consortium', (done) => {
+            let complete = false;
+            const watcher = _.filter(
+                controller.consortiumDbClients,
+                { name: consortiumDb.name }
+            )[0].watcher;
+
+            const consortiumChangeListener = (aggregate) => {
+                if (!complete && aggregate.contributors.length === 1) {
+                    complete = true;
+                    watcher.removeListener(
+                        'change:aggregate',
+                        consortiumChangeListener
+                    );
+                    done();
+                }
             };
 
-            return addAnalysis();
+            watcher.on(
+                'changed:aggregate',
+                consortiumChangeListener
+            );
+
+            const analysisResults1 = {
+                _id: 'analysis01',
+                fileShas: ['cde'],
+                data: {
+                    objective: 1,
+                    gradient: {
+                        'Left-Hippocampus': 1
+                    },
+                    r2: 0.1
+                },
+                history: [{test: true}],
+                username: 'mocha1'
+            };
+            consortiumDb.save(analysisResults1)
         });
 
-        it('re-computes average of all analyses', () => {
-            const addAnalysis = () => {
-                const analysis = {
-                    _id: 'analysis02',
-                    fileShas: ['abc'],
-                    data: {'Left-Hippocampus': 400000, r2: 0},
-                    username: 'mocha'
-                };
-                return consortiumDb.save(analysis);
-            };
-
+        it('Adds the usernames of contributors to aggregate', () => {
             const getAggregate = () => {
                 return consortiumDb.all()
                     .then((docs) => {
@@ -126,30 +141,62 @@ describe('Coinstac Consortia', () => {
                     });
             };
 
-            const waitForAggregateCalc = (arg) => {
-                return Bluebird.delay(arg, 100);
+            return getAggregate().then((aggregate) => {
+                aggregate.should.have.property('contributors');
+                aggregate.contributors.should.include('mocha1');
+            });
+        });
+
+        it('re-computes aggregate of all analyses', (done) => {
+            const consortiumChangeListener = (event) => {
+                const aggregate = event.aggregate;
+                aggregate.should.have.property('data');
+                aggregate.should.have.property('files');
+                aggregate.should.have.property('error');
+                aggregate.should.have.property('aggregate');
+                aggregate.should.have.property('contributors');
+                aggregate.data.should.have.property('objective');
+                aggregate.data.should.have.property('gradient');
+                aggregate.data.should.have.property('mVals');
+                aggregate.data.should.have.property('r2');
+                aggregate.aggregate.should.equal(true);
+                aggregate.history[0].files.should.include('cde');
+                aggregate.history[0].files.should.include('ghi');
+                aggregate.contributors.length.should.equal(0);
+                aggregate.history[0].contributors.should.include('mocha1');
+                aggregate.history[0].contributors.should.include('mocha3');
+                chai.expect(aggregate.error).to.be.null; //jshint ignore:line
+                done();
             };
 
-            return addAnalysis()
-                .then(waitForAggregateCalc)
-                .then(getAggregate)
-                .then((average) => {
-                    average.should.have.property('data');
-                    average.should.have.property('files');
-                    average.should.have.property('error');
-                    average.should.have.property('sampleSize');
-                    average.should.have.property('aggregate');
-                    average.should.have.property('contributors');
-                    average.data.should.have.property('Left-Hippocampus');
-                    average.data.should.have.property('r2');
-                    average.sampleSize.should.equal(2);
-                    average.aggregate.should.equal(true);
-                    average.files.should.include('abc');
-                    average.files.should.include('cde');
-                    average.contributors.should.include('mocha');
-                    average.contributors.should.include('mocha2');
-                    return chai.expect(average.error).to.be.null;
-                });
+            const watcher = _.filter(
+                controller.consortiumDbClients,
+                { name: consortiumDb.name }
+            )[0].watcher;
+
+            watcher.once(
+                'waitingOnAnalyses',
+                consortiumChangeListener
+            );
+
+            const addAnalysis = () => {
+                const analysis = {
+                    _id: 'analysis03',
+                    fileShas: ['ghi'],
+                    data: {
+                        objective: 3,
+                        gradient: {
+                            'Left-Hippocampus': 3
+                        },
+                        r2: 0.3
+                    },
+                    history: [{test: true}],
+                    username: 'mocha3'
+                };
+                return consortiumDb.save(analysis);
+            };
+
+            addAnalysis();
         });
 
     });

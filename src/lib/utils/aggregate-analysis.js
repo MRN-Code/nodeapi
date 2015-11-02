@@ -2,22 +2,78 @@
 
 const _ = require('lodash');
 const coinstacAlgorithms = require('coinstac-distributed-algorithm-set');
-const osr = coinstacAlgorithms.oneShotRegression;
+const ridgeRegression = coinstacAlgorithms.ridgeRegression;
 const laplace = coinstacAlgorithms.laplace;
+const n = require('numeric');
 
 const internals = {};
 internals.roiMeta = {
     'Left-Hippocampus': {
         max: 1,
         min: 0
-    },
-    r2: {
-        max: 1,
-        min: 0
     }
 };
 
 internals.epsilon = 1;
+internals.tolerance = 1e-5;
+
+internals.mean = (values) => {
+    if (values.length === 0) {
+        return 0;
+    }
+
+    const sum = internals.sum(values);
+    return sum / values.length;
+};
+
+internals.sum =  (values) => {
+    const sum = _.reduce(values, (target, value) => {
+        return target + value;
+    }, 0);
+
+    return sum;
+};
+
+/**
+ * get objective function results from each analysis
+ * @param  {array} analyses array of analysis documents
+ * @return {array}          array of objective results
+ */
+internals.getObjectiveValues = (analyses) => {
+    return _.pluck(analyses, 'data.objective');
+};
+
+/**
+ * get gradient function results from each analysis
+ * @param  {array} analyses array of analysis documents
+ * @return {array}          array of gradient results, ordered according to
+ *                                roiMeta
+ */
+internals.getGradientValues = (analyses) => {
+    return _.pluck(analyses, 'data.gradient').map(internals.unzipRoiKeyPairs);
+};
+
+/**
+ * extract values from object in same order as roiMeta
+ * @param  {object} obj object where keys are roi labels
+ * @return {array}     array of values in the same order as roiMeta
+ */
+internals.unzipRoiKeyPairs = (obj) => {
+    const roiKeys = _.keys(internals.roiMeta);
+    return _.map(roiKeys, (key) => {
+        return obj[key];
+    });
+};
+
+/**
+ * combine values with roi labels
+ * @param  {array} values array of values in same order as roiMeta
+ * @return {object}        object with keys from roiMeta and values from array
+ */
+internals.zipRoiKeyPairs = (values) => {
+    const roiKeys = _.keys(internals.roiMeta);
+    return _.zipObject(roiKeys, values);
+};
 
 /**
  * get array of ROI values from each analysis. Values will be in the same order
@@ -26,27 +82,8 @@ internals.epsilon = 1;
  * @param  {array} analyses array of analysis objects with result and owner prop
  * @return {array}         two dim array of ROI values for each site
  */
-internals.getRoiValues = (analyses) => {
-    const roiKeys = _.keys(internals.roiMeta);
-    return _.map(analyses, (analysis) => {
-        const roiObj = analysis.data;
-        const username = analysis.username;
-        return _.map(roiKeys, (key)=> {
-            let errorMsg;
-            if (_.isNumber(roiObj[key])) {
-                return roiObj[key];
-            }
-
-            if (_.isUndefined(roiObj[key])) {
-                errorMsg = `ROI '${key}' not found in ${username}'s dataset`;
-                throw new Error(errorMsg);
-            }
-
-            errorMsg = `Nonnumeric value for '${key}' in ${username}'s data`;
-            throw new Error(errorMsg);
-        });
-
-    });
+internals.getMVals = (analyses) => {
+    return _.pluck(analyses, 'result.mVals').map(internals.unzipRoiKeyPairs);
 };
 
 /**
@@ -56,12 +93,11 @@ internals.getRoiValues = (analyses) => {
  * @param  {array} values two dimensional array of roi values for each site
  * @return {object}       {roi1: average1, roi2: average2}
  */
-internals.calculateAverage = (roiValues) => {
+internals.calculateAverage = (values) => {
 
     // TODO: these keys should be defined in the consortium or analysis
-    const roiKeys = _.keys(internals.roiMeta);
-    const resultVector = osr.aggregateAvg(roiValues);
-    const resultObj = _.zipObject(roiKeys, resultVector);
+    const resultVector = coinstacAlgorithms.utils.columnWiseAverage(values);
+    const resultObj = internals.zipRoiKeyPairs(resultVector);
     return resultObj;
 };
 
@@ -110,14 +146,34 @@ internals.addNoise =  (value, roi, sampleSize) => {
 };
 
 /**
+ * Add the current state of the aggregate to the history stack
+ * @param  {object} aggregate the aggregate object
+ * @return {object}           the aggregate object with updated history prop
+ */
+internals.prepareForNextIteration = (obj) => {
+    const copy = _.cloneDeep(obj);
+    const gradientArr = internals.unzipRoiKeyPairs(obj.data.gradient);
+    delete copy.history;
+    obj.history = obj.history || [];
+    obj.history.push(copy);
+    obj.contributors = [];
+
+    if (n.norm2(gradientArr) < internals.tolerance) {
+        obj.iterate = false;
+    }
+
+    return obj;
+};
+
+/**
  * run a differentially private average of the analyses
  * @param  {array} analyses all analyses to be averaged
  * @return {object}      an object containing the differentially private average
  *                       of all ROIs in each analysis result
  */
-const run = (analyses) => {
+const runSingleShot = (analyses) => {
     const values = internals.getRoiValues(analyses);
-    const averages = internals.calculateAverage(values);
+    const averages = internals.calculateAvg(values);
     const sampleSize = analyses.length;
 
     return _.mapValues(averages, (value, roi) => {
@@ -125,4 +181,63 @@ const run = (analyses) => {
     });
 };
 
-module.exports = run;
+/**
+ * run a differentially private average of the analyses
+ * @param  {array} analyses all analyses to be averaged
+ * @return {object}      an object containing the differentially private average
+ *                       of all ROIs in each analysis result
+ */
+const runMultiShot = (analyses, aggregate) => {
+    const objectiveValues = internals.getObjectiveValues(analyses);
+    const gradientValues = internals.getGradientValues(analyses);
+    const r2Values = _.pluck(analyses, 'data.r2');
+    const aggregateR2 = internals.mean(r2Values);
+    const aggregateObjective = internals.sum(objectiveValues);
+    const aggregateGradient = coinstacAlgorithms
+        .utils.columnWiseSum(gradientValues);
+    const previousBestObjective = aggregate.previousBestFit.objective;
+    let newMValArray;
+
+    aggregate.data.gradient = internals.zipRoiKeyPairs(aggregateGradient);
+    aggregate.data.objective = aggregateObjective;
+    aggregate.data.r2 = aggregateR2;
+
+    // preserve iteration in history
+    internals.prepareForNextIteration(aggregate);
+
+    if (
+        previousBestObjective !== null &&
+        aggregateObjective > previousBestObjective
+    ) {
+        //adjust learningRate only: gradient stays unchanged
+        aggregate.data.learningRate = aggregate.data.learningRate / 2;
+    } else {
+        //we have a new best-fit
+        aggregate.previousBestFit = _.cloneDeep(aggregate.data);
+    }
+
+    //@TODO: remove debug statements
+    console.log('recalculating MVals');
+    console.log('learningRate: ', aggregate.data.learningRate);
+    console.log(
+        'previousMVals: ',
+        internals.unzipRoiKeyPairs(aggregate.previousBestFit.mVals)
+    );
+    console.log(
+        'previousgradient: ',
+        internals.unzipRoiKeyPairs(aggregate.previousBestFit.gradient)
+    );
+
+    newMValArray = ridgeRegression.recalculateMVals(
+        aggregate.data.learningRate,
+        internals.unzipRoiKeyPairs(aggregate.previousBestFit.mVals),
+        internals.unzipRoiKeyPairs(aggregate.previousBestFit.gradient)
+    );
+
+    aggregate.data.mVals = internals.zipRoiKeyPairs(newMValArray);
+
+    return aggregate;
+};
+
+module.exports.singleShot = runSingleShot;
+module.exports.multiShot = runMultiShot;

@@ -32,6 +32,7 @@ exports.register = function(server, options, next) {
     const redisClient =  server.plugins['hapi-redis'].client;
     const authUtils = server.plugins.utilities.auth;
     const invalidCookie = casCookieUtils.invalidate();
+    const errorLogger = server.plugins.logUtil.logger;
 
     const LoginRecord = server.plugins.bookshelf.model('LoginRecord');
 
@@ -42,7 +43,8 @@ exports.register = function(server, options, next) {
 
     /**
      * save a new LoginRecord model with `properties`
-     * @param {object} properties contains props to assign to new LoginRecordObject before saving
+     * @param {object} properties contains props to assign to
+     * new LoginRecordObject before saving
      * @return {Promise}          resolves to result of save operation
      */
     const saveRecordObj = (properties)=> {
@@ -106,7 +108,8 @@ exports.register = function(server, options, next) {
                  * log error and inserts record to db for login failure
                  */
                 const logError = (err)=> {
-                    server.log(['error', 'login'], err.message);
+                    console.log('error????');
+                    errorLogger.logError(['login'], err);
                     recordObj.success = 0;
                     saveRecordObj(recordObj);
                     reply(boom.wrap(err));
@@ -159,7 +162,7 @@ exports.register = function(server, options, next) {
             ].join('<br>'),
             description: 'Logout: Remove API key from auth DB',
             response: {
-              schema: joi.compile(internals.logOutSuccessObj)
+                schema: joi.compile(internals.logOutSuccessObj)
             },
             handler: (request, reply) => {
                 const username = request.auth.credentials.username;

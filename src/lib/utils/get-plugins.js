@@ -30,6 +30,8 @@ const getAppRouteConfig = (relPath, prefix) => {
 
 // Define plugins
 var plugins = [
+
+    require('./error-logger.js'),
     require('inject-then'),
     require('hapi-auth-hawk'),
     {

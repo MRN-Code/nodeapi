@@ -3,7 +3,7 @@
     "cookieDomain": ".mrn.org",
     "hawkKeyLifespan": 1800000,
     "algorithm": "sha256",
-    "dbMapPath": "/coins/coins_auth/conn/dbmap.json",
+    "dbMapPath": "/coins/config/dbmap.json",
     "dbEncryptionKeyPath": "/coins/coins_auth/conn/mcrypt_auth_key",
     "jwtSecretPath": "/coins/coins_auth/jwt-auth-key.txt",
     "casCookieName": "CAS_Auth_User",

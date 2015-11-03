@@ -1,31 +1,47 @@
 'use strict';
 
-var config = require('config');
-var dbMap = require(config.get('dbMapPath'));
-var dbConfig;
+const config = require('config');
+const _ = require('lodash');
+const globalDbMap = require(config.get('dbMapPath'));
+const fs = require('fs');
+const localDbMapPath = config.get('dbMapPath').replace('.json', '.local.json');
 
-var envMap = {
-    production: 'prd',
-    staging: 'training',
-    development: 'dev'
-};
+const appName = 'nodeApi';
+const env = process.env.COINS_ENV;
 
 /**
  * get DB connection parameters, based on COINS_ENV environment var
  * @return {object} DB connection parameters
  */
 function getDbConfig() {
-    if (dbConfig === undefined) {
-        if (envMap[process.env.COINS_ENV] !== undefined) {
-            dbConfig = dbMap[envMap[process.env.COINS_ENV]].nodeApi;
-        } else {
-            throw new Error(
-                `unrecognised database environment: '${process.env.COINS_ENV}'`
-            );
-        }
+    let envAppDefaults;
+    let envDefaults;
+    let dbMap;
+    let globalDefaults;
+    let appDefaults;
+    let localDbMap = {};
+
+    try {
+        fs.accessSync(localDbMapPath);
+        localDbMap = require(localDbMapPath);
+        console.log('Using local custom dbmap.json');
+    } catch (e) {
+        console.log('Using default dbmap.json');
     }
 
-    return dbConfig;
+    dbMap = _.merge(globalDbMap, localDbMap);
+
+    if (dbMap[env] === undefined) {
+        throw new Error(
+            `unrecognised database environment: '${process.env.COINS_ENV}'`
+        );
+    }
+
+    globalDefaults = dbMap._default;
+    appDefaults = dbMap._apps[appName];
+    envDefaults = dbMap[env]._default || {};
+    envAppDefaults = dbMap[env][appName];
+    return _.merge(globalDefaults, appDefaults, envDefaults, envAppDefaults);
 }
 
 module.exports = getDbConfig;

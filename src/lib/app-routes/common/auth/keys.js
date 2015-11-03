@@ -4,6 +4,8 @@ const boom = require('boom');
 const config = require('config');
 const casCookieUtils = require('../../../utils/cas-cookie-utils.js');
 const joi = require('joi');
+const _ = require('lodash');
+const proxy = require('../../../utils/proxy.js');
 
 const baseUrl = '/keys';
 
@@ -21,7 +23,7 @@ internals.credentialSchema = joi.object().keys({
 });
 
 internals.logOutSuccessObj = {
-  message:'You are logged out.'
+    message:'You are logged out.'
 };
 
 exports.register = function(server, options, next) {
@@ -31,10 +33,21 @@ exports.register = function(server, options, next) {
     const authUtils = server.plugins.utilities.auth;
     const invalidCookie = casCookieUtils.invalidate();
 
+    const LoginRecord = server.plugins.bookshelf.model('LoginRecord');
+
     server.state(config.get('casCookieName'), {
         path: '/',
         domain: config.get('cookieDomain')
     });
+
+    /**
+     * save a new LoginRecord model with `properties`
+     * @param {object} properties contains props to assign to new LoginRecordObject before saving
+     * @return {Promise}          resolves to result of save operation
+     */
+    const saveRecordObj = (properties)=> {
+        return LoginRecord.forge(properties).save(null, {method:'insert'});
+    };
 
     server.route({
         method: 'OPTIONS',
@@ -79,6 +92,27 @@ exports.register = function(server, options, next) {
                 const password = data.password.toString();
 
                 /**
+                 * set recordObj attributes/values
+                 */
+                const  recordObj = {
+                    username: data.username.toString(),
+                    loginTime: new Date(),
+                    ipAddr: proxy.getIpAddress(request),
+                    errorCode: 0,
+                    success: 1
+                };
+
+                /**
+                 * log error and inserts record to db for login failure
+                 */
+                const logError = (err)=> {
+                    server.log(['error', 'login'], err.message);
+                    recordObj.success = 0;
+                    saveRecordObj(recordObj);
+                    reply(boom.wrap(err));
+                };
+
+                /**
                  * generate cookie from Hawk credentials
                  * save credentials to database
                  * reply with credentials and cookie
@@ -103,10 +137,9 @@ exports.register = function(server, options, next) {
                 return authUtils.validateUser(username, password)
                     .then(authUtils.generateHawkCredentials)
                     .then(serveHawkCredentials)
-                    .catch((err) => {
-                        server.log(['error', 'login'], err);
-                        reply(boom.wrap(err));
-                    });
+                    .then(_.noop)
+                    .then(_.partial(saveRecordObj, recordObj))
+                    .catch(logError);
             }
         }
     });
@@ -179,6 +212,7 @@ exports.register = function(server, options, next) {
                         reply(boom.wrap(err));
                         return;
                     });
+
             }
         }
     });

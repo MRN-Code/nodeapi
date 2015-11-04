@@ -12,7 +12,7 @@ module.exports.register = (server, options, next) => {
      */
     Bluebird.onPossiblyUnhandledRejection(function(error) {
         const tags = ['possibly unhandled promise rejection'];
-        server.plugins.logUtil.logger.logError(tags, error);
+        server.plugins.logUtil.logError(tags, error);
     });
 
     next();

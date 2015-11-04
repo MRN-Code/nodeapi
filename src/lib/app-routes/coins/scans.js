@@ -19,7 +19,7 @@ exports.register = function(server, options, next) {
     const path = '/scans';
     const Scan = server.plugins.bookshelf.model('Scan');
     const relations = server.plugins.relations;
-    const errorLogger = server.plugins.logUtil.logger;
+    const errorLogger = server.plugins.logUtil;
 
     /**
      * Get the studies that the user is allowed to read scans from

@@ -32,7 +32,7 @@ exports.register = function(server, options, next) {
     const redisClient =  server.plugins['hapi-redis'].client;
     const authUtils = server.plugins.utilities.auth;
     const invalidCookie = casCookieUtils.invalidate();
-    const errorLogger = server.plugins.logUtil.logger;
+    const errorLogger = server.plugins.logUtil;
 
     const LoginRecord = server.plugins.bookshelf.model('LoginRecord');
 
@@ -108,7 +108,6 @@ exports.register = function(server, options, next) {
                  * log error and inserts record to db for login failure
                  */
                 const logError = (err)=> {
-                    console.log('error????');
                     errorLogger.logError(['login'], err);
                     recordObj.success = 0;
                     saveRecordObj(recordObj);

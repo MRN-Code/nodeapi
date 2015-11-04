@@ -27,11 +27,10 @@ module.exports.register = (server, options, next) => {
     //logs and throws error
     logger.logAndThrowError = (tags,err) => {
         server.log('[error]'.concat(tags), getLogData(err));
-        throw new Error(getLogData(err));
+        throw err;
     };
 
-    server.expose('logger', logger);
-    console.log('logger exposed');
+    server.expose(logger);
     next();
 };
 

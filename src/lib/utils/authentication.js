@@ -17,7 +17,7 @@ const userController = require('../controllers/users.js');
 module.exports.register = function(server, options, next) {
     const redisClient = server.plugins['hapi-redis'].client;
     const relations = server.plugins.relations;
-    const errorLogger = server.plugins.logUtil.logger;
+    const errorLogger = server.plugins.logUtil;
 
     if (!redisClient.connected) {
         throw new Error('Redis client not connected: cannot continue');
@@ -238,7 +238,6 @@ module.exports.register = function(server, options, next) {
          * @return {Bluebird} a promise that resolves to true or false
          */
         const comparePassword = (user) => {
-
             const rawPass = user.get('passwordHash');
             let msg;
 
@@ -276,8 +275,6 @@ module.exports.register = function(server, options, next) {
             .then(comparePassword)
             .then(handleCompare)
             .catch(function(err) {
-                console.log(encryptedUsername);
-                console.log('log authentication erorr');
                 errorLogger.logAndThrowError(['validate-user'], err);
             });
     };

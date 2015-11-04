@@ -313,7 +313,7 @@ internals.watchConsortiumDb = (db, server) => {
                 .then(_.partialRight(internals.recalcAggregate, server))
                 .then(_.bind(db.save, db))
                 .catch((err) => {
-                    server.plugins.logUtil.logger.logError(
+                    server.plugins.logUtil.logError(
                         ['coinstac', 'handleAllAnalysesSubmitted'],
                         err
                       );

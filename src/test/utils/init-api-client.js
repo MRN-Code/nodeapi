@@ -63,5 +63,5 @@ module.exports = function initApiClient() {
         onPreFormatRequestOptions: onPreFormatRequestOptions,
         version: pkg.version
     };
-    return require('../sdk/index.js')(apiClientOptions);
+    return require('halfpenny')(apiClientOptions);
 };

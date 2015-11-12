@@ -14,7 +14,7 @@ internals.userSchema = joi.object().keys({
     activeFlag: joi.string().required(),
     passwordExpDate: joi.date().required(),
     acctExpDate: joi.date().required(),
-    isSiteAdmin: joi.string().required(),
+    isSiteAdmin: joi.any(),
     emailUnsubscribed: joi.boolean().required()
 });
 

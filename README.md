@@ -96,19 +96,18 @@ mkdir /tmp/coinstac-pouchdb
         "pouchdb": {
             "consortiaMeta": {
                 "conn": {
-                    "hostname": "localcoin.mrn.og",
-                    "protocol": "https",
-                    "port": 8443,
+                    "hostname": "localhost",
+                    "protocol": "http",
+                    "port": 5984,
                     "pathname": "consortiameta"
                 }
             },
             "consortia": {
                 "conn": {
-                    "hostname": "localcoin.mrn.org",
-                    "protocol": "https",
-                    "port": 8443
-                },
-                "basePathname": "couchdb"
+                    "hostname": "localhost",
+                    "protocol": "http",
+                    "port": 5984
+                }
             }
         }
     }

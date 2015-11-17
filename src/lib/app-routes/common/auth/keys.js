@@ -26,6 +26,15 @@ internals.logOutSuccessObj = {
     message:'You are logged out.'
 };
 
+const postExample = [
+    '<pre>',
+        'JSON.stringify({',
+            '\tusername: btoa(\'your-username\'),',
+            '\tpassword: btoa(\'your-password\'),',
+        '})',
+    '</pre>',
+].join('\n');
+
 exports.register = function(server, options, next) {
     // Private route to get new hawk credentials
     // Requests must authenticate with a username and password
@@ -69,7 +78,9 @@ exports.register = function(server, options, next) {
             tags: ['api', 'auth'],
             notes: [
                 'Expects base64 encoded username/password in payload.',
-                'Response includes a `set-cookie` header with JWT for COINS2.0'
+                'Response includes a `set-cookie` header with JWT for COINS2.0',
+                'Try generating some example POST JSON with:',
+                postExample,
             ].join('<br>'),
             description: 'Login: Get new API key and JWT cookie',
             auth: false,

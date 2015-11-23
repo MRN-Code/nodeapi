@@ -77,7 +77,7 @@ describe('POST keys (login)', () => {
                 .then((response) => {
                     const headers = response.headers;
                     headers.should.to.have.property('set-cookie');
-                    headers['set-cookie'].should.to.match(/^CAS_Auth_User=/);
+                    headers['set-cookie'].should.to.match(/^CAS_Auth_User-/);
                     return response;
                 });
         });
@@ -114,7 +114,7 @@ describe('DELETE keys (logout)', () => {
                 .then((response) => {
                     const headers = response.headers;
                     headers.should.have.property('set-cookie');
-                    headers['set-cookie'].should.to.match(/^CAS_Auth_User=/);
+                    headers['set-cookie'].should.to.match(/^CAS_Auth_User-/);
                     headers['set-cookie'].should.match(/LOGGEDOUT/);
                     return response;
                 });

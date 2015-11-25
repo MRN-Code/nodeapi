@@ -44,7 +44,7 @@ exports.register = function(server, options, next) {
 
     const LoginRecord = server.plugins.bookshelf.model('LoginRecord');
 
-    server.state(config.get('casCookieName'), {
+    server.state(casCookieUtils.cookieName, {
         path: '/',
         domain: config.get('cookieDomain')
     });
@@ -140,7 +140,7 @@ exports.register = function(server, options, next) {
                     return credentialsSaved
                         .then(() => {
                             reply(credentials)
-                                .state(config.get('casCookieName'), casCookie);
+                                .state(casCookieUtils.cookieName, casCookie);
                             return credentials;
                         });
                 };
@@ -210,7 +210,7 @@ exports.register = function(server, options, next) {
                     return reply(internals.logOutSuccessObj)
                         .code(200)
                         .state(
-                            config.get('casCookieName'),
+                            casCookieUtils.cookieName,
                             invalidCookie
                         );
                 };

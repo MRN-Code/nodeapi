@@ -1,5 +1,6 @@
 'use strict';
 
+const os = require('os');
 const config = require('config');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
@@ -17,6 +18,9 @@ const excludedCredentialKeys = [
     'issueTime',
     'expireTime'
 ];
+
+const isDev = process.env.COINS_ENV === 'development';
+const cookieName = config.get('casCookieBase') + '-' + (isDev ? os.hostname() : process.env.COINS_ENV);
 
 /**
  * verify that the jwt id is in the hawk key store
@@ -110,6 +114,7 @@ function invalidateCookie() {
 }
 
 module.exports = {
+    cookieName: cookieName,
     generate: getNewCookieValue,
     verifyAndParse: parseCookie,
     invalidate: invalidateCookie

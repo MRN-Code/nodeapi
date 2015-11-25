@@ -46,7 +46,7 @@ exports.register = function(server, options, next) {
 
     server.state(casCookieUtils.cookieName, {
         path: '/',
-        domain: config.get('cookieDomain'),
+        domain: config.get('cookieDomain')
     });
 
     /**

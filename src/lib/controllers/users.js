@@ -122,7 +122,8 @@ module.exports.post = {
             username: joi.string().min(3).max(20).required(),
             email: joi.string().email().required(),
             label: joi.string().required(),
-            password: joi.string().required().min(8).max(71)
+            password: joi.string().required().min(8).max(71),
+            siteId: joi.string().required().max(3)
         })
     },
     response: {

@@ -26,7 +26,8 @@ const getUserData = () => {
         username: uuid.v1().match(/^(.){10}/)[0],
         password: uuid.v1().match(/^(.){10}/)[0],
         email: uuid.v1().match(/^(.){10}/)[0] + '@test.com',
-        label: 'Test Testerson'
+        label: 'Test Testerson',
+        siteId: '99'
     };
 };
 

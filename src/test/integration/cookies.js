@@ -34,7 +34,7 @@ const setApiClient = function(client) {
  * @return {string}           the actual value of the cookie
  */
 function getCasCookieValue(rawCookie) {
-    const cookieName = config.get('casCookieName');
+    const cookieName = cookieUtils.cookieName;
     const regex = new RegExp('^' + cookieName + '=([^;]*);');
     cookie = rawCookie.match(regex)[1];
     return cookie;

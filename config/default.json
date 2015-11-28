@@ -6,7 +6,7 @@
     "dbMapPath": "/coins/config/dbmap.json",
     "dbEncryptionKeyPath": "/coins/coins_auth/conn/mcrypt_auth_key",
     "jwtSecretPath": "/coins/coins_auth/jwt-auth-key.txt",
-    "casCookieName": "CAS_Auth_User",
+    "casCookieBase": "CAS_Auth_User",
     "defaultUser": {
         "username": "john",
         "password": "$2a$10$iqJSHD.BGr0E2IxQwYgJmeP3NvhPrXAeLSaGCj6IR/XU5QtjVu5Tm",

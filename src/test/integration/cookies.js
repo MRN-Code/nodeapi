@@ -131,8 +131,8 @@ describe('Cookies', () => {
     describe('Test cookie roles', () => {
         it('Should contain the studyRoles for user mochatest', () => {
             parsedCookie.should.have.property('studyRoles');
-            parsedCookie.studyRoles.should.have.property(2319);
-            parsedCookie.studyRoles[2319].should.have.members(studyRolesMock);
+            parsedCookie.studyRoles.should.have.property(8320);
+            parsedCookie.studyRoles[8320].should.have.members(studyRolesMock);
         });
     });
 

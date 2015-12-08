@@ -27,7 +27,7 @@ describe('Scan routes', () => {
             .then(function addScanPrivsToTestUser() {
                 return new Bluebird((res, rej) => {
                     server.plugins.relations.study(
-                        'mochatest is pi of 2319',
+                        'mochatest is pi of 8320',
                         (err) => {
                             if (err) {
                                 rej(err);
@@ -49,25 +49,25 @@ describe('Scan routes', () => {
         it('Should return all scans', () => {
             return apiClient.scans.get()
                 .then((response) => {
-                    response.result.data.should.have.length.of.at.least(9);
+                    response.result.data.should.have.length.of.at.least(1);
                     response.result.data[0].should.have.property('scanId');
                     should.equal(response.result.error, null);
                 });
         });
 
         it('Should return scans by ursi', () => {
-            return apiClient.scans.get({ ursi: 'M06123761' })
+            return apiClient.scans.get({ ursi: 'M99938215' })
                 .then((response) => {
-                    response.result.data.should.have.length.of.at.least(7);
+                    response.result.data.should.have.length.of.at.least(1);
                     response.result.data[0].should.have.property('scanId');
                     should.equal(response.result.error, null);
                 });
         });
 
         it('Should return scans by study', () => {
-            return apiClient.scans.get({ studyId: 2319 })
+            return apiClient.scans.get({ studyId: 8320 })
                 .then((response) => {
-                    response.result.data.should.have.length.of.at.least(9);
+                    response.result.data.should.have.length.of.at.least(1);
                     response.result.data[0].should.have.property('scanId');
                     should.equal(response.result.error, null);
                 });

@@ -5,7 +5,7 @@ const joi = require('joi');
 const Bluebird = require('bluebird');
 const _ = require('lodash');
 
-const scanController = require('../../controllers/studies.js');
+const studyController = require('../../controllers/studies.js');
 /**
  * Call the toJSON method on the object
  * @param  {Object} obj object to call the toJSON method on (bookshelf)
@@ -53,7 +53,7 @@ exports.register = function(server, options, next) {
                 query: getSchema
             },
             response: {
-                schema: joi.array().items(studyController.studySchema)
+                schema: joi.array().items(studyController.studiesSchema)
             },
             handler: function handleGetStudy(request, reply) {
                 const creds = request.auth.credentials;

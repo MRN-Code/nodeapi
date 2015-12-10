@@ -17,19 +17,20 @@ const callToJson = (obj) => {
 
 exports.register = function(server, options, next) {
     const path = '/studies';
-    const Scan = server.plugins.bookshelf.model('Study');
+    const Study = server.plugins.bookshelf.model('Study');
     const relations = server.plugins.relations;
 
     /**
-     * Get the studies that the user is allowed to read scans from
+     * Get the studies that the user is allowed to read from
      * @return {Promise} a promise that resolves to an array of studyIds
      */
     const getReadStudies = (username) => {
         return new Bluebird((res, rej) => {
-            relations.study('What can %s read from?',
+            relations.study('What can %s read_Study from?',
                username,
                (err, studies) => {
                    if (err) rej(err);
+                   console.dir(studies);
                    res(studies);
                });
         });
@@ -43,6 +44,7 @@ exports.register = function(server, options, next) {
         method: 'GET',
         path: path,
         config: {
+            auth: false,
             tags: ['api', 'study'],
             notes: [
                 'query parameter study_id is used to restrict',
@@ -56,7 +58,8 @@ exports.register = function(server, options, next) {
                 schema: joi.array().items(studyController.studiesSchema)
             },
             handler: function handleGetStudy(request, reply) {
-                const creds = request.auth.credentials;
+                //const creds = request.auth.credentials;
+                const creds = {username: 'mochatest'};
                 const formatQuery = Study.prototype._utils.formatQuery;
                 if (!_.isEmpty(request.query)) {
                     new Study()
@@ -69,14 +72,20 @@ exports.register = function(server, options, next) {
                             reply(boom.wrap(err));
                         });
                 } else {
-                    getReadStudies(request.auth.credentials.username)
-                        .then(_.partial(readAllScansInStudies, creds))
+                    getReadStudies(creds.username).
+                        then(function (studies) {
+                            return new Study().
+                                where('study_id', 'in', studies)
+                                .readAll(creds)
+                        })
                         .then(callToJson)
                         .then(reply)
                         .catch((err) => {
                             server.log(['error', 'studies'], err);
                             reply(boom.wrap(err));
                         });
+
+
                 }
             }
         }

@@ -93,6 +93,7 @@ var plugins = [
     getAppRouteConfig('common/auth/cookies.js', 'auth'),
     getAppRouteConfig('common/users.js'),
     getAppRouteConfig('coins/scans.js'),
+    getAppRouteConfig('coins/studies.js'),
     {
         register: require('./version-route.js'),
         registrationOptions: {

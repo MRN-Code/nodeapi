@@ -89,10 +89,13 @@ var plugins = [
             }
         }
     },
+    require('h2o2'),
     getAppRouteConfig('common/auth/keys.js', 'auth'),
     getAppRouteConfig('common/auth/cookies.js', 'auth'),
     getAppRouteConfig('common/users.js'),
     getAppRouteConfig('coins/scans.js'),
+    getAppRouteConfig('coins/file.js'),
+    getAppRouteConfig('coins/file-records.js'),
     {
         register: require('./version-route.js'),
         registrationOptions: {

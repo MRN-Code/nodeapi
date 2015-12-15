@@ -96,6 +96,12 @@ var plugins = [
     getAppRouteConfig('coins/scans.js'),
     getAppRouteConfig('coins/file.js'),
     getAppRouteConfig('coins/file-records.js'),
+    getAppRouteConfig('coins/studies.js'),
+    getAppRouteConfig('coins/sites.js'),
+    // getAppRouteConfig('coins/subjects.js'),
+    // getAppRouteConfig('coins/intervals.js'),
+    // getAppRouteConfig('coins/modalities.js'),
+    // getAppRouteConfig('coins/devices.js'),
     {
         register: require('./version-route.js'),
         registrationOptions: {

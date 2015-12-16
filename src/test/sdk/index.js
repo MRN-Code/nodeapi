@@ -11,7 +11,8 @@
             './authentication',
             './scans',
             './users',
-            './coinstac/consortia'
+            './coinstac/consortia',
+            './coins-metrics'
         ], function(
             ObjectAssign,
             hawk,
@@ -19,7 +20,8 @@
             authentication,
             scans,
             users,
-            consortia
+            consortia,
+            coinsMetrics
         ) {
             return factory(
                 ObjectAssign.assign,
@@ -29,7 +31,8 @@
                 authentication,
                 scans,
                 users,
-                consortia
+                consortia,
+                coinsMetrics
             );
         });
     } else if (typeof module === 'object' && module.exports) {
@@ -54,7 +57,8 @@
             require('./authentication'),
             require('./scans'),
             require('./users'),
-            require('./coinstac/consortia')
+            require('./coinstac/consortia'),
+            require('./coins-metrics')
         );
 
     } else {
@@ -66,6 +70,7 @@
             root.localStorage,
             root.CoinsApiClient.authentication,
             root.CoinsApiClient.scans,
+            root.CoinsApiClient.coinsMetrics,
             root.CoinsApiClient.users,
             root.CoinsApiClient.coinstac.consortia
         );
@@ -80,7 +85,8 @@
     authentication,
     scans,
     users,
-    consortia
+    consortia,
+    coinsMetrics
 ) {
     'use strict';
 
@@ -233,6 +239,7 @@
         me.auth = authentication(me);
         me.scans = scans(me);
         me.users = users(me);
+        me.coinsMetrics = coinsMetrics(me);
         me.coinstac = {
             consortia: consortia(me)
         };

@@ -76,6 +76,12 @@ describe('Scan routes', () => {
         it('Should return a single scan by ID');
     });
 
+    describe('GET /scans/{id}', () => {
+        before(() => {
+            return apiClient.auth.login('mochatest', 'mocha');
+        });
+    });
+
     describe('POST /scans', () => {
         it('Should reject an invalid payload');
         it('Should add a new scan with a valid payload');

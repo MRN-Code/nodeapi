@@ -76,9 +76,18 @@ describe('Scan routes', () => {
         it('Should return a single scan by ID');
     });
 
-    describe('GET /scans/{id}', () => {
+    describe('GET /scans/id/', () => {
         before(() => {
             return apiClient.auth.login('mochatest', 'mocha');
+        });
+
+        it('Should return all scans and series and series data', () => {
+            return apiClient.scanDetails.get()
+                .then((response) => {
+                    response.result.data.should.have.length.of.at.least(1);
+                    //response.result.data[0].should.have.property('scanId');
+                    should.equal(response.result.error, null);
+                });
         });
     });
 

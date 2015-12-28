@@ -8,46 +8,32 @@
 
 See #usage and #environment requirements to boot the API!
 
+# environment requirements
+See [REQUIREMENTS.md](REQUIREMENTS.md) for configuration you system's environment for the API.
+
 # usage
+
 ```bash
 $ npm run startdev # boots the API with all services available, or...
 $ npm run build && node dist/index.js [flags] # build the app, then run the built copy (less CPU), or...
 ```
 
-# environment requirements
-See [REQUIREMENTS.md](REQUIREMENTS.md) for configuration you system's environment for the API.
+Use `node dist/index.js --help` to see all available options.
+- @flag `development/release/production` run the server using COINS_ENV of the respective flag. Shorthand --dev/rel/prd are honored.
 
-# Usage
+- @flag `coinstac` start the server with COINSTAC routes. Shorthand -c Defaults to false.
 
-## Starting the server
-The simplest way to start the server is to use the `npm start` command.
-If that fails, look at `package.json` for the command that `npm start` runs,
-and run that manually for a more useful output.
+- @flag `without-new-relic` start the server without including the New Relic agent. Shorthand -w. Defaults to false.
 
-If you wish to pass CLI options to the startup process, you will need to start
-the server using the full command (see _package.json_ for the command which is
-run by `npm start`).
-
-To start the server as a Daemon, all Ansible-provisioned servers should have an
-upstart script: `sudo start coinsnodeapi`.
+## coins internal usage
+To start the server as a daemon, ansible-provisioned servers should have an upstart script: `sudo start coinsnodeapi`.
 
 To start the server with auto-restart, try using monit: `monit [re]start coinsnodeapi`.
 
-Unfortunately, **pm2** does not play well with our monitoring strategy, so we
-do not recommend using pm2 to run the API as a daemon.
-
-## CLI options
-Use `node index --help` to see all available options.
-
-- @flag development/release/production run the server using COINS_ENV of the respective flag. Shorthand --dev/rel/prd are honored.
-
-- @flag coinstac start the server with COINSTAC routes. Shorthand -c Defaults to false.
-
-- @flag without-new-relic start the server without including the New Relic agent. Shorthand -w. Defaults to false.
 
 Logs are written to the `logs/` directory in this repo.
 
-# New Relic
+## new relic integration
 The New Relic agent is `require()`ed on startup by default, however, it does not
 report to New Relic's servers by default. To turn on reporting, the environment
 variable `NEW_RELIC_ENABLED` must be set to `'true'`. This should be configured

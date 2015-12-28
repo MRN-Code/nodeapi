@@ -9,7 +9,7 @@
 See #usage and #environment requirements to boot the API!
 
 # environment requirements
-See [REQUIREMENTS.md](REQUIREMENTS.md) for configuration you system's environment for the API.
+See [REQUIREMENTS.md](REQUIREMENTS.md) for configuring your system's environment.
 
 # usage
 

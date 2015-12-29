@@ -1,5 +1,11 @@
 The API requires various micro-services to operate.  They are as follows:
 
+## PostgreSQL DB instance with the COINS schema
+@TODO
+
+## grunt-cli
+`npm i -g grunt-cli`
+
 ## redis
 
 Authentication credentials and ACL permissions are stored in

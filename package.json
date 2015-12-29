@@ -45,7 +45,8 @@
     "redis": "1.0.0",
     "relations": "0.5.0",
     "uuid": "2.0.1",
-    "vision": "3.0.0"
+    "vision": "3.0.0",
+    "boom": "2.8.0"
   },
   "devDependencies": {
     "btoa": "1.1.2",
@@ -63,7 +64,6 @@
     "grunt-exec": "0.4.6",
     "grunt-jscs": "2.1.0",
     "grunt-mocha-cli": "1.14.0",
-    "grunt-cli": "0.1.13",
     "hawk": "3.1.0",
     "halfpenny": "0.0.2",
     "inject-then": "2.0.2",

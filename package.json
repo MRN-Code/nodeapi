@@ -45,8 +45,7 @@
     "redis": "1.0.0",
     "relations": "0.5.0",
     "uuid": "2.0.1",
-    "vision": "3.0.0",
-    "boom": "2.8.0"
+    "vision": "3.0.0"
   },
   "devDependencies": {
     "btoa": "1.1.2",

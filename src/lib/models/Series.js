@@ -6,10 +6,7 @@ module.exports = function(bookshelf) {
         idAttribute: 'series_id',
         seriesData: function() {
             return this.hasMany('SeriesData', 'series_id');
-        },
-
-        scan: function() {
-            return this.belongsTo('Scan', 'scan_id');
         }
+
     });
 };

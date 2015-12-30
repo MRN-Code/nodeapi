@@ -84,6 +84,7 @@ describe('Scan routes', () => {
         it('Should return all scans and series and series data', () => {
             return apiClient.scanDetails.get()
                 .then((response) => {
+                    console.log('=========reached here ==========');
                     response.result.data.should.have.length.of.at.least(1);
                     //response.result.data[0].should.have.property('scanId');
                     should.equal(response.result.error, null);

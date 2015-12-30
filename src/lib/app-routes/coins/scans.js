@@ -12,6 +12,7 @@ const scanController = require('../../controllers/scans.js');
  * @return {string}     JSON
  */
 const callToJson = (obj) => {
+    console.log(JSON.stringify(obj.toJSON()));
     return obj.toJSON();
 };
 

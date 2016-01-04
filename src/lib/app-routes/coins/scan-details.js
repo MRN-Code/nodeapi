@@ -5,22 +5,14 @@ const joi = require('joi');
 const _ = require('lodash');
 const Bluebird = require('bluebird');
 
+const scanController = require('../../controllers/scans.js');
+const seriesController = require('../../controllers/series.js');
+const seriesDataController = require('../../controllers/seriesData.js');
+
 exports.register = function(server, options, next) {
 
     const path = '/scans/{id}/';
     const Scan = server.plugins.bookshelf.model('Scan');
-    const relations = server.plugins.relations;
-
-    const getReadScanStudies = (username) => {
-        return new Bluebird((res, rej) => {
-            relations.study('What can %s read_Scan from?',
-               username,
-               (err, studies) => {
-                   if (err) rej(err);
-                   res(studies);
-               });
-        });
-    };
 
     const getSchema = joi.object().keys({
         studyId: joi.number(),
@@ -42,16 +34,17 @@ exports.register = function(server, options, next) {
                 })
             },
             response: {
-                schema: null
+                schema: joi.object().keys({
+                    schema: scanController.scansSchema,
+                    series: joi.array().items(seriesController.seriesSchema),
+                    seriesData: joi.array().items(seriesDataController.seriesDataSchema)
+                })
             },
             handler: function handleGetScansDetails(request, reply) {
-                debugger;
                 const creds = request.auth.credentials;
-                console.log('------' + request.params.id + '--------');
-
                 const getReadScanDetails = () => {
-                    return Scan.where({scan_id: request.params.id})
-                    .read(creds,{withRelated:['series','series.seriesData']})
+                    return Scan.where({scanId: request.params.id})
+                    .read(creds, { withRelated:['series','series.seriesData']})
                     .then(function(data) {
                       console.log(JSON.stringify(data));
                       return data;
@@ -61,7 +54,6 @@ exports.register = function(server, options, next) {
                 getReadScanDetails()
                 .then(reply)
                 .catch((err) => {
-                    console.log('-------error here -----');
                     server.log(['error', 'scan-details'], err.stack);
                     reply(boom.wrap(err));
                 });

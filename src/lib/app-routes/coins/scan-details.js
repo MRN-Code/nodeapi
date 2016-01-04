@@ -43,10 +43,9 @@ exports.register = function(server, options, next) {
             handler: function handleGetScansDetails(request, reply) {
                 const creds = request.auth.credentials;
                 const getReadScanDetails = () => {
-                    return Scan.where({scanId: request.params.id})
-                    .read(creds, { withRelated:['series','series.seriesData']})
+                    return Scan.where({scan_id: request.params.id})
+                    .read(creds, { withRelated:['series','series.seriesData'], require: true})
                     .then(function(data) {
-                      console.log(JSON.stringify(data));
                       return data;
                   });
                 };

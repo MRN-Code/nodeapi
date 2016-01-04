@@ -86,7 +86,6 @@ describe('Scan routes', () => {
             return apiClient.scanDetails.get({ scanId: 366998 })
                 .then((response) => {
                     response.result.data.should.have.length.of.at.least(1);
-                    response.result.data[0].should.have.property('scanId');
                     should.equal(response.result.error, null);
                 });
         });

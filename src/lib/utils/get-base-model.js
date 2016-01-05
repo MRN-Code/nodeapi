@@ -53,7 +53,6 @@ internals.saveHist = () => {
 
 module.exports = function getBaseModel(bookshelf) {
     const BaseModel = bookshelf.Model.extend({
-        parse: internals.keysToCamelCase,
         format: internals.keysToSnakeCase,
         _utils: {
             keysToCamelCase: internals.keysToCamelCase,
@@ -63,6 +62,11 @@ module.exports = function getBaseModel(bookshelf) {
         },
         initialize: function() {
             this.on('saved', this._utils.saveHist);
+        },
+        formatForReply: function(options) {
+            var copy = _.cloneDeep(this);
+            copy.attributes = this._utils.keysToCamelCase(copy.attributes);
+            return this.toJSON.call(copy, options);
         }
     });
     internals.bookshelf = bookshelf;

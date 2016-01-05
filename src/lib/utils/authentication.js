@@ -56,9 +56,10 @@ module.exports.register = function(server, options, next) {
         return refreshCurrentStudyRoles(username)
             .then((roleList) => {
                 const epoch = (new Date()).getTime();
+                debugger;
                 const credentials = {
                     username: username,
-                    user: userController.sanitize(user).toJSON(),
+                    user: userController.sanitize(user).formatForReply(),
                     id: uuid.v4(),
                     key: uuid.v4(),
                     algorithm: config.algorithm,
@@ -104,7 +105,7 @@ module.exports.register = function(server, options, next) {
         };
 
         return new UserRole()
-            .where({username: encryptedUsername})
+            .where('username', encryptedUsername)
             .fetchAll({withRelated: 'role'})
             .then(resetStudyRoles)
             .then(getStudyRoles)
@@ -157,7 +158,7 @@ module.exports.register = function(server, options, next) {
                 '%s is the %s of %s',
                 username,
                 role.related('role').get('label').toLowerCase(),
-                role.get('studyId'));
+                role.get('study_id'));
 
         });
 
@@ -199,6 +200,7 @@ module.exports.register = function(server, options, next) {
      */
     authUtils.validateUser = function(username, password) {
         const User = server.plugins.bookshelf.model('User');
+        debugger;
         let userObj = {};
         const encryptedUsername = authUtils.encryptUsername(username);
         if (!username || !password) {
@@ -217,19 +219,20 @@ module.exports.register = function(server, options, next) {
                 throw boom.unauthorized('Unknown username and password');
             }
 
-            if (moment().isAfter(user.get('acctExpDate'))) {
+            if (moment().isAfter(user.get('acct_exp_date'))) {
                 throw boom.unauthorized('Account expired');
             }
 
-            if (moment().isAfter(user.get('passwordExpDate'))) {
+            if (moment().isAfter(user.get('password_exp_date'))) {
                 throw boom.unauthorized('Password expired');
             }
 
-            if (user.get('activeFlag') === 'N') {
+            if (user.get('active_flag') === 'N') {
                 throw boom.unauthorized('Account deactivated');
             }
 
             //set userObj in closure
+            debugger;
             userObj = user;
 
             return user;
@@ -242,7 +245,7 @@ module.exports.register = function(server, options, next) {
          */
         const comparePassword = (user) => {
 
-            const rawPass = user.get('passwordHash');
+            const rawPass = user.get('password_hash');
             let msg;
 
             // validate that rawPass is not falsy
@@ -273,7 +276,8 @@ module.exports.register = function(server, options, next) {
 
         //TODO: if User is ever protected with the bookshelf shield,
         //we will need to figure out a way to get around that...
-        return new User({username: encryptedUsername})
+        return new User()
+            .where('username', encryptedUsername)
             .fetch()
             .then(checkAccountStatus)
             .then(comparePassword)

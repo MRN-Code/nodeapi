@@ -19,6 +19,7 @@ exports.register = function(server, options, next) {
     const path = '/scans';
     const Scan = server.plugins.bookshelf.model('Scan');
     const relations = server.plugins.relations;
+    const errorLogger = server.plugins.logUtil;
 
     /**
      * Get the studies that the user is allowed to read scans from
@@ -78,7 +79,7 @@ exports.register = function(server, options, next) {
                         .then(callToJson)
                         .then(reply)
                         .catch((err) => {
-                            server.log(['error', 'scans'], err);
+                            errorLogger.logError(['scans'], err);
                             reply(boom.wrap(err));
                         });
                 } else {
@@ -87,7 +88,7 @@ exports.register = function(server, options, next) {
                         .then(callToJson)
                         .then(reply)
                         .catch((err) => {
-                            server.log(['error', 'scans'], err);
+                            errorLogger.logError(['scans'], err);
                             reply(boom.wrap(err));
                         });
                 }

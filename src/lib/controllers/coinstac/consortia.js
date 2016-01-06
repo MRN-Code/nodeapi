@@ -313,10 +313,10 @@ internals.watchConsortiumDb = (db, server) => {
                 .then(_.partialRight(internals.recalcAggregate, server))
                 .then(_.bind(db.save, db))
                 .catch((err) => {
-                    server.log(
-                        ['error', 'coinstac', 'handleAllAnalysesSubmitted'],
-                        err.message
-                    );
+                    server.plugins.logUtil.logError(
+                        ['coinstac', 'handleAllAnalysesSubmitted'],
+                        err
+                      );
                 })
                 .then(releaseLock());
         });

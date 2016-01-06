@@ -101,12 +101,12 @@ const handleAllPluginsRegistered = () => {
 server.registerThen = Bluebird.promisify(server.register);
 
 Bluebird.onPossiblyUnhandledRejection((err) => {
-    server.log(['error', 'unhandled-rejection'], err);
+    server.plugins.logUtil.logError(['unhandled-rejection'], err);
 });
 
 // Redirect stderr to server logs
 process.stderr.on('data', (data) => {
-    server.log(['error', 'stderr'], data);
+    server.plugins.logger.logError(['stderr'], data);
 });
 
 //register plugins
@@ -115,11 +115,10 @@ server.app.pluginsRegistered = plugins.reduce(
     Bluebird.resolve()
 ).then(handleAllPluginsRegistered)
     .catch((err) => {
-        console.log(err);
-        server.log('Error loading plugins');
-        server.log(err);
+        server.plugins.logger.logAndThrowError(
+          ['Error loading plugins'], err
+        );
         process.exit(1);
-        throw err;
 
     });
 

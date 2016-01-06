@@ -1,194 +1,39 @@
 # nodeapi
-node based API for COINS
+[nodejs](https://nodejs.org/) based API for COINS
+
+# install
+
+1. clone this repo
+2. `cd` into the cloned folder and run `npm install`
+
+See #usage and #environment requirements to boot the API!
+
+# environment requirements
+See [REQUIREMENTS.md](REQUIREMENTS.md) for configuring your system's environment.
 
 # usage
+
 ```bash
-$ npm run startdev # or...
-$ npm run build && node dist/index.js # build the app, then run the built copy, or...
-$ babel-node index.js # es6 ify the app on-the-fly. `npm i -g babel` to get the babel-node binary
+$ npm run startdev # boots the API with all services available, or...
+$ npm run build && node dist/index.js [flags] # build the app, then run the built copy (less CPU), or...
 ```
 
-# requirements
+Use `node dist/index.js --help` to see all available options.
+- @flag `development/release/production` run the server using COINS_ENV of the respective flag. Shorthand --dev/rel/prd are honored.
 
-If things aren't working, go down this quick checklist.
+- @flag `coinstac` start the server with COINSTAC routes. Shorthand -c Defaults to false.
 
-- [ ] Is a redis server installed and running locally?
+- @flag `without-new-relic` start the server without including the New Relic agent. Shorthand -w. Defaults to false.
 
-- [ ] Have you pulled the latest changes in coins_auth, and run `grunt build`?
-
-- [ ] Is nginx installed, configured and running locally?
-
-- [ ] (only if running in COINSTAC mode) Did you create a cloudant account, or `mkdir /tmp/coinstac-pouchdb`?
-
-If you miss any of these requirements, remove all node modules and reinstall them
-after installing the requirements.
-
-
-### redis
-Authentication credentials and ACL permissions are stored in
-a redis datastore. You need to have redis installed and running
-before starting the server.
-
-On Linux (Ubuntu):
-```
-apt-get install redis-server;
-redis-server &
-```
-
-On Mac:
-```
-brew install redis
-redis-server /usr/local/etc/redis.conf &
-```
-
-### coins_auth
-Database connection parameters are expected to be found at `/coins/coins_auth/conn/dbmap.json`.
-If you do not yet have a coins_auth repo, clone our coins_auth repo (private) to
-`/coins/coins_auth`. Next, grab a copy of `coinscredentials.json` from another
-server and put it in _coins_auth_.
-If you already have a coins_auth repo, be sure to run `git pull`
-Finally, run **grunt decrypt** in coins_auth/ to decrypt the latest dbmap.
-
-### nginx
-The COINS API listens for HTTP on port 8800. If you need to connect using HTTPS,
-you will need to place a reverse proxy in front of the API. This is most easily
-accomplished with nginx. There is an ansible role to install and configure nginx
-as a reverse proxy and SSL terminator for the API. **All development servers
-which are configured with Ansible should listen for HTTPS connections on port
-8443.** Ask Dylan for more details.
-
-### *ouchDB (only if running in COINSTAC mode)
-The COINSTAC services rely on PouchDB, which needs to persist its data somewhere.
-There are two options for Pouch persisence backends currently:
-
-#### PouchDB Leveldown (simplest, but will not work with COINSTAC client)
-It is necessary to make a path to store pouchdb data temporarily (will
-eventually use couchdb for this).
-```
-mkdir /tmp/coinstac-pouchdb
-```
-
-#### CouchDB
-
-1. Install couchdb: `sudo apt-get install couchdb`
-1. Edit couchdb to listen to all IPs:
-  1. Open _/etc/couchdb/default.ini_ (osx: /usr/local/etc/couchdb/default.ini)
-  1. Change `bind_address` to `0.0.0.0`
-  1. Change `enable_cors` to `true`
-  1. Uncomment `[cors]` -> `origins = *`
-1. (No longer optional) If on a localcoin, edit the nginx config, and then `sudo service nginx reload`:
-  1. Open _/etc/nginx/sites-enabled/default_
-  1. Add the following below the `api location` block:
-  ```
-  location /couchdb {
-    rewrite /couchdb(.*) /$1 break;
-    proxy_set_header        X-Forwarded-Host $host;
-    proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_cache             off;
-    proxy_pass              http://localhost:5984;
-    proxy_redirect          off;
-  }
-  ```
-1. Create a _config/local.json_ file with the following content:
-```
-{
-    "coinstac": {
-        "pouchdb": {
-            "consortiaMeta": {
-                "conn": {
-                    "hostname": "localhost",
-                    "protocol": "http",
-                    "port": 5984,
-                    "pathname": "consortiameta"
-                }
-            },
-            "consortia": {
-                "conn": {
-                    "hostname": "localhost",
-                    "protocol": "http",
-                    "port": 5984
-                }
-            }
-        }
-    }
-}
-```
-
-#### Cloudant
-
-1. Sign up for a Cloudant account (Cloudant.com)
-1. Once logged in, click on `Account->CORS->Enable CORS`, and select **All origin domains**
-1. Create a _config/local.json_ file with the following content:
-```
-{
-    "coinstac": {
-        "pouchdb": {
-            "cloudant": {
-                "key": "${base64 encode username:password}",
-                "hostname": "${USERNAME}.cloudant.com"
-            },
-            "consortiaMeta": {
-                "conn": {
-                    "hostname": "${USERNAME}.cloudant.com",
-                    "protocol": "https",
-                    "pathname": "consortiameta"
-                },
-                "pouchConfig": {
-                    "ajax": {
-                        "headers": {
-                            "Authorization": "${base64 encode username:password}"
-                        }
-                    }
-                }
-            },
-            "consortia": {
-                "conn": {
-                    "hostname": "${USERNAME}.cloudant.com",
-                    "protocol": "https"
-                },
-                "pouchConfig": {
-                    "ajax": {
-                        "headers": {
-                            "Authorization": "${base64 encode username:password}"
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-```
-# Usage
-
-## Starting the server
-The simplest way to start the server is to use the `npm start` command.
-If that fails, look at `package.json` for the command that `npm start` runs,
-and run that manually for a more useful output.
-
-If you wish to pass CLI options to the startup process, you will need to start
-the server using the full command (see _package.json_ for the command which is
-run by `npm start`).
-
-To start the server as a Daemon, all Ansible-provisioned servers should have an
-upstart script: `sudo start coinsnodeapi`.
+## coins internal usage
+To start the server as a daemon, ansible-provisioned servers should have an upstart script: `sudo start coinsnodeapi`.
 
 To start the server with auto-restart, try using monit: `monit [re]start coinsnodeapi`.
 
-Unfortunately, **pm2** does not play well with our monitoring strategy, so we
-do not recommend using pm2 to run the API as a daemon.
-
-## CLI options
-Use `node index --help` to see all available options.
-
-- @flag development/release/production run the server using COINS_ENV of the respective flag. Shorthand --dev/rel/prd are honored.
-
-- @flag coinstac start the server with COINSTAC routes. Shorthand -c Defaults to false.
-
-- @flag without-new-relic start the server without including the New Relic agent. Shorthand -w. Defaults to false.
 
 Logs are written to the `logs/` directory in this repo.
 
-# New Relic
+## new relic integration
 The New Relic agent is `require()`ed on startup by default, however, it does not
 report to New Relic's servers by default. To turn on reporting, the environment
 variable `NEW_RELIC_ENABLED` must be set to `'true'`. This should be configured
@@ -245,3 +90,18 @@ development systems should listen on port 8443.
 Please refer to the swagger documentation that is auto-generated by this repo.
 To view it, start this server `npm start`, and navigate to the base url +
 `/documentation` (e.g. https://coins-api.mrn.org/api/v<version>/documentation).
+
+## Troubleshooting
+
+If things aren't working, go down this quick checklist.
+
+- [ ] Is a redis server installed and running locally?
+
+- [ ] Have you pulled the latest changes in coins_auth, and run `grunt build`?
+
+- [ ] Is nginx installed, configured and running locally?
+
+- [ ] (only if running in COINSTAC mode) Did you create a cloudant account, or `mkdir /tmp/coinstac-pouchdb`?
+
+If you miss any of these requirements, remove all node modules and reinstall them
+after installing the requirements.

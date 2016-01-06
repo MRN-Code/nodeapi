@@ -100,6 +100,7 @@ var plugins = [
     getAppRouteConfig('coins/file-records.js'),
     getAppRouteConfig('coins/studies.js'),
     getAppRouteConfig('coins/sites.js'),
+    getAppRouteConfig('coins/subjectTypes.js'),
     // getAppRouteConfig('coins/subjects.js'),
     // getAppRouteConfig('coins/intervals.js'),
     // getAppRouteConfig('coins/modalities.js'),

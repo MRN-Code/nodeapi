@@ -74,8 +74,8 @@ exports.register = function(server, options, next) {
                 } else {
                     getReadStudies(creds.username).
                         then(function (studies) {
-                            return new Study().
-                                where('study_id', 'in', studies)
+                            return new Study()
+                                .where('study_id', 'in', studies)
                                 .readAll(creds)
                         })
                         .then(callToJson)

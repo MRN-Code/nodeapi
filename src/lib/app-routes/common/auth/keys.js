@@ -86,9 +86,6 @@ exports.register = function(server, options, next) {
             ].join('<br>'),
             description: 'Login: Get new API key and JWT cookie',
             auth: false,
-            cors: {
-                credentials: true
-            },
             validate: {
                 headers: true, //TODO: validate x-forwaded https header
                 payload: {

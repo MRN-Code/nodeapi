@@ -22,15 +22,7 @@ const connectionConfig = require('./lib/utils/get-connection-options.js')();
 const plugins = require('./lib/utils/get-plugins.js')();
 
 // Set up Server
-const server = new hapi.Server({
-    connections: {
-        routes: {
-            cors: {
-                credentials: true
-            }
-        }
-    }
-});
+const server = new hapi.Server();
 
 server.connection(connectionConfig.http);
 

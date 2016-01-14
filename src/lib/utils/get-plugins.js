@@ -43,6 +43,7 @@ var plugins = [
             return;
         }
     },
+    require('./swagger.js'),
     {
         register: require('good'),
         options: require('./get-good-config.js')()

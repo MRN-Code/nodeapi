@@ -7,7 +7,7 @@ module.exports = function() {
                 {
                     expand: true,
                     cwd: 'src',
-                    src: ['**/*.json'],
+                    src: ['**/*.json', '**/*.yml'],
                     dest: 'dist'
                 }
             ]

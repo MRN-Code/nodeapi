@@ -64,7 +64,7 @@
     "grunt-jscs": "2.1.0",
     "grunt-mocha-cli": "1.14.0",
     "hawk": "3.1.0",
-    "halfpenny": "0.0.2",
+    "halfpenny": "0.0.5",
     "inject-then": "2.0.2",
     "load-grunt-config": "0.17.2",
     "load-grunt-tasks": "3.2.0",

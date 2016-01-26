@@ -57,7 +57,7 @@ module.exports = function initApiClient() {
             uri: 'url',
             body: 'payload',
         },
-        baseUrl: 'http://localhost:' + config.get('httpPort') + '/api',
+        baseUrl: 'http://localhost:' + config.get('httpPort'),
         formatResponseCallback: formatResponseCallback,
         formatRequestHeaders: formatRequestHeaders,
         onPreFormatRequestOptions: onPreFormatRequestOptions,

@@ -7,7 +7,7 @@ const server = require('../../index.js');
 const initApiClient = require('../utils/init-api-client.js');
 const pkg = require(path.join(process.cwd(), 'package.json'));
 const cookieUtils = require('../../lib/utils/cas-cookie-utils.js');
-const baseUrl = 'http://localhost/api/v' + pkg.version + '/auth/cookies';
+const baseUrl = 'http://localhost/auth/cookies';
 /* jscs: disable */
 const expiredCookie = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1vY2hhdGVzdCIsImlkIjoiNDY4NmQxZTYtOGZkYS00NjhiLTg0MDUtMDQzNmU2NTljMWNhIiwiaWF0IjoxNDM3OTQ3MTIyLCJleHAiOjE0Mzc5NDg5MjJ9.O8HCYEe0S5lQ5dZPNoEcrrr3yFpyXUN3Mm7BJbxeaYI'; //jshint ignore:line
 /* jscs: enable */

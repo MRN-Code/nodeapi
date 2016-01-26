@@ -5,7 +5,7 @@ const path = require('path');
 const pkg = require(path.join(process.cwd(), 'package.json'));
 const cliOpts = require('./cli-options.js');
 const chalk = require('chalk');
-const baseRoutePrefix = '/api/v' + pkg.version;
+const baseRoutePrefix = ''; //'/api/v' + pkg.version;
 const baseRoutePath = path.join(__dirname, '../app-routes/');
 
 const schema = require(
@@ -14,18 +14,19 @@ const schema = require(
 
 const getAppRouteConfig = (relPath, prefix) => {
     let routePrefix = baseRoutePrefix;
+    const registerConfig = {
+        register: require(path.join(baseRoutePath, relPath))
+    };
+
     if (prefix) {
-        routePrefix = path.join(baseRoutePrefix, prefix);
+        registerConfig.registrationOptions = {
+            routes: {
+                prefix: '/' + prefix
+            }
+        };
     }
 
-    return {
-        register: require(path.join(baseRoutePath, relPath)),
-        registrationOptions: {
-            routes: {
-                prefix: routePrefix
-            }
-        }
-    };
+    return registerConfig;
 };
 
 // Define plugins
@@ -83,11 +84,19 @@ var plugins = [
     {
         register: require('hapi-swagger'),
         options: {
-            apiVersion: pkg.version
+            info: {
+                version: pkg.version,
+                title: 'COINS API'
+            },
+            basePath: '/api/v' + pkg.version + '/',
+            documentationPath: '/swagger/documentation',
+            jsonPath: '/swagger/swagger.json',
+            swaggerUIPath: '/swagger/swaggerui/',
+            pathPrefixSize: 2
         },
         registrationOptions: {
             routes: {
-                prefix: '/api/v' + pkg.version
+                //prefix: '/api/v' + pkg.version
             }
         }
     },

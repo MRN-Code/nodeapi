@@ -63,6 +63,9 @@ exports.register = function(server, options, next) {
                  'output'
              ].join(' '),
             description: 'Returns a collection of scans',
+            plugins: {
+                'hapi-swagger': { nickname: 'get' }
+            },
             validate: {
                 query: getSchema
             },
@@ -114,7 +117,11 @@ exports.register = function(server, options, next) {
             description: 'Saves a scan',
             validate: {
                 payload: postSchema
-            }
+            },
+            plugins: {
+                'hapi-swagger': { nickname: 'post' }
+            },
+
         },
         handler: (request, reply) => {
             new Scan.forge(request.query)

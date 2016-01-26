@@ -170,7 +170,7 @@ internals.getAnalyses = (docs) => {
 };
 
 internals.getAggregate = (docs) => {
-    return _.find(docs, {aggregate: true}) || {};
+    return _.find(docs, { aggregate: true }) || {};
 };
 
 /**
@@ -387,6 +387,9 @@ internals.getConsortiumDb = (opts) => {
 
 module.exports.getAll = {
     tags: ['api', 'coinstac', 'consortia'],
+    plugins: {
+        'hapi-swagger': { nickname: 'get' }
+    },
     notes: [
         'Returns all consortia stored in consortia DB',
         'No query params supported currently'
@@ -418,6 +421,9 @@ module.exports.getAll = {
 
 module.exports.getOne = {
     tags: ['api', 'coinstac', 'consortia'],
+    plugins: {
+        'hapi-swagger': { nickname: 'getById' }
+    },
     notes: [
         'Returns the consortia referenced by {id}'
     ].join('<br>'),
@@ -457,6 +463,9 @@ module.exports.getOne = {
 
 module.exports.post = {
     tags: ['api', 'coinstac', 'consortia'],
+    plugins: {
+        'hapi-swagger': { nickname: 'post' }
+    },
     notes: [
         'Creates a new consortia object and persists it to database'
     ].join('<br>'),
@@ -523,6 +532,9 @@ module.exports.post = {
 
 module.exports.put = {
     tags: ['api', 'coinstac', 'consortia'],
+    plugins: {
+        'hapi-swagger': { nickname: 'put' }
+    },
     notes: [
         'Updates a consortia object and persists it to database'
     ].join('<br>'),

@@ -13,7 +13,6 @@ if (!cliOpts['without-new-relic']) {
 }
 
 const hapi = require('hapi');
-const config = require('config');
 const Bluebird = require('bluebird');
 const path = require('path');
 require('./lib/utils/promise-uncaught-polyfill.js');
@@ -107,9 +106,8 @@ server.app.pluginsRegistered = plugins.reduce(
     Bluebird.resolve()
 ).then(handleAllPluginsRegistered)
     .catch((err) => {
-        server.plugins.logger.logAndThrowError(
-          ['Error loading plugins'], err
-        );
+        console.log(err.stack);
+        server.log(['error'], err.stack);
         process.exit(1);
 
     });

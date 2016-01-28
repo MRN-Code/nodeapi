@@ -48,11 +48,14 @@
     "vision": "3.0.0"
   },
   "devDependencies": {
+    "axios": "0.5.4",
     "btoa": "1.1.2",
+    "chalk": "1.1.1",
     "code": "1.5.0",
     "coins-grunt-env": "1.0.2",
     "es6-object-assign": "1.0.1",
     "fakeredis": "0.3.2",
+    "fs-extra": "0.26.5",
     "grunt": "0.4.5",
     "grunt-babel": "5.0.3",
     "grunt-contrib-clean": "0.6.0",
@@ -62,8 +65,8 @@
     "grunt-exec": "0.4.6",
     "grunt-jscs": "2.1.0",
     "grunt-mocha-cli": "1.14.0",
-    "hawk": "3.1.0",
     "halfpenny": "0.0.3",
+    "hawk": "3.1.0",
     "inject-then": "2.0.2",
     "load-grunt-config": "0.17.2",
     "load-grunt-tasks": "3.2.0",
@@ -72,7 +75,8 @@
     "pouchdb": "4.0.3",
     "rename-keys": "1.1.2",
     "should": "7.1.0",
-    "time-grunt": "1.2.1"
+    "time-grunt": "1.2.1",
+    "webpack": "1.12.12"
   },
   "scripts": {
     "build": "grunt build",
@@ -81,7 +85,9 @@
     "startdev": "babel-node src/index.js --development -c",
     "lint": "grunt lint",
     "validate": "npm ls",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build",
+    "update-codegen": "node scripts/update-codegen.js",
+    "generate-client": "node scripts/generate-client.js"
   },
   "repository": {
     "type": "git",

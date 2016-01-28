@@ -166,7 +166,7 @@ exports.register = function(server, options, next) {
         config: {
             tags: ['api', 'auth'],
             plugins: {
-                'hapi-swagger': { nickname: 'delete' }
+                'hapi-swagger': { nickname: 'remove' }
             },
             notes: [
                 'Auth signature required. Must match key provided in url.',

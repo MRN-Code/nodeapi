@@ -12,7 +12,7 @@
     }
     root.{{moduleName}}.ApiClient = factory();
   }
-}(this, function(superagent) {
+}(this, function() {
   'use strict';
 
   var ApiClient = function ApiClient(basePath, agent) {
@@ -121,15 +121,19 @@
     if (bodyParam) {
         requestObj.data = bodyParam;
     }
-    return this.agent(requestObj)
+    return this.agent.request(requestObj)
         .then(function(response) {
             if (callback) {
                 callback(null, response.data, response);
+            } else {
+                return response;
             }
         })
         .catch(function(error) {
             if (callback) {
                 callback(error, error.data, error);
+            } else {
+                throw error;
             }
         });
   };

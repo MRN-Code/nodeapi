@@ -55,18 +55,5 @@
                 "aclContextName": "study"
             }
         }
-    ],
-    "coinstac": {
-        "pouchdb": {
-            "consortiaMeta": {
-                "conn": false, //necessary to override default
-                "path": "/tmp/coinstac-pouchdb",
-                "name": "consortiameta"
-            },
-            "consortia": {
-                "conn": false, //necessary to override default
-                "path": "/tmp/coinstac-pouchdb"
-            }
-        }
-    }
+    ]
 }

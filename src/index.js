@@ -82,11 +82,9 @@ const handleAllPluginsRegistered = () => {
     // Wrap models with Shield
     require(path.join(__dirname, 'lib/utils/shields-up.js'))(server);
 
-    if (!module.parent) {
-        server.start(() => {
-            server.log(['startup'], 'server running at: ' + server.info.uri);
-        });
-    }
+    server.start(() => {
+        server.log(['startup'], 'server running at: ' + server.info.uri);
+    });
 };
 
 server.registerThen = Bluebird.promisify(server.register);

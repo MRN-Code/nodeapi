@@ -2,7 +2,7 @@
 
 const chai = require('chai');
 const Bluebird = require('bluebird');
-const server = require('../../index.js');
+const serverReady = require('../utils/get-server.js');
 const initApiClient = require('../utils/init-api-client.js');
 let apiClient;
 let credentials;
@@ -22,7 +22,7 @@ chai.should();
 
 describe('POST keys (login)', () => {
     before('wait for server to be ready', () => {
-        return server.app.pluginsRegistered
+        return serverReady
             .then(initApiClient)
             .then(setApiClient);
     });
@@ -30,14 +30,14 @@ describe('POST keys (login)', () => {
     describe('Unsuccessul login', () => {
         it('should respond with 401 if username or pwd are incorrect', () => {
             const handleAuthError = (err) => {
-                return err.data;
+                return err;
             };
 
             return apiClient.auth.login('wrongUser', 'wrongPwd')
                 .catch(handleAuthError)
                 .then((response) => {
                     //should have thrown an error;
-                    response.statusCode.should.equal(401);
+                    response.status.should.equal(401);
                     return response;
                 });
         });
@@ -53,7 +53,7 @@ describe('POST keys (login)', () => {
         it('Should return status-code 200', () => {
             return loginPromise
                 .then((response) => {
-                    response.statusCode.should.to.eql(200);
+                    response.status.should.eql(200);
                     return response;
                 });
         });
@@ -61,7 +61,7 @@ describe('POST keys (login)', () => {
         it('Should should return a hawk auth object in payload', () => {
             return loginPromise
                 .then((response) => {
-                    credentials = JSON.parse(response.payload).data[0];
+                    credentials = response.data.data[0];
                     credentials.should.to.be.instanceOf(Object);
                     credentials.should.to.have.property('id');
                     credentials.should.to.have.property('key');
@@ -86,14 +86,16 @@ describe('POST keys (login)', () => {
 
 describe('DELETE keys (logout)', () => {
     before('wait for server to be ready', () => {
-        return server.app.pluginsRegistered;
+        return serverReady;
     });
 
     describe('Successful logout', () => {
         let responsePromise;
+        let credentials;
         before('Login first, then logout', () => {
             responsePromise = apiClient.auth.login('mochatest', 'mocha')
                 .then(() => {
+                    credentials = apiClient.auth.getAuthCredentials();
                     return apiClient.auth.logout();
                 });
 
@@ -103,10 +105,9 @@ describe('DELETE keys (logout)', () => {
         it('Should respond with 200 OK', () => {
             return responsePromise
                 .then((response) => {
-                    response.statusCode.should.equal(200);
+                    response.status.should.equal(200);
                     return response;
                 });
-
         });
 
         it('Should expire auth cookie', () => {
@@ -124,18 +125,21 @@ describe('DELETE keys (logout)', () => {
         it('Should unset the hawk key in the key store', () => {
             return responsePromise
                 .then((response) => {
-                    const redisClient = server.plugins['hapi-redis'].client;
-                    return new Bluebird((res, rej) => {
-                        const id = apiClient.getAuthCredentials().id;
-                        redisClient.hgetall(id, (result) => {
-                            const errMsg = 'Hawk key should no longer exist';
-                            if (result !== null) {
-                                rej(new Error(errMsg));
-                                return;
-                            }
+                    return serverReady.then((server) => {
+                        const redisClient = server.plugins['hapi-redis'].client;
+                        return new Bluebird((res, rej) => {
+                            const id = credentials.id;
+                            redisClient.hgetall(id, (result) => {
+                                const errMsg = 'Hawk id should not still exist';
+                                if (result !== null) {
+                                    rej(new Error(errMsg));
+                                    return;
+                                }
 
-                            res(response);
+                                res(response);
+                            });
                         });
+
                     });
                 });
         });
@@ -146,12 +150,17 @@ describe('DELETE keys (logout)', () => {
     describe('Already logged out', () => {
         let loggedInAndOut = false;
         let responsePromise;
+        let credentials;
         before(() => {
             const callLogout = () => {
+                credentials = apiClient.auth.getAuthCredentials();
                 return apiClient.auth.logout();
             };
 
             const callLogoutAgain = () => {
+
+                // simulate being logged in still by re-setting creds
+                apiClient.auth.setAuthCredentials(credentials);
                 loggedInAndOut = true;
                 return apiClient.auth.logout();
             };
@@ -160,7 +169,7 @@ describe('DELETE keys (logout)', () => {
                 .then(callLogout)
                 .then(callLogoutAgain)
                 .catch((err) => {
-                    return err.data;
+                    return err;
                 });
 
             return responsePromise;
@@ -170,7 +179,7 @@ describe('DELETE keys (logout)', () => {
             return responsePromise
                 .then((response) => {
                     loggedInAndOut.should.equal(true);
-                    response.statusCode.should.equal(401);
+                    response.status.should.equal(401);
                     return response;
                 });
         });

@@ -1,67 +1,27 @@
 'use strict';
 
-const _ = require('lodash');
-const qs = require('qs');
-const path = require('path');
-const pkg = require(path.join(process.cwd(), 'package.json'));
-const server = require('../../index.js');
-const formatResponseCallback = (response) => {
-    response.body = response.result;
-    return response;
-};
-
-const formatRequestHeaders = (headers) => {
-    headers = headers || [];
-
-    // HAWK auth relies on x-forwarded-host headers...
-    headers.push({name: 'x-forwarded-host', value:'localhost:8800' });
-    return headers.reduce((target, header) => {
-        target[header.name] = header.value;
-        return target;
-    }, {});
-
-};
-
-/**
- * perform some intial formatting before allowing the API client to format
- * the response object. In this case, we need to append the query string params
- * to the uri
- * @param  {object} request request options, as formatted for node-request
- * @return {object}         request options to be used by auto-formatter
- */
-const onPreFormatRequestOptions = (request) => {
-    let queryString;
-    if (request.qs) {
-        queryString = qs.stringify(request.qs);
-        if (queryString.length) {
-            request.uri += '?' + queryString;
-        }
-    }
-
-    //Add fake remote IP address
-    request.remoteAddress = 'mochatestIP';
-
-    return request;
-};
+const DomStorage = require('dom-storage');
+const axios = require('axios');
+const clientFactory = require('../../client/client.js');
 
 /**
  * Initialize the API client for use with testing
  * designed to be called after allPluginsLoaded resolves
  * @return {object} the initialized API Client
  */
-module.exports = function initApiClient() {
-    const config = require('config');
+module.exports = function initApiClient(server) {
+    const port = server.connections[0].info.port;
     const apiClientOptions = {
-        requestFn: _.bind(server.injectThen, server),
-        requestObjectMap: {
-            uri: 'url',
-            body: 'payload',
-        },
-        baseUrl: 'http://localhost:' + config.get('httpPort'),
-        formatResponseCallback: formatResponseCallback,
-        formatRequestHeaders: formatRequestHeaders,
-        onPreFormatRequestOptions: onPreFormatRequestOptions,
-        version: pkg.version
+        apiUrl: `http://localhost:${port}`,
+        xhrAgent: axios,
+        authStore: new DomStorage(null, { strict: true })
     };
-    return require('halfpenny')(apiClientOptions);
+    const client  = clientFactory(apiClientOptions);
+    client.ApiClient.default.agent.interceptors.request.use((reqConfig) => {
+        //simulate proxy service, since hawk expects to find the hostname
+        //in the x-forwaded-host header field
+        reqConfig.headers['x-forwarded-host'] = `localhost:${port}`;
+        return reqConfig;
+    });
+    return client;
 };

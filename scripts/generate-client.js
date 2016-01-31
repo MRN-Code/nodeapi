@@ -79,7 +79,6 @@ const exit = () => {
 };
 
 const handleError = (err) => {
-    debugger;
     console.log(chalk.red('Error generating client'));
     console.log(chalk.red(err.message));
     console.dir(err.stack);

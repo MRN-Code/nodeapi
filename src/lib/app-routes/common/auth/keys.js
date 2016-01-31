@@ -168,6 +168,11 @@ exports.register = function(server, options, next) {
             plugins: {
                 'hapi-swagger': { nickname: 'remove' }
             },
+            validate: {
+                params: {
+                    id: joi.string().required()
+                }
+            },
             notes: [
                 'Auth signature required. Must match key provided in url.',
                 'A `set-cookie` header in response invalidates the JWT cookie.',

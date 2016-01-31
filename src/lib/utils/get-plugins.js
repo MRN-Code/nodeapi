@@ -116,11 +116,7 @@ var plugins = [
 
 if (cliOpts.coinstac) {
     console.log(chalk.blue('Including COINSTAC routes'));
-    plugins.push({
-        register: require('./houchdb.js'),
-        options: config.get('coinstac.pouchdb.consortiaMeta')
-    });
-    plugins.push(getAppRouteConfig('coinstac/consortia.js', 'coinstac'));
+    // @TODO: add plugin for coinstac couchdb auth/proxy
 }
 
 module.exports = () => { return plugins; };

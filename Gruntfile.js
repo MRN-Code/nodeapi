@@ -6,7 +6,6 @@ module.exports = function(grunt) {
 
     // By default, lint and run all tests.
     grunt.registerTask('lint', ['jshint', 'jscs']);
-    grunt.registerTask('test', ['build', 'mochacli']);
-    grunt.registerTask('default', ['lint', 'test']);
+    grunt.registerTask('default', ['lint', 'build']);
     grunt.registerTask('build', ['clean', 'copy', 'babel']);
 };

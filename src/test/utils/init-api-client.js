@@ -12,9 +12,6 @@ const formatResponseCallback = (response) => {
 
 const formatRequestHeaders = (headers) => {
     headers = headers || [];
-
-    // HAWK auth relies on x-forwarded-host headers...
-    headers.push({name: 'x-forwarded-host', value:'localhost:8800' });
     return headers.reduce((target, header) => {
         target[header.name] = header.value;
         return target;

@@ -1,10 +1,11 @@
 'use strict';
 
 const chai = require('chai');
-const server = require('../../index.js');
+const serverReady = require('../utils/get-server.js');
 const Bluebird = require('bluebird');
 const initApiClient = require('../utils/init-api-client.js');
 let apiClient;
+let server;
 
 /**
  * set the apiClient variable inside the parent closure
@@ -16,12 +17,23 @@ const setApiClient = function(client) {
     return client;
 };
 
+/**
+ * set server variable inside parent clojure
+ * @param  {object} hapiServer the server object returned by serverReady promise
+ * @return {object}            the same server object
+ */
+const setServer = (hapiServer) => {
+    server = hapiServer;
+    return hapiServer;
+};
+
 // Set should property of all objects for BDD assertions
 const should = chai.should();
 
 describe('Scan routes', () => {
     before('wait for server to be ready', () => {
-        return server.app.pluginsRegistered
+        return serverReady
+            .then(setServer)
             .then(initApiClient)
             .then(setApiClient)
             .then(function addScanPrivsToTestUser() {
@@ -47,29 +59,29 @@ describe('Scan routes', () => {
         });
 
         it('Should return all scans', () => {
-            return apiClient.scans.get()
+            return apiClient.ScansApi.get()
                 .then((response) => {
-                    response.result.data.should.have.length.of.at.least(1);
-                    response.result.data[0].should.have.property('scanId');
-                    should.equal(response.result.error, null);
+                    response.data.data.should.have.length.of.at.least(1);
+                    response.data.data[0].should.have.property('scanId');
+                    should.equal(response.data.error, null);
                 });
         });
 
         it('Should return scans by ursi', () => {
-            return apiClient.scans.get({ ursi: 'M99938215' })
+            return apiClient.ScansApi.get(null, 'M99938215')
                 .then((response) => {
-                    response.result.data.should.have.length.of.at.least(1);
-                    response.result.data[0].should.have.property('scanId');
-                    should.equal(response.result.error, null);
+                    response.data.data.should.have.length.of.at.least(1);
+                    response.data.data[0].should.have.property('scanId');
+                    should.equal(response.data.error, null);
                 });
         });
 
         it('Should return scans by study', () => {
-            return apiClient.scans.get({ studyId: 8320 })
+            return apiClient.ScansApi.get(8320)
                 .then((response) => {
-                    response.result.data.should.have.length.of.at.least(1);
-                    response.result.data[0].should.have.property('scanId');
-                    should.equal(response.result.error, null);
+                    response.data.data.should.have.length.of.at.least(1);
+                    response.data.data[0].should.have.property('scanId');
+                    should.equal(response.data.error, null);
                 });
         });
 

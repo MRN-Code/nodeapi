@@ -1,6 +1,6 @@
 'use strict';
 
-const client = require('./codegen-client/src/index.js');
+const clientFactory = require('./codegen-client/src/index.js');
 const authClient = require('./authClient');
 
 /**
@@ -13,13 +13,7 @@ const authClient = require('./authClient');
  * @return {object} apiClient object
  */
 module.exports = (config) => {
-
-    // create a new instance of the agent because authClient adds an
-    // interceptor, and we do not want to modify the global agent.
-    const xhrAgent = config.xhrAgent.create();
-
-    // initialize the default ApiClient
-    client.ApiClient.init(config.apiUrl, xhrAgent);
+    const client = clientFactory(config);
 
     // intialize the authClient, which wraps the auth methods of the apiClient
     client.auth = authClient.init(client, config.authStore);

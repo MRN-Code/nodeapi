@@ -20,7 +20,7 @@ const authClient = {
     init: (apiClient, authStorage) => {
         apiClient.auth = authClient;
         authClient.authStorage = authStorage;
-        authClient.authKeysApi = new apiClient.AuthkeysApi();
+        authClient.authKeysApi = apiClient.AuthkeysApi;
         authClient.interceptRequests();
         authClient.initialized = true;
         return authClient;

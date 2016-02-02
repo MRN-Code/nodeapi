@@ -78,6 +78,26 @@
   };
 
   /**
+   * Check if the given parameter value is like file content.
+   */
+  ApiClient.prototype.isFileParam = function isFileParam(param) {
+    // Buffer or fs.ReadStream in Node.js
+    if (typeof module === 'object' && module.exports &&
+        (param instanceof Buffer || param instanceof require('fs').ReadStream)) {
+      return true;
+    }
+    // Blob in browser
+    if (typeof Blob === 'function' && param instanceof Blob) {
+      return true;
+    }
+    // File in browser (it seems File object is also instance of Blob, but keep this for safe)
+    if (typeof File === 'function' && param instanceof File) {
+      return true;
+    }
+    return false;
+  };
+
+  /**
    * Normalize parameters values:
    *   remove nils,
    *   keep files and arrays,
@@ -88,7 +108,7 @@
     for (var key in params) {
       if (params.hasOwnProperty(key) && params[key] != null) {
         var value = params[key];
-        if (value instanceof Blob || Array.isArray(value)) {
+        if (this.isFileParam(value) || Array.isArray(value)) {
           newParams[key] = value;
         } else {
           newParams[key] = this.paramToString(value);

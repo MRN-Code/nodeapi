@@ -1,7 +1,7 @@
 'use strict';
 
 const chai = require('chai');
-const server = require('../../index.js');
+const serverReady = require('../utils/get-server.js');
 const initApiClient = require('../utils/init-api-client.js');
 const cookieUtils = require('../../lib/utils/cas-cookie-utils.js');
 const baseUrl = 'http://localhost/auth/cookies';
@@ -9,6 +9,7 @@ const baseUrl = 'http://localhost/auth/cookies';
 const expiredCookie = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1vY2hhdGVzdCIsImlkIjoiNDY4NmQxZTYtOGZkYS00NjhiLTg0MDUtMDQzNmU2NTljMWNhIiwiaWF0IjoxNDM3OTQ3MTIyLCJleHAiOjE0Mzc5NDg5MjJ9.O8HCYEe0S5lQ5dZPNoEcrrr3yFpyXUN3Mm7BJbxeaYI'; //jshint ignore:line
 /* jscs: enable */
 let apiClient;
+let server;
 let cookie;
 let parsedCookie;
 let credentials;
@@ -24,6 +25,11 @@ const setApiClient = function(client) {
     apiClient = client;
     return client;
 };
+
+const setServer = function(hapiServer) {
+    server = hapiServer;
+    return hapiServer;
+}
 
 /**
  * extract the cookie value from the set-cookie header
@@ -50,14 +56,15 @@ chai.should();
 
 describe('Cookies', () => {
     before('wait for server to be ready', () => {
-        return server.app.pluginsRegistered
+        return serverReady
+            .then(setServer)
             .then(initApiClient)
             .then(setApiClient)
             .then(login)
             .then((response) => {
                 const rawCookies = response.headers['set-cookie'];
                 cookie = getCasCookieValue(rawCookies[0]);
-                credentials = response.body.data[0];
+                credentials = response.data.data[0];
 
                 return cookieUtils.verifyAndParse(cookie,
                     server.plugins['hapi-redis'].client);
@@ -101,7 +108,7 @@ describe('Cookies', () => {
         const logoutThenResetOldCredentials = (oldCredentials) => {
             return apiClient.auth.logout()
                 .then(() => {
-                    return apiClient.setAuthCredentials(oldCredentials);
+                    return apiClient.auth.setAuthCredentials(oldCredentials);
                 });
 
         };
@@ -112,7 +119,7 @@ describe('Cookies', () => {
             const request = {
                 method: method,
                 url: url,
-                headers: apiClient.generateHawkHeader(url, method).field
+                headers: apiClient.auth.generateHawkHeader(url, method).field
             };
             return server.injectThen(request).then((response) => {
                 response.statusCode.should.equal(401);
@@ -120,8 +127,8 @@ describe('Cookies', () => {
             });
         };
 
-        return apiClient.getAuthCredentials()
-            .then(logoutThenResetOldCredentials)
+        const credentials = apiClient.auth.getAuthCredentials();
+        return logoutThenResetOldCredentials(credentials)
             .then(sendRequest);
     });
 

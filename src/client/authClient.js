@@ -1,6 +1,7 @@
 'use strict';
 const getHawkHeader = require('hawk/lib/client').header;
 const authKeyId = 'COINS_AUTH_CREDENTIALS';
+const url = require('url');
 
 // define base64 encoding function for non-browser environments
 // @TODO: avoid shipping authClient with browser bundle
@@ -34,9 +35,18 @@ const authClient = {
         const xhrAgent = authClient.authKeysApi.apiClient.agent;
         const addHawkHeaders = (requestConfig) => {
             if (authClient.getAuthCredentials()) {
-                const url = requestConfig.url;
                 const method = requestConfig.method;
-                const authHeader = authClient.generateHawkHeader(url, method);
+
+                // add query params to URL
+                const urlObj = url.parse(requestConfig.url);
+                const query = requestConfig.params;
+                urlObj.query = query;
+                const urlString = url.format(urlObj);
+
+                const authHeader = authClient.generateHawkHeader(
+                    urlString,
+                    method
+                );
                 requestConfig.headers.Authorization = authHeader.field;
             }
 

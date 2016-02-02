@@ -45,6 +45,9 @@ var plugins = [
         }
     },
     {
+        register: require('./strip-api-url-prefix.js')
+    },
+    {
         register: require('good'),
         options: require('./get-good-config.js')()
     },

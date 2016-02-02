@@ -69,9 +69,9 @@
     "grunt-exec": "0.4.6",
     "grunt-jscs": "2.1.0",
     "grunt-mocha-cli": "1.14.0",
-    "halfpenny": "0.0.3",
     "hawk": "3.1.0",
     "inject-then": "2.0.2",
+    "json-loader": "0.5.4",
     "load-grunt-config": "0.17.2",
     "load-grunt-tasks": "3.2.0",
     "memdown": "1.0.0",
@@ -84,7 +84,7 @@
     "webpack": "1.12.12"
   },
   "scripts": {
-    "build": "grunt build",
+    "build": "grunt build-internal",
     "postbuild": "npm run-script generate-client",
     "pretest": "npm run-script build",
     "test": "mocha --harmony --timeout=10000 -R spec 'dist/test/integration/*.js' 'dist/test/unit/*.js'",
@@ -94,7 +94,8 @@
     "validate": "npm ls",
     "postinstall": "npm run build",
     "update-codegen": "node scripts/update-codegen.js",
-    "generate-client": "node scripts/generate-client.js"
+    "generate-client": "node scripts/generate-client.js",
+    "postgenerate-client": "node node_modules/webpack/bin/webpack.js"
   },
   "repository": {
     "type": "git",

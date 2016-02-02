@@ -75,7 +75,7 @@ var plugins = [
         register: require('./response-formatter.js'),
         options: {
             excludeVarieties: ['view', 'file'],
-            excludePlugins: ['hapi-swagger']
+            excludePlugins: ['hapi-swagger', 'client-source']
         }
     },
     require('./authentication.js'),
@@ -106,6 +106,14 @@ var plugins = [
     getAppRouteConfig('coins/scans.js'),
     {
         register: require('./version-route.js'),
+        registrationOptions: {
+            routes: {
+                prefix: '/api'
+            }
+        }
+    },
+    {
+        register: require('./client-route.js'),
         registrationOptions: {
             routes: {
                 prefix: '/api'

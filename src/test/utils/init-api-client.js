@@ -2,7 +2,7 @@
 
 const DomStorage = require('dom-storage');
 const axios = require('axios');
-const clientFactory = require('../../client/client.js');
+const clientFactory = require('../../client/dist/client.js');
 
 /**
  * Initialize the API client for use with testing

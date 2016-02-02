@@ -72,6 +72,9 @@ var plugins = [
         }
     },
     {
+        register: require('./add-proxy-host-header.js'),
+    },
+    {
         register: require('./response-formatter.js'),
         options: {
             excludeVarieties: ['view', 'file'],

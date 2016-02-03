@@ -94,7 +94,6 @@ var plugins = [
                 version: pkg.version,
                 title: 'COINS API'
             },
-            basePath: '/api/v' + pkg.version + '/',
             documentationPath: '/swagger/documentation',
             jsonPath: '/swagger/swagger.json',
             swaggerUIPath: '/swagger/swaggerui/',

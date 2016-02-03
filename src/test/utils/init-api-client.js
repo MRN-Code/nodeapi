@@ -14,7 +14,7 @@ module.exports = function initApiClient(server) {
     const apiClientOptions = {
         apiUrl: `http://localhost:${port}`,
         xhrAgent: axios,
-        authStore: new DomStorage(null, { strict: true })
+        store: new DomStorage(null, { strict: true })
     };
     const client  = clientFactory(apiClientOptions);
     client.ApiClient.default.agent.interceptors.request.use((reqConfig) => {

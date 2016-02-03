@@ -12,16 +12,12 @@ module.exports = {
     entry: {
         client: path.join(clientDir, 'client.js')
     },
-    externals: [
-        'dom-storage'
-    ],
     output: {
         path: path.join(clientDir, 'dist'),
         filename: '[name].js', // one for each `entry`
         chunkFilename: '[id].chunk.js',
         library: 'client',
-        libraryTarget: 'umd',
-        umdNamedDefine: true,
+        libraryTarget: 'commonjs2'
     },
     plugins: [
         new DedupePlugin(),

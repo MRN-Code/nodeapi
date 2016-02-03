@@ -7,7 +7,7 @@ exports.register = (server, options, next) =>  {
         path: '/client/{param*}',
         method: 'GET',
         config: {
-            tags: ['api'],
+            tags: ['client'],
             notes: 'Add filename (e.g. client.js)',
             description: 'Returns client source code',
             auth: false,

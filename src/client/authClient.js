@@ -18,11 +18,13 @@ const authClient = {
      * @param  {object} authStorage the localstorage provider to use for creds
      * @return {object}             the authClient
      */
-    init: (apiClient, authStorage) => {
+    init: (apiClient, config) => {
+        var authStorage = config.store;
+        var xhrAgent = config.xhrAgent;
         apiClient.auth = authClient;
         authClient.authStorage = authStorage;
         authClient.authKeysApi = apiClient.AuthkeysApi;
-        authClient.interceptRequests();
+        authClient.interceptRequests(xhrAgent);
         authClient.initialized = true;
         return authClient;
     },
@@ -31,8 +33,7 @@ const authClient = {
      * set up xhr interceptor to add HAWK headers to requests
      * @return {void}
      */
-    interceptRequests: () => {
-        const xhrAgent = authClient.authKeysApi.apiClient.agent;
+    interceptRequests: (xhrAgent) => {
         const addHawkHeaders = (requestConfig) => {
             if (authClient.getAuthCredentials()) {
                 const method = requestConfig.method;

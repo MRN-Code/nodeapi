@@ -27,6 +27,11 @@ const opts = require('nomnom')
         flag: true,
         help: 'Do not start new relic agent'
     })
+    .option('port', {
+        abbr: 'p',
+        default: null,
+        help: 'Port to listen on'
+    })
     .parse();
 
 _.each(opts, (val, opt) => {

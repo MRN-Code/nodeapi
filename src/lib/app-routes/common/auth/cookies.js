@@ -14,6 +14,9 @@ exports.register = (server, options, next) =>  {
         method: 'GET',
         config: {
             tags: ['api', 'auth', '2.0backwardscompat'],
+            plugins: {
+                'hapi-swagger': { nickname: 'get' }
+            },
             notes: [
                 'Only intended for use by COINS 2.0',
                 'Possible error codes:',

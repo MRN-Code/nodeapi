@@ -1,4 +1,13 @@
 {
+    "build": {
+        "codegenSrcPath": "swagger-codegen-src",
+        "codegenSrcExecRelPath": "modules/swagger-codegen-cli/target/swagger-codegen-cli.jar",
+        "codegenPath": "swagger-codegen/bin",
+        "codegenExecRelPath": "swagger-codegen-cli.jar",
+        "codegenRepoUrl": "git@github.com:swagger-api/swagger-codegen.git",
+        "codegenTemplatePath": "swagger-codegen/lib/javascript-template",
+        "clientDestPath": "dist/client/codegen-client"
+    },
     "httpPort": 8800,
     "cookieDomain": ".mrn.org",
     "hawkKeyLifespan": 1800000,
@@ -46,18 +55,5 @@
                 "aclContextName": "study"
             }
         }
-    ],
-    "coinstac": {
-        "pouchdb": {
-            "consortiaMeta": {
-                "conn": false, //necessary to override default
-                "path": "/tmp/coinstac-pouchdb",
-                "name": "consortiameta"
-            },
-            "consortia": {
-                "conn": false, //necessary to override default
-                "path": "/tmp/coinstac-pouchdb"
-            }
-        }
-    }
+    ]
 }

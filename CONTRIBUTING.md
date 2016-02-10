@@ -31,7 +31,6 @@ Here is a simple checklist for adding new routes. It explains where new code mus
 - [ ] **Tests** : where possible, begin by writing tests that fail (because the new feature or fix is not yet implemented).
   - [ ] **Unit tests** are added to `test/unit`
   - [ ] **Integration tests** are added to `test/integration`.
-  - [ ] A **Client SDK** is used to run integration tests of each route. The clients are added to `test/sdk`.  See `test/sdk/CONTRIBUTING.md`
 
   See `test/CONTRIBUTING.md`.
 

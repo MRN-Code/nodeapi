@@ -8,7 +8,7 @@ var dbConfig = require('./get-db-config.js')();
  */
 function getKnexConfig() {
     return {
-        debug: true,
+        debug: false,
         client: 'pg',
         connection: {
             host: dbConfig.host,

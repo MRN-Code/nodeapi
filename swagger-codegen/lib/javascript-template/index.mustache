@@ -1,0 +1,34 @@
+(function(factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module.
+    define(['./ApiClient'{{#apiInfo}}{{#apis}}, './api/{{importPath}}'{{/apis}}{{/apiInfo}}], factory);
+  } else if (typeof module === 'object' && module.exports) {
+    // CommonJS-like environments that support module.exports, like Node.
+    module.exports = factory(require('./ApiClient'){{#apiInfo}}{{#apis}}, require('./api/{{importPath}}'){{/apis}}{{/apiInfo}});
+  }
+}(function(ApiClient{{#apiInfo}}{{#apis}}, {{importPath}}{{/apis}}{{/apiInfo}}) {
+  'use strict';
+
+  /**
+   * Initialize the API client (singleton)
+   * @param  {object} config contains properties:
+   *                         apiUrl: the base URL of the remote API host
+   *                         xhrAgent: the XHR Agent to be used: (axios)
+   *                         authStore: a persistent data store for auth keys.
+   *                             should implement a sync localstorage interface.
+   * @return {object} apiClient object
+   */
+  return function(config){
+    // create a new instance of the agent because authClient adds an
+    // interceptor, and we do not want to modify the global agent.
+    const xhrAgent = config.xhrAgent.create();
+
+    // initialize the default ApiClient
+    ApiClient.init(config.apiUrl, xhrAgent);
+
+    return {
+      ApiClient: ApiClient{{#apiInfo}}{{#apis}},
+      {{importPath}}: new {{importPath}}(){{/apis}}{{/apiInfo}}
+    };
+  };
+}));

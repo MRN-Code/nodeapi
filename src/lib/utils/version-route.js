@@ -12,6 +12,9 @@ exports.register = (server, options, next) =>  {
             notes: 'Get current version of API',
             description: 'Returns current version of API.',
             auth: false,
+            plugins: {
+                'hapi-swagger': { nickname: 'get' }
+            },
             handler: (request, reply) => {
                 reply({ version: 'v' + pkg.version });
             }

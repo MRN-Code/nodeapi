@@ -26,8 +26,6 @@ These are simple, since there are not many dependencies. See existing unit tests
 
 Follow the steps below to write a new integration test.
 
-- [ ] Write an API client library for your routes. **See `test/sdk/CONTRIBUTING.md`**
-
 - [ ] Create a new file in test/integration/<route_name>.js, and paste the `integration test template` into it
 
 - [ ] Add your test logic.
@@ -40,9 +38,10 @@ Follow the steps below to write a new integration test.
 'use strict';
 
 const chai = require('chai');
-const server = require('../../index.js');
+const serverReady = require('../utils/get-server.js');
 const initApiClient = require('../utils/init-api-client.js');
 let apiClient;
+let server;
 let credentials;
 
 /**
@@ -55,6 +54,16 @@ const setApiClient = function(client) {
     return client;
 };
 
+/**
+ * set server variable inside parent clojure
+ * @param  {object} hapiServer the server object returned by serverReady promise
+ * @return {object}            the same server object
+ */
+const setServer = (hapiServer) => {
+    server = hapiServer;
+    return hapiServer;
+};
+
 // Set should property of all objects for BDD assertions
 chai.should();
 
@@ -62,14 +71,15 @@ describe('Replace this with what your test describes', () => {
 
     // Always wait for the server to be ready before beginning any tests
     before('wait for server to be ready', () => {
-        return server.app.pluginsRegistered
+        return serverReady
+            .then(setServer)
             .then(initApiClient)
             .then(setApiClient);
     });
 
     it('does what we expect', () => {
         apiClient.auth.login('mochatest', 'mocha')
-            .then(apClient.myLib.get)
+            .then(apClient.MyLib.get)
             .then(assert stuff);
     });
 });

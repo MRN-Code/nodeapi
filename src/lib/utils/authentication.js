@@ -105,8 +105,8 @@ module.exports.register = function(server, options, next) {
         };
 
         return new UserRole()
-            .where({username: encryptedUsername})
-            .fetchAll({withRelated: 'role'})
+            .where({ username: encryptedUsername })
+            .fetchAll({ withRelated: 'role' })
             .then(resetStudyRoles)
             .then(getStudyRoles)
             .catch((err) => {
@@ -269,7 +269,7 @@ module.exports.register = function(server, options, next) {
 
         //TODO: if User is ever protected with the bookshelf shield,
         //we will need to figure out a way to get around that...
-        return new User({username: encryptedUsername})
+        return new User({ username: encryptedUsername })
             .fetch()
             .then(checkAccountStatus)
             .then(comparePassword)

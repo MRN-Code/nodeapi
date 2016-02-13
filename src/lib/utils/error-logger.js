@@ -20,12 +20,12 @@ const getLogData = (err) => {
 module.exports.register = (server, options, next) => {
 
     //logs error
-    logger.logError = (tags,err) => {
+    logger.logError = (tags, err) => {
         server.log(['error'].concat(tags), getLogData(err));
     };
 
     //logs and throws error
-    logger.logAndThrowError = (tags,err) => {
+    logger.logAndThrowError = (tags, err) => {
         server.log('[error]'.concat(tags), getLogData(err));
         throw err;
     };

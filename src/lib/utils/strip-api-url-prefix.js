@@ -8,6 +8,7 @@ module.exports.register = function(server, options, next) {
         if (newPath.indexOf('/api/v.') < 0) {
             return reply.continue();
         }
+
         let newUrl = _.clone(request.url);
         delete newUrl.path;
         delete newUrl.href;

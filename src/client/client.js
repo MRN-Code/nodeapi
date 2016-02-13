@@ -1,18 +1,18 @@
 'use strict';
 
 (function(factory) {
-  if (typeof define === 'function' && define.amd) {
-    // AMD. Register as an anonymous module.
-    define(factory);
-  } else if (typeof module === 'object' && module.exports) {
-    // CommonJS-like environments that support module.exports, like Node.
-    module.exports = factory();
-  }
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(factory);
+    } else if (typeof module === 'object' && module.exports) {
+        // CommonJS-like environments that support module.exports, like Node.
+        module.exports = factory();
+    }
 })(function() {
 
     const clientFactory = require('./codegen-client/src/index.js');
     const authClient = require('./authClient');
-    
+
     /**
      * Initialize the API client (singleton)
      * @param  {object} config contains properties:
@@ -24,7 +24,7 @@
      */
     return (config) => {
         const client = clientFactory(config);
-    
+
         // intialize the authClient, which wraps the auth methods of the apiClient
         client.auth = authClient.init(client, config.store);
         return client;

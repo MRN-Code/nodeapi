@@ -71,7 +71,7 @@ describe('responseFormatter', () => {
             method: 'GET',
             config: {
                 handler: (request, reply) => {
-                    reply({key: 'some mochat test object'});
+                    reply({ key: 'some mochat test object' });
                 }
             }
         });

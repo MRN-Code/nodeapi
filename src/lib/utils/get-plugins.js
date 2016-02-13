@@ -129,6 +129,7 @@ var plugins = [
 
 if (cliOpts.coinstac) {
     console.log(chalk.blue('Including COINSTAC routes'));
+
     // @TODO: add plugin for coinstac couchdb auth/proxy
 }
 

@@ -50,9 +50,6 @@
     "vision": "3.0.0"
   },
   "devDependencies": {
-    "axios": "0.5.4",
-    "btoa": "1.1.2",
-    "chalk": "1.1.1",
     "code": "1.5.0",
     "coins-grunt-env": "1.0.2",
     "dom-storage": "2.0.2",
@@ -95,7 +92,7 @@
     "postinstall": "npm run build",
     "update-codegen": "node scripts/update-codegen.js",
     "generate-client": "node scripts/generate-client.js",
-    "postgenerate-client": "node node_modules/webpack/bin/webpack.js"
+    "postgenerate-client": "webpack"
   },
   "repository": {
     "type": "git",

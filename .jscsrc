@@ -4,5 +4,12 @@
     "validateIndentation": 4,
     "safeContextKeyword": ["self"],
     "disallowMultipleVarDecl": "exceptUndefined",
-    "requireTrailingComma": null
+    "requireTrailingComma": null,
+    "requireSpacesInAnonymousFunctionExpression": {
+        "beforeOpeningCurlyBrace": true
+    },
+    "disallowSpacesInFunction": {
+        "beforeOpeningRoundBrace": true,
+        "beforeopeningCurlyBrace": false
+    }
 }

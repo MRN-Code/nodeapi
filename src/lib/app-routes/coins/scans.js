@@ -82,7 +82,6 @@ exports.register = function(server, options, next) {
                         .then(callToJson)
                         .then(reply)
                         .catch((err) => {
-                            errorLogger.logError(['scans'], err);
                             reply(boom.wrap(err));
                         });
                 } else {
@@ -91,7 +90,6 @@ exports.register = function(server, options, next) {
                         .then(callToJson)
                         .then(reply)
                         .catch((err) => {
-                            errorLogger.logError(['scans'], err);
                             reply(boom.wrap(err));
                         });
                 }

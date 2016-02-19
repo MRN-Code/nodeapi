@@ -33,7 +33,6 @@ var plugins = [
     require('./error-logger.js'),
     require('inject-then'),
     require('hapi-auth-hawk'),
-    require('h2o2'),
     {
         register: require('hapi-redis'),
         options: require('./get-redis-config.js')(),

@@ -1,4 +1,4 @@
-    'use strict';
+'use strict';
 const Bluebird = require('bluebird');
 const config = require('config');
 const path = require('path');

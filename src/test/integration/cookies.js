@@ -29,7 +29,7 @@ const setApiClient = function(client) {
 const setServer = function(hapiServer) {
     server = hapiServer;
     return hapiServer;
-}
+};
 
 /**
  * extract the cookie value from the set-cookie header

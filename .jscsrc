@@ -8,7 +8,6 @@
     "requireSpacesInAnonymousFunctionExpression": {
         "beforeOpeningCurlyBrace": true
     },
-    "requirePaddingNewLinesAfterBlocks": false,
     "disallowSpacesInFunction": {
         "beforeOpeningRoundBrace": true,
         "beforeopeningCurlyBrace": false

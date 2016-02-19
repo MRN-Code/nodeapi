@@ -11,6 +11,7 @@ module.exports.register = function(server, options, next) {
         if (!request.headers['x-forwarded-host']) {
             request.headers['x-forwarded-host'] = request.headers.host;
         }
+
         reply.continue();
     });
     next();

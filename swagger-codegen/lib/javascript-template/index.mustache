@@ -19,9 +19,7 @@
    * @return {object} apiClient object
    */
   return function(config){
-    // create a new instance of the agent because authClient adds an
-    // interceptor, and we do not want to modify the global agent.
-    const xhrAgent = config.xhrAgent.create();
+    const xhrAgent = config.xhrAgent;
 
     // initialize the default ApiClient
     ApiClient.init(config.apiUrl, xhrAgent);

@@ -55,5 +55,8 @@
                 "aclContextName": "study"
             }
         }
-    ]
+    ],
+    "coinstac": {
+        "storageBaseUrl": "http://localhost:5984"
+    }
 }

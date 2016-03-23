@@ -1,6 +1,6 @@
 'use strict';
 
-const Bluebird = require('Bluebird');
+const Bluebird = require('bluebird');
 const path = require('path');
 const cliOpts = require(path.join('../../lib/utils/cli-options.js'));
 const getport = Bluebird.promisify(require('getport'));

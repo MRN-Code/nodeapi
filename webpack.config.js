@@ -1,23 +1,22 @@
+
 var path = require('path');
 var webpack = require('webpack');
 var DedupePlugin = webpack.optimize.DedupePlugin;
 var UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
+var config = require('config');
 
 var isDev = process.env.COINS_ENV === 'development';
-var clientDir = path.join(process.cwd(), 'dist', 'client');
+var clientEntry = path.join(__dirname, config.get('build.clientDestPath'), 'src/index.js');
 
 module.exports = {
     bail: true,
     target: 'node',
-    entry: {
-        client: path.join(clientDir, 'client.js')
-    },
+    entry: { client: clientEntry },
     output: {
-        path: path.join(clientDir, 'dist'),
-        filename: '[name].js', // one for each `entry`
-        chunkFilename: '[id].chunk.js',
+        path: path.join(__dirname, 'dist'),
+        filename: '[name].js',
         library: 'client',
-        libraryTarget: 'commonjs2'
+        libraryTarget: 'umd'
     },
     plugins: [
         new DedupePlugin(),

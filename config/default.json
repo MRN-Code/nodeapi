@@ -39,7 +39,7 @@
         "port": 6379
     },
     "logPath": "./logs",
-    "permissionsSchemaPath": "./dist/lib/permissions/permission-schema.json",
+    "permissionsSchemaPath": "./src/lib/permissions/permission-schema.json",
     "shieldConfig": [
         {
             "defaults": {

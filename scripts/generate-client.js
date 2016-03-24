@@ -6,27 +6,24 @@ const path = require('path');
 const fse = bluebird.promisifyAll(require('fs-extra'));
 const exec = bluebird.promisify(require('child_process').exec);
 
-const serverPath = path.join(process.cwd(), 'dist', 'index.js');
-const swaggerSpecPath = path.join(
-    process.cwd(),
-    'dist',
-    'swagger.json'
-);
+const pkgRoot = path.join(__dirname, '../');
+const serverPath = path.join(pkgRoot, 'src/index.js');
+const swaggerSpecPath = path.join(pkgRoot, 'dist', 'swagger.json');
 const server = require(serverPath);
 
 const codegenExecPath = path.join(
-    process.cwd(),
+    pkgRoot,
     config.get('build.codegenPath'),
     config.get('build.codegenExecRelPath')
 );
 
 const clientDestPath = path.join(
-    process.cwd(),
+    pkgRoot,
     config.get('build.clientDestPath')
 );
 
 const codegenTemplatePath = path.join(
-    process.cwd(),
+    pkgRoot,
     config.get('build.codegenTemplatePath')
 );
 
@@ -45,33 +42,28 @@ const codegenCmd = [
 
 const swaggerSpecUrl = '/swagger/swagger.json';
 
-const logInfo = (msg) => {
-    console.log(chalk.white(msg));
-};
+const logInfo = (msg) => console.log(chalk.white(msg));
 
-const logSuccess = () => {
-    console.log(chalk.green('...done'));
-};
+const logSuccess = () => console.log(chalk.green('...done'));
 
 const getSwaggerSpec = () => {
     logInfo('Getting swagger spec from API');
     return server.injectThen(swaggerSpecUrl)
-        .then((response) => {
-            logSuccess();
-            return response.result;
-        });
+    .then((response) => {
+        logSuccess();
+        return response.result;
+    });
 };
 
 const writeSwaggerSpec = (specObj) => {
     logInfo('Writing swagger spec to disk');
     return fse.writeJSONAsync(swaggerSpecPath, specObj)
-        .then(logSuccess);
+    .then(logSuccess);
 };
 
 const generateClient = () => {
     logInfo('Generating client');
-    return exec(codegenCmd)
-        .then(logSuccess);
+    return exec(codegenCmd).then(logSuccess);
 };
 
 const exit = () => {

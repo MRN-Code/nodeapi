@@ -11,12 +11,10 @@ exports.register = (server, options, next) =>  {
             notes: 'Add filename (e.g. client.js)',
             description: 'Returns client source code',
             auth: false,
-            plugins: {
-                'hapi-swagger': { nickname: 'get' }
-            },
+            plugins: { 'hapi-swagger': { nickname: 'get' } },
             handler: {
                 directory: {
-                    path: path.join(process.cwd(), 'dist', 'client', 'dist'),
+                    path: path.join(__dirname, '../../../dist'),
                     listing: true
                 }
             }

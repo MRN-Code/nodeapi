@@ -15,10 +15,10 @@ See [REQUIREMENTS.md](REQUIREMENTS.md) for configuring your system's environment
 
 ```bash
 $ npm run startdev # boots the API with all services available, or...
-$ npm run build && node dist/index.js [flags] # build the app, then run the built copy (less CPU), or...
+$ node src/index.js [flags]
 ```
 
-Use `node dist/index.js --help` to see all available options.
+Use `node src/index.js --help` to see all available options.
 - @flag `development/release/production` run the server using COINS_ENV of the respective flag. Shorthand --dev/rel/prd are honored.
 
 - @flag `coinstac` start the server with COINSTAC routes. Shorthand -c Defaults to false.
@@ -92,11 +92,11 @@ To view it, start this server `npm start`, and navigate to the base url +
 `/swagger/documentation` (e.g. https://coins-api.mrn.org/swagger/documentation).
 
 ### client
-This API also serves a javascript client. The client is auto-generated during the build process, and exists in _dist/client/dist/client.js_. At present the **client only runs in a nodejs environment (not in the browser)**.
+This API also serves a javascript client. The client is auto-generated during the build process, and exists in _src/client/src/client.js_. At present the **client only runs in a nodejs environment (not in the browser)**.
 
 To retrieve the client remotely, simply send a `get` request to `/api/client/client.js`.
 
-The client exposes a function which takes a config object, and returns a SDK. Please refer to _src/test/utils/init-api-client.js_ for an example of setting up the client. 
+The client exposes a function which takes a config object, and returns a SDK. Please refer to _src/test/utils/init-api-client.js_ for an example of setting up the client.
 
 ## Troubleshooting
 

@@ -14,7 +14,7 @@ exports.register = (server, options, next) =>  {
             plugins: { 'hapi-swagger': { nickname: 'get' } },
             handler: {
                 directory: {
-                    path: path.join(__dirname, '../../../dist'),
+                    path: path.join(__dirname, '../../../dist/client/dist'),
                     listing: true
                 }
             }

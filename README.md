@@ -14,8 +14,7 @@ See [REQUIREMENTS.md](REQUIREMENTS.md) for configuring your system's environment
 # usage
 
 ```bash
-$ npm run startdev # boots the API with all services available, or...
-$ node src/index.js [flags]
+$ node src/index.js
 ```
 
 Use `node src/index.js --help` to see all available options.

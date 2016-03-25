@@ -16,7 +16,7 @@ const checkResponseCode = (response) => {
 
 const checkResponseContent = (response) => {
     const clientSource = fs.readFileSync(
-        path.join(__dirname, '../../../dist/client.js'),
+        path.join(__dirname, '../../../dist/client/dist/client.js'),
         'utf8'
     );
     response.result.should.eql(clientSource);

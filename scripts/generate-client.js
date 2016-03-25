@@ -1,10 +1,11 @@
 'use strict';
+const cp = require('child_process');
 const bluebird = require('bluebird');
 const chalk = require('chalk');
 const config = require('config');
 const path = require('path');
 const fse = bluebird.promisifyAll(require('fs-extra'));
-const exec = bluebird.promisify(require('child_process').exec);
+const exec = bluebird.promisify(cp.exec);
 
 const pkgRoot = path.join(__dirname, '../');
 const serverPath = path.join(pkgRoot, 'src/index.js');
@@ -19,7 +20,7 @@ const codegenExecPath = path.join(
 
 const clientDestPath = path.join(
     pkgRoot,
-    config.get('build.clientDestPath')
+    config.get('build.codeGenCompileDest')
 );
 
 const codegenTemplatePath = path.join(

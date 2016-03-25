@@ -6,14 +6,17 @@ var UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
 var config = require('config');
 
 var isDev = process.env.COINS_ENV === 'development';
-var clientEntry = path.join(__dirname, config.get('build.clientDestPath'), 'src/index.js');
+var clientEntry = path.join(__dirname, 'src', 'client', 'client.js');
+var clientOutput = path.join(__dirname, 'dist', 'client', 'dist');
 
 module.exports = {
     bail: true,
     target: 'node',
-    entry: { client: clientEntry },
+    entry: {
+        client: clientEntry
+    },
     output: {
-        path: path.join(__dirname, 'dist'),
+        path: clientOutput,
         filename: '[name].js',
         library: 'client',
         libraryTarget: 'umd'

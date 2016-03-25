@@ -167,10 +167,7 @@ describe('DELETE keys (logout)', () => {
 
             responsePromise = apiClient.auth.login('mochatest', 'mocha')
                 .then(callLogout)
-                .then(callLogoutAgain)
-                .catch((err) => {
-                    return err;
-                });
+                .then(callLogoutAgain);
 
             return responsePromise;
         });
@@ -178,6 +175,7 @@ describe('DELETE keys (logout)', () => {
         it('Should respond with 401 unauthorized', () => {
             return responsePromise
                 .then((response) => {
+                    debugger
                     loggedInAndOut.should.equal(true);
                     response.status.should.equal(401);
                     return response;

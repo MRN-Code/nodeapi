@@ -1,9 +1,7 @@
-
 var path = require('path');
 var webpack = require('webpack');
 var DedupePlugin = webpack.optimize.DedupePlugin;
 var UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
-var config = require('config');
 
 var isDev = process.env.COINS_ENV === 'development';
 var clientEntry = path.join(__dirname, 'src', 'client', 'client.js');

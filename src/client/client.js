@@ -1,6 +1,4 @@
 'use strict';
-// @NOTE the relative file path listed below is evaluated after codegen-client
-// compiles this file.  in this case, this file lives in dist/client/client.js
 const clientFactory = require('../../dist/client/codegen-client-compiled/src/index.js');
 const authClient = require('./authClient');
 

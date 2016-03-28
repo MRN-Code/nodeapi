@@ -75,7 +75,7 @@
     "postinstall": "npm run build",
     "test": "mocha --timeout=10000 -R spec 'src/test/integration/*.js' 'src/test/unit/*.js'",
     "start": "node src/index.js",
-    "lint": "jscs --fix grunt/ src/",
+    "lint": "jscs --fix src/",
     "validate": "npm ls",
     "update-codegen": "node scripts/update-codegen.js",
     "generate-client": "node scripts/generate-client.js",

@@ -167,7 +167,10 @@ describe('DELETE keys (logout)', () => {
 
             responsePromise = apiClient.auth.login('mochatest', 'mocha')
                 .then(callLogout)
-                .then(callLogoutAgain);
+                .then(callLogoutAgain)
+                .catch((err) => {
+                    return err;
+                });
 
             return responsePromise;
         });

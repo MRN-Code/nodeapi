@@ -102,12 +102,12 @@ process.stderr.on('data', (data) => {
 server.app.pluginsRegistered = plugins.reduce(
     registerPluginThen,
     Bluebird.resolve()
-).then(handleAllPluginsRegistered)
-    .catch((err) => {
-        console.log(err.stack);
-        server.log(['error'], err.stack);
-        process.exit(1);
-
-    });
+)
+.then(handleAllPluginsRegistered)
+.catch((err) => {
+    console.log(err.stack);
+    server.log(['error'], err.stack);
+    process.exit(1);
+});
 
 module.exports = server;

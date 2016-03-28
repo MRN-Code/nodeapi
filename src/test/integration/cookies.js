@@ -48,7 +48,6 @@ function getCasCookieValue(rawCookie) {
  * @return {Promise} resolves to login response
  */
 function login() {
-    debugger
     return apiClient.auth.login('mochatest', 'mocha');
 }
 

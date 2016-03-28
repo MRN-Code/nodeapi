@@ -151,17 +151,14 @@ const authClient = {
         const credentials = authClient.getAuthCredentials();
 
         const extractResponse = (response) => {
-          debugger
             rawResponse = response;
         };
 
         const returnRawResponse = () => {
-          debugger
             return rawResponse;
         };
 
         const removeCredentials = () => {
-          debugger
             return authClient.setAuthCredentials(null);
         };
 

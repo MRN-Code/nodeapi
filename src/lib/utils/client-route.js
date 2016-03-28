@@ -3,6 +3,7 @@ const path = require('path');
 
 //export plugin registration function
 exports.register = (server, options, next) =>  {
+    const clientDistPath = path.join(__dirname, '../../../dist/client/dist');
     server.route({
         path: '/client/{param*}',
         method: 'GET',
@@ -14,7 +15,7 @@ exports.register = (server, options, next) =>  {
             plugins: { 'hapi-swagger': { nickname: 'get' } },
             handler: {
                 directory: {
-                    path: path.join(__dirname, '../../../dist/client/dist'),
+                    path: clientDistPath,
                     listing: true
                 }
             }

@@ -1,4 +1,6 @@
 'use strict';
+
+require('./handle-errors');
 const cp = require('child_process');
 const bluebird = require('bluebird');
 const chalk = require('chalk');
@@ -67,15 +69,7 @@ const generateClient = () => {
     return exec(codegenCmd).then(logSuccess);
 };
 
-const exit = () => {
-    process.exit(0);
-};
-
-const handleError = (err) => {
-    console.log(chalk.red('Error generating client'));
-    console.log(chalk.red(err.message));
-    console.dir(err.stack);
-};
+const exit = () => process.exit(0);
 
 logInfo('Waiting for server to come online');
 server.app.pluginsRegistered
@@ -83,5 +77,4 @@ server.app.pluginsRegistered
     .then(getSwaggerSpec)
     .then(writeSwaggerSpec)
     .then(generateClient)
-    .then(exit)
-    .catch(handleError);
+    .then(exit);

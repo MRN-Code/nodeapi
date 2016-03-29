@@ -6,7 +6,7 @@
         "codegenExecRelPath": "swagger-codegen-cli.jar",
         "codegenRepoUrl": "git@github.com:swagger-api/swagger-codegen.git",
         "codegenTemplatePath": "swagger-codegen/lib/javascript-template",
-        "clientDestPath": "dist/client/codegen-client"
+        "codeGenCompileDest": "dist/client/codegen-client-compiled"
     },
     "httpPort": 8800,
     "cookieDomain": ".mrn.org",
@@ -39,7 +39,7 @@
         "port": 6379
     },
     "logPath": "./logs",
-    "permissionsSchemaPath": "./dist/lib/permissions/permission-schema.json",
+    "permissionsSchemaPath": "./src/lib/permissions/permission-schema.json",
     "shieldConfig": [
         {
             "defaults": {
@@ -55,5 +55,8 @@
                 "aclContextName": "study"
             }
         }
-    ]
+    ],
+    "coinstac": {
+        "storageBaseUrl": "http://localhost:5984"
+    }
 }

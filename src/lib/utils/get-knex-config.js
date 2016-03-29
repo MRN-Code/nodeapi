@@ -1,12 +1,14 @@
 'use strict';
 
-var dbConfig = require('./get-db-config.js')();
+const getDBConfig = require('./get-db-config.js');
 
 /**
  * get config object for Knex DB connection, including connection params
  * @return {object} config object
  */
-function getKnexConfig() {
+function getKnexConfig(opts) {
+    const options = opts || {};
+    const dbConfig = getDBConfig();
     return {
         debug: false,
         client: 'pg',

@@ -5,7 +5,6 @@ const path = require('path');
 const pkg = require(path.join(process.cwd(), 'package.json'));
 const cliOpts = require('./cli-options.js');
 const chalk = require('chalk');
-const baseRoutePrefix = ''; //'/api/v' + pkg.version;
 const baseRoutePath = path.join(__dirname, '../app-routes/');
 
 const schema = require(
@@ -13,7 +12,6 @@ const schema = require(
 );
 
 const getAppRouteConfig = (relPath, prefix) => {
-    let routePrefix = baseRoutePrefix;
     const registerConfig = {
         register: require(path.join(baseRoutePath, relPath))
     };
@@ -82,7 +80,11 @@ var plugins = [
         register: require('./response-formatter.js'),
         options: {
             excludeVarieties: ['view', 'file'],
-            excludePlugins: ['hapi-swagger', 'client-source']
+            excludePlugins: [
+                'hapi-swagger',
+                'client-source',
+                'coinstac-storage-proxy'
+            ]
         }
     },
     require('./authentication.js'),
@@ -130,8 +132,11 @@ var plugins = [
 
 if (cliOpts.coinstac) {
     console.log(chalk.blue('Including COINSTAC routes'));
-
-    // @TODO: add plugin for coinstac couchdb auth/proxy
+    plugins.push(require('h2o2'));
+    plugins.push({
+        register: require('coinstac-storage-proxy'),
+        options: { targetBaseUrl: config.get('coinstac.storageBaseUrl') }
+    });
 }
 
 module.exports = () => { return plugins; };

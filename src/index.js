@@ -1,10 +1,10 @@
 'use strict';
-const boot = require('./lib/utils/boot.js');
-const connectionConfig = require('./lib/utils/get-connection-options.js')();
-const plugins = require('./lib/utils/get-plugins.js')();
-const registerPlugin = require('./lib/utils/register-plugin.js');
+const boot = require('./lib/utils/boot');
+const connectionConfig = require('./lib/utils/get-connection-options')();
+const plugins = require('./lib/utils/get-plugins')();
+const registerPlugin = require('./lib/utils/register-plugin');
 const setAuthenicationStrategy = require('./lib/utils/set-authentication-strategy');
-const shieldsUp = require('./lib/utils/shields-up.js');
+const shieldsUp = require('./lib/utils/shields-up');
 const Bluebird = require('bluebird');
 const path = require('path');
 const hapi = require('hapi');

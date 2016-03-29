@@ -17,7 +17,7 @@
     "btoa": "1.1.2",
     "chai": "3.2.0",
     "chalk": "1.1.1",
-    "coinstac-storage-proxy": "1.0.1",
+    "coinstac-storage-proxy": "1.0.5",
     "config": "1.16.0",
     "good": "6.3.0",
     "good-console": "5.0.3",

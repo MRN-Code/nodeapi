@@ -11,7 +11,7 @@ function getConnectionOptions() {
     return {
         http: {
             labels: ['api'],
-            port: parseInt(cliOpts.port) || config.get('httpPort')
+            port: parseInt(cliOpts.port, 10) || config.get('httpPort')
 
         }
     };

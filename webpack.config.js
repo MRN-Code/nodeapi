@@ -9,14 +9,13 @@ var clientOutput = path.join(__dirname, 'dist', 'client', 'dist');
 
 module.exports = {
     bail: true,
-    target: 'node',
     entry: {
         client: clientEntry
     },
     output: {
         path: clientOutput,
         filename: '[name].js',
-        library: 'client',
+        library: 'coinsAPIClientFactory',
         libraryTarget: 'umd'
     },
     plugins: [
@@ -36,5 +35,11 @@ module.exports = {
                 loader: 'json'
             }
         ]
+    },
+    externals: [
+      { url: false }
+    ],
+    node: {
+      fs: "empty"
     }
 };

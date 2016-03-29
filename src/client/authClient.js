@@ -1,12 +1,13 @@
 'use strict';
-const getHawkHeader = require('hawk/lib/client').header;
+const getHawkHeader = require('hawk/lib/browser').client.header;
+
 const authKeyId = 'COINS_AUTH_CREDENTIALS';
 const url = require('url');
 
 // define base64 encoding function for non-browser environments
 // @TODO: avoid shipping authClient with browser bundle
-const btoa = require('btoa');
-const atob = require('atob');
+const atob = require('abab/lib/atob');
+const btoa = require('abab/lib/btoa');
 
 const authClient = {
     initialized: false,

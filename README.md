@@ -96,7 +96,7 @@ This API also serves a javascript client. The client is auto-generated during th
 
 To retrieve the client remotely, simply send a `get` request to `/api/client/client.js`.
 
-The client exposes a function which takes a config object, and returns a SDK. Please refer to _src/test/utils/init-api-client.js_ for an example of setting up the client. 
+The client exposes a function which takes a config object, and returns a SDK. Please refer to _src/test/utils/init-api-client.js_ for an example of setting up the client.
 
 ## Troubleshooting
 
@@ -112,3 +112,7 @@ If things aren't working, go down this quick checklist.
 
 If you miss any of these requirements, remove all node modules and reinstall them
 after installing the requirements.
+
+### WARNING
+
+- tests are not passing on node 4.3.x+.  See [here](https://github.com/hapijs/hapi/issues/3103)

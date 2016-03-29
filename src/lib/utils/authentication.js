@@ -17,7 +17,6 @@ const userController = require('../controllers/users.js');
 module.exports.register = function(server, options, next) {
     const redisClient = server.plugins['hapi-redis'].client;
     const relations = server.plugins.relations;
-    const errorLogger = server.plugins.logUtil;
 
     if (!redisClient.connected) {
         throw new Error('Redis client not connected: cannot continue');

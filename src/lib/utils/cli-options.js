@@ -34,6 +34,7 @@ const opts = require('nomnom')
     })
     .parse();
 
+// handle CLI options
 _.each(opts, (val, opt) => {
     if (_.contains(['development', 'release', 'production'], opt) && val) {
         process.env.COINS_ENV = opt;
@@ -41,5 +42,15 @@ _.each(opts, (val, opt) => {
 });
 
 console.log(chalk.blue(`Running with COINS_ENV: ${process.env.COINS_ENV}`));
+
+if (!opts['without-new-relic']) {
+    console.log(chalk.blue('Including New Relic agent'));
+    const newrelic = require('newrelic');
+    if (newrelic.agent) {
+        console.log(chalk.blue('New Relic agent reporting enabled'));
+    } else {
+        console.log(chalk.blue('New Relic agent reporting disabled'));
+    }
+}
 
 module.exports = opts;

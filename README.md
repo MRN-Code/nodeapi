@@ -111,3 +111,7 @@ If things aren't working, go down this quick checklist.
 
 If you miss any of these requirements, remove all node modules and reinstall them
 after installing the requirements.
+
+### WARNING
+
+- tests are not passing on node 4.3.x+.  See [here](https://github.com/hapijs/hapi/issues/3103)

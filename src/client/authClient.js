@@ -150,22 +150,19 @@ const authClient = {
 
         const credentials = authClient.getAuthCredentials();
 
-        const extractResponse = (response) => {
+        const handlePostLogout = (response) => {
             rawResponse = response;
+            return authClient.setAuthCredentials(null);
         };
 
         const returnRawResponse = () => {
             return rawResponse;
         };
 
-        const removeCredentials = () => {
-            return authClient.setAuthCredentials(null);
-        };
-
-        return authClient.authKeysApi.remove(credentials.id)
-            .then(extractResponse)
-            .then(removeCredentials)
-            .then(returnRawResponse);
+        return authClient.authKeysApi
+        .remove(credentials.id)
+        .then(handlePostLogout)
+        .then(returnRawResponse);
     },
 
     /**

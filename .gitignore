@@ -35,5 +35,6 @@ dump.rdb
 
 # source code for swagger-codegen (only used when updating executable)
 swagger-codegen-src
-.vscode
+.DS*
+.vscode*
 *.pgdump

@@ -29,8 +29,13 @@ const getAppRouteConfig = (relPath, prefix) => {
 
 // Define plugins
 var plugins = [
-
-    require('./error-logger.js'),
+    {
+      register: require('good'),
+      options: require('./get-good-config.js')()
+    },
+    require('./global-error-handler.js'),
+    require('./register-uncaught-exceptions.js'),
+    require('./register-unhandled-rejections.js'),
     require('inject-then'),
     require('hapi-auth-hawk'),
     {
@@ -44,10 +49,6 @@ var plugins = [
     },
     {
         register: require('./strip-api-url-prefix.js')
-    },
-    {
-        register: require('good'),
-        options: require('./get-good-config.js')()
     },
     {
         register: require('hapi-bookshelf-models'),

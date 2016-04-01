@@ -41,9 +41,10 @@ _.each(opts, (val, opt) => {
     }
 });
 
+const isDev = process.env.COINS_ENV === 'development';
 console.log(chalk.blue(`Running with COINS_ENV: ${process.env.COINS_ENV}`));
 
-if (!opts['without-new-relic']) {
+if (!opts['without-new-relic'] && !isDev) {
     console.log(chalk.blue('Including New Relic agent'));
     const newrelic = require('newrelic');
     if (newrelic.agent) {

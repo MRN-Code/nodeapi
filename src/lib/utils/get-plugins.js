@@ -30,8 +30,8 @@ const getAppRouteConfig = (relPath, prefix) => {
 // Define plugins
 var plugins = [
     {
-      register: require('good'),
-      options: require('./get-good-config.js')()
+        register: require('good'),
+        options: require('./get-good-config.js')()
     },
     require('./global-error-handler.js'),
     require('./register-uncaught-exceptions.js'),

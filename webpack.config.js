@@ -9,14 +9,13 @@ var clientOutput = path.join(__dirname, 'dist', 'client', 'dist');
 
 module.exports = {
     bail: true,
-    target: 'node',
     entry: {
         client: clientEntry
     },
     output: {
         path: clientOutput,
         filename: '[name].js',
-        library: 'client',
+        library: 'coinsAPIClientFactory',
         libraryTarget: 'umd'
     },
     plugins: [
@@ -34,7 +33,21 @@ module.exports = {
             {
                 test: /\.json$/,
                 loader: 'json'
+            },
+            {
+              test: /\.jsx?$/,
+              exclude: /(node_modules|bower_components)/,
+              loader: 'babel', // 'babel-loader' is also a legal name to reference
+              query: {
+                presets: ['es2015']
+              }
             }
         ]
+    },
+    externals: [
+      { url: false }
+    ],
+    node: {
+      fs: "empty"
     }
 };

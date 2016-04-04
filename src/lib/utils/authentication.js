@@ -17,6 +17,7 @@ const userController = require('../controllers/users.js');
 module.exports.register = function(server, options, next) {
     const redisClient = server.plugins['hapi-redis'].client;
     const relations = server.plugins.relations;
+    const errorLogger = server.plugins.logUtil;
 
     if (!redisClient.connected) {
         throw new Error('Redis client not connected: cannot continue');
@@ -104,13 +105,12 @@ module.exports.register = function(server, options, next) {
         };
 
         return new UserRole()
-            .where({username: encryptedUsername})
-            .fetchAll({withRelated: 'role'})
+            .where({ username: encryptedUsername })
+            .fetchAll({ withRelated: 'role' })
             .then(resetStudyRoles)
             .then(getStudyRoles)
             .catch((err) => {
-                server.log(['error', 'refreshRoles'], err);
-                throw(err);
+                errorLogger.logAndThrowError(['refreshRoles'], err);
             });
     }
 
@@ -137,9 +137,7 @@ module.exports.register = function(server, options, next) {
 
                 return Bluebird.all(revokes);
             }).catch((err) => {
-
-                server.log(['error', 'revokeRoles'], err);
-                throw(err);
+                errorLogger.logAndThrowError(['revokeRoles'], err);
             });
 
     }
@@ -163,8 +161,7 @@ module.exports.register = function(server, options, next) {
 
         return Bluebird.all(rolePromises)
             .catch((err) => {
-                server.log(['error', 'addRoles'], err);
-                throw(err);
+                errorLogger.logAndThrowError(['addRoles'], err);
             });
     }
 
@@ -241,7 +238,6 @@ module.exports.register = function(server, options, next) {
          * @return {Bluebird} a promise that resolves to true or false
          */
         const comparePassword = (user) => {
-
             const rawPass = user.get('passwordHash');
             let msg;
 
@@ -273,14 +269,13 @@ module.exports.register = function(server, options, next) {
 
         //TODO: if User is ever protected with the bookshelf shield,
         //we will need to figure out a way to get around that...
-        return new User({username: encryptedUsername})
+        return new User({ username: encryptedUsername })
             .fetch()
             .then(checkAccountStatus)
             .then(comparePassword)
             .then(handleCompare)
             .catch(function(err) {
-                server.log(['error', 'validate-user'], err);
-                throw(err);
+                errorLogger.logAndThrowError(['validate-user'], err);
             });
     };
 

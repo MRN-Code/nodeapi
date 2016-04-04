@@ -32,7 +32,7 @@ internals.getUser = (authUtils, UserModel, userData) => {
 
     //clone to avoid mutation
     let username = userData.username;
-    let qbObj = {orWhere: formatQuery(userData)};
+    let qbObj = { orWhere: formatQuery(userData) };
     if (username) {
         qbObj.orWhere.username = authUtils.encryptUsername(username);
     }
@@ -97,7 +97,7 @@ internals.addUser = (authUtils, UserModel, userData) => {
     };
 
     const saveUser = (userData) => {
-        return UserModel.forge(userData).save(null, {method: 'insert'});
+        return UserModel.forge(userData).save(null, { method: 'insert' });
     };
 
     if (username) {
@@ -112,6 +112,9 @@ internals.addUser = (authUtils, UserModel, userData) => {
 
 module.exports.post = {
     tags: ['api', 'users'],
+    plugins: {
+        'hapi-swagger': { nickname: 'post' }
+    },
     notes: [
         'Creates a new user with the properties in the payload.'
     ].join('<br>'),

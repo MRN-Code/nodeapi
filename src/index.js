@@ -13,7 +13,6 @@ if (!cliOpts['without-new-relic']) {
 }
 
 const hapi = require('hapi');
-const config = require('config');
 const Bluebird = require('bluebird');
 const path = require('path');
 require('./lib/utils/promise-uncaught-polyfill.js');
@@ -22,15 +21,7 @@ const connectionConfig = require('./lib/utils/get-connection-options.js')();
 const plugins = require('./lib/utils/get-plugins.js')();
 
 // Set up Server
-const server = new hapi.Server({
-    connections: {
-        routes: {
-            cors: {
-                credentials: true
-            }
-        }
-    }
-});
+const server = new hapi.Server();
 
 server.connection(connectionConfig.http);
 
@@ -91,22 +82,20 @@ const handleAllPluginsRegistered = () => {
     // Wrap models with Shield
     require(path.join(__dirname, 'lib/utils/shields-up.js'))(server);
 
-    if (!module.parent) {
-        server.start(() => {
-            server.log(['startup'], 'server running at: ' + server.info.uri);
-        });
-    }
+    server.start(() => {
+        server.log(['startup'], 'server running at: ' + server.info.uri);
+    });
 };
 
 server.registerThen = Bluebird.promisify(server.register);
 
 Bluebird.onPossiblyUnhandledRejection((err) => {
-    server.log(['error', 'unhandled-rejection'], err);
+    server.plugins.logUtil.logError(['unhandled-rejection'], err);
 });
 
 // Redirect stderr to server logs
 process.stderr.on('data', (data) => {
-    server.log(['error', 'stderr'], data);
+    server.plugins.logger.logError(['stderr'], data);
 });
 
 //register plugins
@@ -115,11 +104,9 @@ server.app.pluginsRegistered = plugins.reduce(
     Bluebird.resolve()
 ).then(handleAllPluginsRegistered)
     .catch((err) => {
-        console.log(err);
-        server.log('Error loading plugins');
-        server.log(err);
+        console.log(err.stack);
+        server.log(['error'], err.stack);
         process.exit(1);
-        throw err;
 
     });
 

@@ -20,6 +20,7 @@ exports.register = function(server, options, next) {
     const path = '/scans';
     const Scan = server.plugins.bookshelf.model('Scan');
     const relations = server.plugins.relations;
+    const errorLogger = server.plugins.logUtil;
 
     /**
      * Get the studies that the user is allowed to read scans from
@@ -63,6 +64,9 @@ exports.register = function(server, options, next) {
                  'output'
              ].join(' '),
             description: 'Returns a collection of scans',
+            plugins: {
+                'hapi-swagger': { nickname: 'get' }
+            },
             validate: {
                 query: getSchema
             },
@@ -79,7 +83,7 @@ exports.register = function(server, options, next) {
                         .then(callToJson)
                         .then(reply)
                         .catch((err) => {
-                            server.log(['error', 'scans'], err);
+                            errorLogger.logError(['scans'], err);
                             reply(boom.wrap(err));
                         });
                 } else {
@@ -88,7 +92,7 @@ exports.register = function(server, options, next) {
                         .then(callToJson)
                         .then(reply)
                         .catch((err) => {
-                            server.log(['error', 'scans'], err);
+                            errorLogger.logError(['scans'], err);
                             reply(boom.wrap(err));
                         });
                 }
@@ -114,7 +118,11 @@ exports.register = function(server, options, next) {
             description: 'Saves a scan',
             validate: {
                 payload: postSchema
-            }
+            },
+            plugins: {
+                'hapi-swagger': { nickname: 'post' }
+            },
+
         },
         handler: (request, reply) => {
             new Scan.forge(request.query)

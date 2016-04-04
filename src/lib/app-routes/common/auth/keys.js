@@ -41,6 +41,7 @@ exports.register = function(server, options, next) {
     const redisClient =  server.plugins['hapi-redis'].client;
     const authUtils = server.plugins.utilities.auth;
     const invalidCookie = casCookieUtils.invalidate();
+    const errorLogger = server.plugins.logUtil;
 
     const LoginRecord = server.plugins.bookshelf.model('LoginRecord');
 
@@ -51,11 +52,12 @@ exports.register = function(server, options, next) {
 
     /**
      * save a new LoginRecord model with `properties`
-     * @param {object} properties contains props to assign to new LoginRecordObject before saving
+     * @param {object} properties contains props to assign to
+     * new LoginRecordObject before saving
      * @return {Promise}          resolves to result of save operation
      */
     const saveRecordObj = (properties)=> {
-        return LoginRecord.forge(properties).save(null, {method:'insert'});
+        return LoginRecord.forge(properties).save(null, { method:'insert' });
     };
 
     server.route({
@@ -63,6 +65,9 @@ exports.register = function(server, options, next) {
         path: baseUrl + '/{id}',
         config: {
             tags: ['api', 'auth'],
+            plugins: {
+                'hapi-swagger': { nickname: 'options' }
+            },
             description: 'Preflight route always responds with 200',
             auth: false,
             handler: function(request, reply) {
@@ -76,6 +81,9 @@ exports.register = function(server, options, next) {
         path: baseUrl,
         config: {
             tags: ['api', 'auth'],
+            plugins: {
+                'hapi-swagger': { nickname: 'post' }
+            },
             notes: [
                 'Expects base64 encoded username/password in payload.',
                 'Response includes a `set-cookie` header with JWT for COINS2.0',
@@ -84,9 +92,6 @@ exports.register = function(server, options, next) {
             ].join('<br>'),
             description: 'Login: Get new API key and JWT cookie',
             auth: false,
-            cors: {
-                credentials: true
-            },
             validate: {
                 headers: true, //TODO: validate x-forwaded https header
                 payload: {
@@ -117,7 +122,7 @@ exports.register = function(server, options, next) {
                  * log error and inserts record to db for login failure
                  */
                 const logError = (err)=> {
-                    server.log(['error', 'login'], err.message);
+                    errorLogger.logError(['login'], err);
                     recordObj.success = 0;
                     saveRecordObj(recordObj);
                     reply(boom.wrap(err));
@@ -160,6 +165,14 @@ exports.register = function(server, options, next) {
         path: baseUrl + '/{id}',
         config: {
             tags: ['api', 'auth'],
+            plugins: {
+                'hapi-swagger': { nickname: 'remove' }
+            },
+            validate: {
+                params: {
+                    id: joi.string().required()
+                }
+            },
             notes: [
                 'Auth signature required. Must match key provided in url.',
                 'A `set-cookie` header in response invalidates the JWT cookie.',
@@ -170,7 +183,7 @@ exports.register = function(server, options, next) {
             ].join('<br>'),
             description: 'Logout: Remove API key from auth DB',
             response: {
-              schema: joi.compile(internals.logOutSuccessObj)
+                schema: joi.compile(internals.logOutSuccessObj)
             },
             handler: (request, reply) => {
                 const username = request.auth.credentials.username;

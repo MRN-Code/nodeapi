@@ -1,6 +1,7 @@
 'use strict';
 
 const config = require('config');
+const cliOpts = require('./cli-options.js');
 
 /**
  * get connection options for hapi server pack (http and https)
@@ -10,7 +11,7 @@ function getConnectionOptions() {
     return {
         http: {
             labels: ['api'],
-            port: config.get('httpPort')
+            port: parseInt(cliOpts.port) || config.get('httpPort')
 
         }
     };

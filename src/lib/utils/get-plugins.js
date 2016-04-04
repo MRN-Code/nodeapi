@@ -5,7 +5,6 @@ const path = require('path');
 const pkg = require(path.join(process.cwd(), 'package.json'));
 const cliOpts = require('./cli-options.js');
 const chalk = require('chalk');
-const baseRoutePrefix = '/api/v' + pkg.version;
 const baseRoutePath = path.join(__dirname, '../app-routes/');
 
 const schema = require(
@@ -13,23 +12,25 @@ const schema = require(
 );
 
 const getAppRouteConfig = (relPath, prefix) => {
-    let routePrefix = baseRoutePrefix;
+    const registerConfig = {
+        register: require(path.join(baseRoutePath, relPath))
+    };
+
     if (prefix) {
-        routePrefix = path.join(baseRoutePrefix, prefix);
+        registerConfig.registrationOptions = {
+            routes: {
+                prefix: '/' + prefix
+            }
+        };
     }
 
-    return {
-        register: require(path.join(baseRoutePath, relPath)),
-        registrationOptions: {
-            routes: {
-                prefix: routePrefix
-            }
-        }
-    };
+    return registerConfig;
 };
 
 // Define plugins
 var plugins = [
+
+    require('./error-logger.js'),
     require('inject-then'),
     require('hapi-auth-hawk'),
     {
@@ -40,6 +41,9 @@ var plugins = [
             Bluebird.promisifyAll(redis.client);
             return;
         }
+    },
+    {
+        register: require('./strip-api-url-prefix.js')
     },
     {
         register: require('good'),
@@ -69,10 +73,17 @@ var plugins = [
         }
     },
     {
+        register: require('./add-proxy-host-header.js'),
+    },
+    {
         register: require('./response-formatter.js'),
         options: {
             excludeVarieties: ['view', 'file'],
-            excludePlugins: ['hapi-swagger']
+            excludePlugins: [
+                'hapi-swagger',
+                'client-source',
+                'coinstac-storage-proxy'
+            ]
         }
     },
     require('./authentication.js'),
@@ -81,11 +92,18 @@ var plugins = [
     {
         register: require('hapi-swagger'),
         options: {
-            apiVersion: pkg.version
+            info: {
+                version: pkg.version,
+                title: 'COINS API'
+            },
+            documentationPath: '/swagger/documentation',
+            jsonPath: '/swagger/swagger.json',
+            swaggerUIPath: '/swagger/swaggerui/',
+            pathPrefixSize: 2
         },
         registrationOptions: {
             routes: {
-                prefix: '/api/v' + pkg.version
+                //prefix: '/api/v' + pkg.version
             }
         }
     },
@@ -101,16 +119,24 @@ var plugins = [
                 prefix: '/api'
             }
         }
+    },
+    {
+        register: require('./client-route.js'),
+        registrationOptions: {
+            routes: {
+                prefix: '/api'
+            }
+        }
     }
 ];
 
 if (cliOpts.coinstac) {
     console.log(chalk.blue('Including COINSTAC routes'));
+    plugins.push(require('h2o2'));
     plugins.push({
-        register: require('./houchdb.js'),
-        options: config.get('coinstac.pouchdb.consortiaMeta')
+        register: require('coinstac-storage-proxy'),
+        options: { targetBaseUrl: config.get('coinstac.storageBaseUrl') }
     });
-    plugins.push(getAppRouteConfig('coinstac/consortia.js', 'coinstac'));
 }
 
 module.exports = () => { return plugins; };

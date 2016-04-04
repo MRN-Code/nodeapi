@@ -95,11 +95,11 @@ describe('Scan routes', () => {
         });
 
         it('Should return all scans and series and series data', () => {
-            return apiClient.scanDetails.get({ scanId: 366998 })
-                .then((response) => {
-                    response.result.data.should.have.length.of.at.least(1);
-                    should.equal(response.result.error, null);
-                });
+            return apiClient.ScansidApi.get(366998)
+            .then((response) => {
+                response.data.data.should.have.length.of.at.least(1);
+                should.equal(response.data.error, null);
+            });
         });
     });
 

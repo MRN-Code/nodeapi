@@ -3,11 +3,8 @@
 const boom = require('boom');
 const joi = require('joi');
 const _ = require('lodash');
-const Bluebird = require('bluebird');
 
 const scanController = require('../../controllers/scans.js');
-const seriesController = require('../../controllers/series.js');
-const seriesDataController = require('../../controllers/seriesData.js');
 
 exports.register = function(server, options, next) {
 
@@ -23,7 +20,7 @@ exports.register = function(server, options, next) {
         method: 'GET',
         path: path,
         config: {
-            tags: ['api', 'scans-details'],
+            tags: ['api', 'scan-details'],
             notes: [
                 'query parameters is scan_id'
              ].join(' '),
@@ -33,30 +30,26 @@ exports.register = function(server, options, next) {
                     id: joi.number().required()
                 })
             },
+            plugins: {
+                'hapi-swagger': { nickname: 'get' }
+            },
             response: {
-                schema: joi.object().keys({
-                    schema: scanController.scansSchema,
-                    series: joi.array().items(seriesController.seriesSchema),
-                    seriesData: joi.array().items(seriesDataController.seriesDataSchema)
-                })
+                schema: joi.array().items(scanController.scansSchema)
             },
             handler: function handleGetScansDetails(request, reply) {
                 const creds = request.auth.credentials;
                 const getReadScanDetails = () => {
-                    return Scan.where({scan_id: request.params.id})
-                    .read(creds, { withRelated:['series','series.seriesData'], require: true})
-                    .then(function(data) {
-                      return data;
-                  });
+                    /* jscs: disable */
+                    return Scan.where({ scan_id: request.params.id }) //jshint ignore:line
+                    .read(creds, { withRelated: ['series', 'series.seriesData'], require: true })
+                    .then((qryReslt) => [qryReslt.toJSON()]);
+                    /* jscs: enable */
                 };
 
+                // @TODO distinguish between application error and user request error
                 getReadScanDetails()
                 .then(reply)
-                .catch((err) => {
-                    server.log(['error', 'scan-details'], err.stack);
-                    reply(boom.wrap(err));
-                });
-
+                .catch((err) => reply(boom.wrap(err)));
             }
         }
     });
@@ -64,5 +57,5 @@ exports.register = function(server, options, next) {
 };
 
 exports.register.attributes = {
-    name: 'scans-details'
+    name: 'scan-details'
 };

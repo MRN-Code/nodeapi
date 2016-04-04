@@ -1,12 +1,14 @@
 'use strict';
 
 const joi = require('joi');
+const seriesSchema = require('./series');
 
 /**
  * joi.any().required(), // TODO waiting on ‘joi.extend’
  * to handle nullable property`
  */
 module.exports.scansSchema = joi.object().keys({
+    series: joi.array().items(seriesSchema),
     scanId: joi.number().required(),
     label: joi.string().required(),
     segmentInterval: joi.string().required(),

@@ -17,7 +17,6 @@ const userController = require('../controllers/users.js');
 module.exports.register = function(server, options, next) {
     const redisClient = server.plugins['hapi-redis'].client;
     const relations = server.plugins.relations;
-    const errorLogger = server.plugins.logUtil;
 
     if (!redisClient.connected) {
         throw new Error('Redis client not connected: cannot continue');
@@ -108,10 +107,7 @@ module.exports.register = function(server, options, next) {
             .where({ username: encryptedUsername })
             .fetchAll({ withRelated: 'role' })
             .then(resetStudyRoles)
-            .then(getStudyRoles)
-            .catch((err) => {
-                errorLogger.logAndThrowError(['refreshRoles'], err);
-            });
+            .then(getStudyRoles);
     }
 
     /**
@@ -136,8 +132,6 @@ module.exports.register = function(server, options, next) {
                 });
 
                 return Bluebird.all(revokes);
-            }).catch((err) => {
-                errorLogger.logAndThrowError(['revokeRoles'], err);
             });
 
     }
@@ -159,10 +153,7 @@ module.exports.register = function(server, options, next) {
 
         });
 
-        return Bluebird.all(rolePromises)
-            .catch((err) => {
-                errorLogger.logAndThrowError(['addRoles'], err);
-            });
+        return Bluebird.all(rolePromises);
     }
 
     /**
@@ -273,10 +264,7 @@ module.exports.register = function(server, options, next) {
             .fetch()
             .then(checkAccountStatus)
             .then(comparePassword)
-            .then(handleCompare)
-            .catch(function(err) {
-                errorLogger.logAndThrowError(['validate-user'], err);
-            });
+            .then(handleCompare);
     };
 
     server.expose('auth', authUtils);

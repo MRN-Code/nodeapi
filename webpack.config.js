@@ -4,20 +4,19 @@ var DedupePlugin = webpack.optimize.DedupePlugin;
 var UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
 
 var isDev = process.env.COINS_ENV === 'development';
-var clientDir = path.join(process.cwd(), 'dist', 'client');
+var clientEntry = path.join(__dirname, 'src', 'client', 'client.js');
+var clientOutput = path.join(__dirname, 'dist', 'client', 'dist');
 
 module.exports = {
     bail: true,
-    target: 'node',
     entry: {
-        client: path.join(clientDir, 'client.js')
+        client: clientEntry
     },
     output: {
-        path: path.join(clientDir, 'dist'),
-        filename: '[name].js', // one for each `entry`
-        chunkFilename: '[id].chunk.js',
-        library: 'client',
-        libraryTarget: 'commonjs2'
+        path: clientOutput,
+        filename: '[name].js',
+        library: 'coinsAPIClientFactory',
+        libraryTarget: 'umd'
     },
     plugins: [
         new DedupePlugin(),
@@ -34,7 +33,21 @@ module.exports = {
             {
                 test: /\.json$/,
                 loader: 'json'
+            },
+            {
+              test: /\.jsx?$/,
+              exclude: /(node_modules|bower_components)/,
+              loader: 'babel', // 'babel-loader' is also a legal name to reference
+              query: {
+                presets: ['es2015']
+              }
             }
         ]
+    },
+    externals: [
+      { url: false }
+    ],
+    node: {
+      fs: "empty"
     }
 };

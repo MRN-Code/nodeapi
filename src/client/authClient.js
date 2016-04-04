@@ -1,12 +1,13 @@
 'use strict';
-const getHawkHeader = require('hawk/lib/client').header;
+const getHawkHeader = require('hawk/lib/browser').client.header;
+
 const authKeyId = 'COINS_AUTH_CREDENTIALS';
 const url = require('url');
 
 // define base64 encoding function for non-browser environments
 // @TODO: avoid shipping authClient with browser bundle
-const btoa = require('btoa');
-const atob = require('atob');
+const atob = require('abab/lib/atob');
+const btoa = require('abab/lib/btoa');
 
 const authClient = {
     initialized: false,
@@ -150,22 +151,19 @@ const authClient = {
 
         const credentials = authClient.getAuthCredentials();
 
-        const extractResponse = (response) => {
+        const handlePostLogout = (response) => {
             rawResponse = response;
+            return authClient.setAuthCredentials(null);
         };
 
         const returnRawResponse = () => {
             return rawResponse;
         };
 
-        const removeCredentials = () => {
-            return authClient.setAuthCredentials(null);
-        };
-
-        return authClient.authKeysApi.remove(credentials.id)
-            .then(extractResponse)
-            .then(removeCredentials)
-            .then(returnRawResponse);
+        return authClient.authKeysApi
+        .remove(credentials.id)
+        .then(handlePostLogout)
+        .then(returnRawResponse);
     },
 
     /**

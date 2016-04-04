@@ -7,7 +7,7 @@ const fs = require('fs');
 const localDbMapPath = config.get('dbMapPath').replace('.json', '.local.json');
 
 const appName = 'nodeApi';
-const env = process.env.COINS_ENV;
+const env = process.env.COINS_ENV || process.env.NODE_ENV;
 
 /**
  * get DB connection parameters, based on COINS_ENV environment var
@@ -33,7 +33,7 @@ function getDbConfig() {
 
     if (dbMap[env] === undefined) {
         throw new Error(
-            `unrecognised database environment: '${process.env.COINS_ENV}'`
+            `unrecognised database environment: '${env}'`
         );
     }
 

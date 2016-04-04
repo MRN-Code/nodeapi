@@ -8,17 +8,18 @@ exports.register = (server, options, next) =>  {
         path: '/client/{param*}',
         method: 'GET',
         config: {
-            tags: ['client'],
-            notes: 'Add filename (e.g. client.js)',
-            description: 'Returns client source code',
             auth: false,
-            plugins: { 'hapi-swagger': { nickname: 'get' } },
+            cors: true,
+            description: 'Returns client source code',
+            notes: 'Add filename (e.g. client.js)',
             handler: {
                 directory: {
                     path: clientDistPath,
                     listing: true
                 }
-            }
+            },
+            plugins: { 'hapi-swagger': { nickname: 'get' } },
+            tags: ['client'],
         }
     });
     next();

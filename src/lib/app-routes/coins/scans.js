@@ -11,10 +11,7 @@ const scanController = require('../../controllers/scans.js');
  * @param  {Object} obj object to call the toJSON method on (bookshelf)
  * @return {string}     JSON
  */
-const callToJson = (obj) => {
-    console.log(JSON.stringify(obj.toJSON()));
-    return obj.toJSON();
-};
+const callToJson = (obj) => obj.toJSON();
 
 exports.register = function(server, options, next) {
     const path = '/scans';

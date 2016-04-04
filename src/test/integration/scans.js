@@ -88,6 +88,21 @@ describe('Scan routes', () => {
         it('Should return a single scan by ID');
     });
 
+    //TODO need to test it thoroughly again near future
+    describe('GET /scans/id/', () => {
+        before(() => {
+            return apiClient.auth.login('mochatest', 'mocha');
+        });
+
+        it('Should return all scans and series and series data', () => {
+            return apiClient.ScansidApi.get(366998)
+            .then((response) => {
+                response.data.data.should.have.length.of.at.least(1);
+                should.equal(response.data.error, null);
+            });
+        });
+    });
+
     describe('POST /scans', () => {
         it('Should reject an invalid payload');
         it('Should add a new scan with a valid payload');

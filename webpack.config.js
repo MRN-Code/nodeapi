@@ -14,9 +14,7 @@ module.exports = {
     },
     output: {
         path: clientOutput,
-        filename: '[name].js',
-        library: 'coinsAPIClientFactory',
-        libraryTarget: 'umd'
+        filename: '[name].js'
     },
     plugins: [
         new DedupePlugin(),

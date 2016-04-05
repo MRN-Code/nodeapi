@@ -137,9 +137,10 @@ const authClient = {
         return authClient.authKeysApi.post({
             username: btoa(username),
             password: btoa(password)
-        }).then(extractCredentials)
-            .then(authClient.setAuthCredentials)
-            .then(returnRawResponse);
+        })
+        .then(extractCredentials)
+        .then(authClient.setAuthCredentials)
+        .then(returnRawResponse);
     },
 
     /**

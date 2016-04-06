@@ -64,6 +64,9 @@ exports.register = function(server, options, next) {
         path: baseUrl + '/{id}',
         config: {
             tags: ['api', 'auth'],
+            plugins: {
+                'hapi-swagger': { nickname: 'options' }
+            },
             description: 'Preflight route always responds with 200',
             auth: false,
             handler: function(request, reply) {
@@ -77,6 +80,9 @@ exports.register = function(server, options, next) {
         path: baseUrl,
         config: {
             tags: ['api', 'auth'],
+            plugins: {
+                'hapi-swagger': { nickname: 'post' }
+            },
             notes: [
                 'Expects base64 encoded username/password in payload.',
                 'Response includes a `set-cookie` header with JWT for COINS2.0',
@@ -157,6 +163,9 @@ exports.register = function(server, options, next) {
         path: baseUrl + '/{id}',
         config: {
             tags: ['api', 'auth'],
+            plugins: {
+                'hapi-swagger': { nickname: 'remove' }
+            },
             validate: {
                 params: {
                     id: joi.string().required()

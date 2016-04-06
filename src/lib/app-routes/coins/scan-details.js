@@ -30,6 +30,9 @@ exports.register = function(server, options, next) {
                     id: joi.number().required()
                 })
             },
+            plugins: {
+                'hapi-swagger': { nickname: 'get' }
+            },
             response: {
                 schema: joi.array().items(scanController.scansSchema)
             },

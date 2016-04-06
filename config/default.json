@@ -6,7 +6,8 @@
         "codegenExecRelPath": "swagger-codegen-cli.jar",
         "codegenRepoUrl": "git@github.com:swagger-api/swagger-codegen.git",
         "codegenTemplatePath": "swagger-codegen/lib/javascript-template",
-        "codeGenCompileDest": "dist/client/codegen-client-compiled"
+        "codeGenCompileDest": "dist/client/codegen-client-compiled",
+        "codeGenDocsDest": "dist/client/docs"
     },
     "httpPort": 8800,
     "cookieDomain": ".mrn.org",

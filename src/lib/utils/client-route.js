@@ -18,7 +18,6 @@ exports.register = (server, options, next) =>  {
                     listing: true
                 }
             },
-            plugins: { 'hapi-swagger': { nickname: 'get' } },
             tags: ['client'],
         }
     });

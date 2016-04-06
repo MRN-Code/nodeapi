@@ -112,9 +112,6 @@ internals.addUser = (authUtils, UserModel, userData) => {
 
 module.exports.post = {
     tags: ['api', 'users'],
-    plugins: {
-        'hapi-swagger': { nickname: 'post' }
-    },
     notes: [
         'Creates a new user with the properties in the payload.'
     ].join('<br>'),

@@ -36,7 +36,7 @@ const opts = require('nomnom')
 
 // handle CLI options
 _.each(opts, (val, opt) => {
-    if (_.contains(['development', 'release', 'production'], opt) && val) {
+    if (_.includes(['development', 'release', 'production'], opt) && val) {
         process.env.COINS_ENV = opt;
     }
 });

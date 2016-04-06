@@ -1,4 +1,6 @@
-const _ = require('lodash');
+'use strict';
+
+const isFunction = require('lodash/isFunction');
 
 /**
  * Register a plugin, defined by config
@@ -20,12 +22,12 @@ module.exports = (currentPromise, config, server) => {
     };
 
     const callAfterRegistrationCallback = () => {
-        if (_.isFunction(config.afterRegistration)) {
+        if (isFunction(config.afterRegistration)) {
             return config.afterRegistration(server);
         }
     };
 
-    if (_.isFunction(config)) {
+    if (isFunction(config)) {
         plugin.register = config;
     } else {
         plugin.register = config.register;

@@ -36,7 +36,7 @@
     "lodash": "4.8.2",
     "mcrypt": "0.1.9",
     "moment": "2.10.6",
-    "newrelic": "1.26.1",
+    "newrelic": "1.26.2",
     "nomnom": "1.8.1",
     "pouchy": "2.0.0",
     "qs": "5.1.0",

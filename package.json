@@ -80,6 +80,7 @@
     "postinstall": "npm run build",
     "test": "istanbul cover -x '**/dist/**' ${PWD}/node_modules/.bin/_mocha -- --timeout=10000 -R spec 'src/test/integration/*.js' 'src/test/unit/*.js'",
     "postest": "istanbul check --statements 90 --functions 90",
+    "prestart": "node scripts/build.js",
     "start": "node src/index.js",
     "lint": "jscs --fix src/",
     "validate": "npm ls",

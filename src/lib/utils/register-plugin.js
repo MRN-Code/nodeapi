@@ -12,32 +12,32 @@ const isFunction = require('lodash/isFunction');
  * @returns {Promise}
  */
 module.exports = (currentPromise, config, server) => {
-    const plugin = {
-        register: null,
-        options: {}
-    };
+  const plugin = {
+    register: null,
+    options: {}
+  };
 
-    const callRegisterThen = () => {
-        return server.registerThen(plugin, config.registrationOptions || {});
-    };
+  const callRegisterThen = () => {
+    return server.registerThen(plugin, config.registrationOptions || {});
+  };
 
-    const callAfterRegistrationCallback = () => {
-        if (isFunction(config.afterRegistration)) {
-            return config.afterRegistration(server);
-        }
-    };
-
-    if (isFunction(config)) {
-        plugin.register = config;
-    } else {
-        plugin.register = config.register;
+  const callAfterRegistrationCallback = () => {
+    if (isFunction(config.afterRegistration)) {
+      return config.afterRegistration(server);
     }
+  };
 
-    if (config.options) {
-        plugin.options = config.options;
-    }
+  if (isFunction(config)) {
+    plugin.register = config;
+  } else {
+    plugin.register = config.register;
+  }
 
-    return currentPromise
+  if (config.options) {
+    plugin.options = config.options;
+  }
+
+  return currentPromise
         .then(callRegisterThen)
         .then(callAfterRegistrationCallback);
 

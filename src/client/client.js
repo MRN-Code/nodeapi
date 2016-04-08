@@ -14,11 +14,11 @@ const authClient = require('./authClient');
 module.exports = (config) => {
     // create a new instance of the agent because authClient adds an
     // interceptor, and we do not want to modify the global agent.
-    config.xhrAgent = config.xhrAgent.create();
+  config.xhrAgent = config.xhrAgent.create();
 
-    const client = clientFactory(config);
+  const client = clientFactory(config);
 
     // intialize the authClient, which wraps the auth methods of the apiClient
-    client.auth = authClient.init(client, config);
-    return client;
+  client.auth = authClient.init(client, config);
+  return client;
 };

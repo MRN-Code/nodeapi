@@ -23,9 +23,9 @@ server.app.pluginsRegistered = plugins.reduce(
 .then(() => setAuthenicationStrategy(server))
 .then(() => shieldsUp(server))
 .then(() => {
-    server.start(() => {
-        server.log(['startup'], 'server running at: ' + server.info.uri);
-    });
+  server.start(() => {
+    server.log(['startup'], 'server running at: ' + server.info.uri);
+  });
 });
 
 module.exports = server;

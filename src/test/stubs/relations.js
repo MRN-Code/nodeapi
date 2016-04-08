@@ -1,10 +1,10 @@
 'use strict';
 const relations = { };
 
-relations.define = function(name, definition) {
-    relations[name] = () => { return definition; };
+relations.define = function (name, definition) {
+  relations[name] = () => { return definition; };
 
-    return relations;
+  return relations;
 };
 
 module.exports = relations;

@@ -6,17 +6,17 @@
  * checks for the x-forwarded-host header to validate client mac addresses
  * against.
  */
-module.exports.register = function(server, options, next) {
-    server.ext('onPreAuth', (request, reply) => {
-        if (!request.headers['x-forwarded-host']) {
-            request.headers['x-forwarded-host'] = request.headers.host;
-        }
+module.exports.register = function (server, options, next) {
+  server.ext('onPreAuth', (request, reply) => {
+    if (!request.headers['x-forwarded-host']) {
+      request.headers['x-forwarded-host'] = request.headers.host;
+    }
 
-        reply.continue();
-    });
-    next();
+    reply.continue();
+  });
+  next();
 };
 
 module.exports.register.attributes = {
-    name: 'add-proxy-host-header'
+  name: 'add-proxy-host-header'
 };

@@ -1,8 +1,8 @@
 'use strict';
 const cliOptsSet = require('./override-cli-opts.js');
 const getServer = () => {
-    const server = require('../../index.js');
-    return server.app.pluginsRegistered
+  const server = require('../../index.js');
+  return server.app.pluginsRegistered
         .then(() => { return server; });
 };
 

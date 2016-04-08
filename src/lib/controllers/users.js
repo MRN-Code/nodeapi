@@ -7,15 +7,15 @@ const moment = require('moment');
 const internals = {};
 
 internals.userSchema = joi.object().keys({
-    username: joi.string().min(3).max(20).required(),
-    email: joi.string().email().required(),
-    label: joi.string().required(),
-    siteId: joi.string().required(),
-    activeFlag: joi.string().required(),
-    passwordExpDate: joi.date().required(),
-    acctExpDate: joi.date().required(),
-    isSiteAdmin: joi.any(),
-    emailUnsubscribed: joi.boolean().required()
+  username: joi.string().min(3).max(20).required(),
+  email: joi.string().email().required(),
+  label: joi.string().required(),
+  siteId: joi.string().required(),
+  activeFlag: joi.string().required(),
+  passwordExpDate: joi.date().required(),
+  acctExpDate: joi.date().required(),
+  isSiteAdmin: joi.any(),
+  emailUnsubscribed: joi.boolean().required()
 });
 
 /**
@@ -27,26 +27,26 @@ internals.userSchema = joi.object().keys({
  *                                 otherwise a bookshelf object
  */
 internals.getUser = (authUtils, UserModel, userData) => {
-    const user = new UserModel();
-    const formatQuery = user._utils.formatQuery;
+  const user = new UserModel();
+  const formatQuery = user._utils.formatQuery;
 
-    //clone to avoid mutation
-    let username = userData.username;
-    let qbObj = { orWhere: formatQuery(userData) };
-    if (username) {
-        qbObj.orWhere.username = authUtils.encryptUsername(username);
-    }
+    // clone to avoid mutation
+  let username = userData.username;
+  let qbObj = { orWhere: formatQuery(userData) };
+  if (username) {
+    qbObj.orWhere.username = authUtils.encryptUsername(username);
+  }
 
-    return user
+  return user
         .query(qbObj)
         .fetch();
 };
 
 internals.defaultValues = {
-    siteId: '-1',
-    activeFlag: 'Y',
-    passwordExpDate: moment().add(1, 'years').format('MM/DD/YYYY'),
-    acctExpDate: moment().add(1, 'years').format('MM/DD/YYYY')
+  siteId: '-1',
+  activeFlag: 'Y',
+  passwordExpDate: moment().add(1, 'years').format('MM/DD/YYYY'),
+  acctExpDate: moment().add(1, 'years').format('MM/DD/YYYY')
 };
 
 /**
@@ -55,7 +55,7 @@ internals.defaultValues = {
  * @return {string}     JSON
  */
 internals.callToJson = (obj) => {
-    return obj.toJSON();
+  return obj.toJSON();
 };
 
 /**
@@ -64,9 +64,9 @@ internals.callToJson = (obj) => {
  * @return {Promise}
  */
 internals.callFetch = (obj) => {
-    //remove all attributes but username
-    obj.attributes = { username: obj.get('username') };
-    return obj.fetch();
+    // remove all attributes but username
+  obj.attributes = { username: obj.get('username') };
+  return obj.fetch();
 };
 
 /**
@@ -75,9 +75,9 @@ internals.callFetch = (obj) => {
  * @return {object}     sanitized model
  */
 internals.sanitize = (obj) => {
-    delete obj.attributes.passwordHash;
-    delete obj.attributes.passwordResetKey;
-    return obj;
+  delete obj.attributes.passwordHash;
+  delete obj.attributes.passwordResetKey;
+  return obj;
 };
 
 /**
@@ -87,58 +87,58 @@ internals.sanitize = (obj) => {
  * @return {[type]}           [description]
  */
 internals.addUser = (authUtils, UserModel, userData) => {
-    const userDataClone = _.clone(userData);
-    const username = userDataClone.username;
-    const password = userDataClone.password;
-    const setHashedPassword = (password) => {
-        userDataClone.passwordHash = password;
-        userDataClone.password = null;
-        return userDataClone;
-    };
+  const userDataClone = _.clone(userData);
+  const username = userDataClone.username;
+  const password = userDataClone.password;
+  const setHashedPassword = (password) => {
+    userDataClone.passwordHash = password;
+    userDataClone.password = null;
+    return userDataClone;
+  };
 
-    const saveUser = (userData) => {
-        return UserModel.forge(userData).save(null, { method: 'insert' });
-    };
+  const saveUser = (userData) => {
+    return UserModel.forge(userData).save(null, { method: 'insert' });
+  };
 
-    if (username) {
-        userDataClone.username = authUtils.encryptUsername(username);
-    }
+  if (username) {
+    userDataClone.username = authUtils.encryptUsername(username);
+  }
 
-    return authUtils.hashPassword(password)
+  return authUtils.hashPassword(password)
         .then(setHashedPassword)
         .then(_.partialRight(_.defaults, internals.defaultValues))
         .then(saveUser);
 };
 
 module.exports.post = {
-    tags: ['api', 'users'],
-    plugins: {
-        'hapi-swagger': { nickname: 'post' }
-    },
-    notes: [
-        'Creates a new user with the properties in the payload.'
-    ].join('<br>'),
-    description: 'Creates a new user with the properties in the payload.',
-    auth: false,
-    validate: {
-        payload: joi.object().keys({
-            username: joi.string().min(3).max(20).required(),
-            email: joi.string().email().required(),
-            label: joi.string().required(),
-            password: joi.string().required().min(8).max(71),
-            siteId: joi.string().required().max(3)
-        })
-    },
-    response: {
-        schema: internals.userSchema
-    },
-    handler: (request, reply) => {
-        const authUtils = request.server.plugins.utilities.auth;
-        const User = request.server.plugins.bookshelf.model('User');
-        const userData = {
-            username: request.payload.username,
-            email: request.payload.email
-        };
+  tags: ['api', 'users'],
+  plugins: {
+    'hapi-swagger': { nickname: 'post' }
+  },
+  notes: [
+    'Creates a new user with the properties in the payload.'
+  ].join('<br>'),
+  description: 'Creates a new user with the properties in the payload.',
+  auth: false,
+  validate: {
+    payload: joi.object().keys({
+      username: joi.string().min(3).max(20).required(),
+      email: joi.string().email().required(),
+      label: joi.string().required(),
+      password: joi.string().required().min(8).max(71),
+      siteId: joi.string().required().max(3)
+    })
+  },
+  response: {
+    schema: internals.userSchema
+  },
+  handler: (request, reply) => {
+    const authUtils = request.server.plugins.utilities.auth;
+    const User = request.server.plugins.bookshelf.model('User');
+    const userData = {
+      username: request.payload.username,
+      email: request.payload.email
+    };
 
         /**
          * compare a user model retrieved from DB against the supplied input
@@ -146,26 +146,26 @@ module.exports.post = {
          * @return {boolean}              true if existingUser DNE.
          *                                Throws exception otherwise
          */
-        const compareExistingUser = (existingUser) => {
-            if (!existingUser) {
+    const compareExistingUser = (existingUser) => {
+      if (!existingUser) {
 
                 // no matching user found
-                return true;
-            }
+        return true;
+      }
 
-            const existingProperties = _.reduce(userData, (res, val, key) => {
-                if (existingUser.get(key) === val) {
-                    res[key] = val;
-                }
+      const existingProperties = _.reduce(userData, (res, val, key) => {
+        if (existingUser.get(key) === val) {
+          res[key] = val;
+        }
 
-                return res;
-            }, {});
+        return res;
+      }, {});
 
-            throw boom.badData('User data already exists', existingProperties);
-        };
+      throw boom.badData('User data already exists', existingProperties);
+    };
 
-        //Check whether username or email already exist
-        internals.getUser(authUtils, User, userData)
+        // Check whether username or email already exist
+    internals.getUser(authUtils, User, userData)
             .then(compareExistingUser)
             .then(_.partial(
                 internals.addUser,
@@ -178,10 +178,10 @@ module.exports.post = {
             .then(internals.callToJson)
             .then(reply)
             .catch((err) => {
-                request.log(['error', 'users'], err.message);
-                reply(boom.wrap(err));
+              request.log(['error', 'users'], err.message);
+              reply(boom.wrap(err));
             });
-    }
+  }
 };
 
 module.exports.sanitize = internals.sanitize;

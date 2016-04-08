@@ -10,16 +10,16 @@ const internals = {};
  * @return {object}     the processed object
  */
 internals.keysToSnakeCase = (obj, recurse) => {
-    return _.reduce(obj, (res, val, key) => {
-        const newKey = _.snakeCase(key);
-        if (recurse && _.isObject(val)) {
-            res[newKey] = internals.keysToSnakeCase(val, recurse);
-        } else {
-            res[newKey] = val;
-        }
+  return _.reduce(obj, (res, val, key) => {
+    const newKey = _.snakeCase(key);
+    if (recurse && _.isObject(val)) {
+      res[newKey] = internals.keysToSnakeCase(val, recurse);
+    } else {
+      res[newKey] = val;
+    }
 
-        return res;
-    }, {});
+    return res;
+  }, {});
 };
 
 /**
@@ -29,16 +29,16 @@ internals.keysToSnakeCase = (obj, recurse) => {
  * @return {object}     the processed object
  */
 internals.keysToCamelCase = (obj, recurse) => {
-    return _.reduce(obj, (res, val, key) => {
-        const newKey = _.camelCase(key);
-        if (recurse && _.isObject(val)) {
-            res[newKey] = internals.keysToCamelCase(val, recurse);
-        } else {
-            res[newKey] = val;
-        }
+  return _.reduce(obj, (res, val, key) => {
+    const newKey = _.camelCase(key);
+    if (recurse && _.isObject(val)) {
+      res[newKey] = internals.keysToCamelCase(val, recurse);
+    } else {
+      res[newKey] = val;
+    }
 
-        return res;
-    }, {});
+    return res;
+  }, {});
 };
 
 /**
@@ -46,26 +46,26 @@ internals.keysToCamelCase = (obj, recurse) => {
  *
  */
 internals.saveHist = () => {
-    //TODO: implement
-    console.log('Warning: Need to implement hist_table saving');
-    return this;
+    // TODO: implement
+  console.log('Warning: Need to implement hist_table saving');
+  return this;
 };
 
 module.exports = function getBaseModel(bookshelf) {
-    const BaseModel = bookshelf.Model.extend({
-        parse: internals.keysToCamelCase,
-        format: internals.keysToSnakeCase,
-        _utils: {
-            keysToCamelCase: internals.keysToCamelCase,
-            keysToSnakeCase: internals.keysToSnakeCase,
-            formatQuery: _.partialRight(internals.keysToSnakeCase, true),
-            saveHist: internals.saveHist
-        },
-        initialize: function() {
-            this.on('saved', this._utils.saveHist);
-        }
-    });
-    internals.bookshelf = bookshelf;
-    internals.BaseModel = BaseModel;
-    return BaseModel;
+  const BaseModel = bookshelf.Model.extend({
+    parse: internals.keysToCamelCase,
+    format: internals.keysToSnakeCase,
+    _utils: {
+      keysToCamelCase: internals.keysToCamelCase,
+      keysToSnakeCase: internals.keysToSnakeCase,
+      formatQuery: _.partialRight(internals.keysToSnakeCase, true),
+      saveHist: internals.saveHist
+    },
+    initialize: function () {
+      this.on('saved', this._utils.saveHist);
+    }
+  });
+  internals.bookshelf = bookshelf;
+  internals.BaseModel = BaseModel;
+  return BaseModel;
 };

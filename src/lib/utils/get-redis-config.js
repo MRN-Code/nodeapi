@@ -3,12 +3,12 @@
 var config = require('config');
 
 var redisConfig = {
-    port: config.get('redis').port,
-    host: config.get('redis').host
+  port: config.get('redis').port,
+  host: config.get('redis').host
 };
 
 function getRedisConfig() {
-    return redisConfig;
+  return redisConfig;
 }
 
 module.exports = getRedisConfig;

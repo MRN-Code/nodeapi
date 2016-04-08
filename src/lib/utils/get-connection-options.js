@@ -8,13 +8,13 @@ const cliOpts = require('./cli-options.js');
  * @return {object} containing keys for each protocol (http and https)
  */
 function getConnectionOptions() {
-    return {
-        http: {
-            labels: ['api'],
-            port: parseInt(cliOpts.port, 10) || config.get('httpPort')
+  return {
+    http: {
+      labels: ['api'],
+      port: parseInt(cliOpts.port, 10) || config.get('httpPort')
 
-        }
-    };
+    }
+  };
 }
 
 module.exports = getConnectionOptions;

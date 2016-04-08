@@ -9,7 +9,7 @@ const dbEncryptionKeyPath = config.get('dbEncryptionKeyPath');
 const authKey = fs.readFileSync(dbEncryptionKeyPath).toString().trim();
 
 function getMcryptCypher() {
-    return cypher;
+  return cypher;
 }
 
 cypher.open(authKey);

@@ -7,10 +7,10 @@ const joi = require('joi');
  * to handle nullable property`
  */
 module.exports.seriesDataSchema = joi.object().keys({
-    seriesDataId: joi.number().required(),
-    seriesId: joi.number().required(),
-    scanDataTypeId: joi.number().required(),
-    value: joi.string().required(),
-    seriesDataType: joi.number().required(),
+  seriesDataId: joi.number().required(),
+  seriesId: joi.number().required(),
+  scanDataTypeId: joi.number().required(),
+  value: joi.string().required(),
+  seriesDataType: joi.number().required(),
 
 });

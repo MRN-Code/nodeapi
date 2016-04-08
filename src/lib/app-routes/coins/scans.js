@@ -45,11 +45,6 @@ exports.register = function(server, options, next) {
             .readAll(credentials);
     };
 
-    const getSchema = joi.object().keys({
-        studyId: joi.number(),
-        ursi: joi.string().min(9).max(9)
-    });
-
     server.route({
         method: 'GET',
         path: path,
@@ -64,10 +59,13 @@ exports.register = function(server, options, next) {
                 'hapi-swagger': { nickname: 'get' }
             },
             validate: {
-                query: getSchema
+                query: joi.object().keys({
+                    studyId: joi.number(),
+                    ursi: joi.string().min(9).max(9)
+                }).label('UserScanRequest')
             },
             response: {
-                schema: joi.array().items(scanController.scansSchema)
+                schema: joi.array().items(scanController.scansSchema).label('Scans')
             },
             handler: function handleGetScans(request, reply) {
                 const creds = request.auth.credentials;
@@ -94,16 +92,6 @@ exports.register = function(server, options, next) {
         }
     });
 
-    const postSchema = joi.object().keys({
-        scanId: joi.number().required(),
-        label: joi.string().required(),
-        studyId: joi.number().required(),
-        scannerId: joi.number().required(),
-        scanDate: joi.date().required(),
-        ursi: joi.string().min(9).max(9).required(),
-        subjectAge: joi.number().required()
-    });
-
     server.route({
         method: 'POST',
         path: path,
@@ -111,7 +99,15 @@ exports.register = function(server, options, next) {
             tags: ['api', 'scans'],
             description: 'Saves a scan',
             validate: {
-                payload: postSchema
+                payload: joi.object().keys({
+                    scanId: joi.number().required(),
+                    label: joi.string().required(),
+                    studyId: joi.number().required(),
+                    scannerId: joi.number().required(),
+                    scanDate: joi.date().required(),
+                    ursi: joi.string().min(9).max(9).required(),
+                    subjectAge: joi.number().required()
+                }).label('newScan')
             },
             plugins: {
                 'hapi-swagger': { nickname: 'post' }
@@ -120,10 +116,10 @@ exports.register = function(server, options, next) {
         },
         handler: (request, reply) => {
             new Scan.forge(request.query)
-                .then(_.partial(reply, 'saved'))
-                .catch((err) => {
-                    reply(boom.wrap(err));
-                });
+            .then(_.partial(reply, 'saved'))
+            .catch((err) => {
+                reply(boom.wrap(err));
+            });
         }
     });
 

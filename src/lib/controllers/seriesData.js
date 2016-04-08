@@ -12,5 +12,4 @@ module.exports.seriesDataSchema = joi.object().keys({
     scanDataTypeId: joi.number().required(),
     value: joi.string().required(),
     seriesDataType: joi.number().required(),
-
-});
+}).label('Series');

@@ -17,4 +17,4 @@ module.exports.seriesSchema = joi.object().keys({
     sortOrder: joi.number().required(),
     labelId: joi.number().required(),
     dxExcluded: joi.boolean().required(),
-});
+}).label('Series');

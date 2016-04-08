@@ -8,8 +8,9 @@ exports.register = (server, options, next) =>  {
         path: '/version',
         method: 'GET',
         config: {
+            id: 'version',
             tags: ['api'],
-            notes: 'Get current version of API',
+            notes: ['Get current version of API', 'client:version'].join(' '),
             description: 'Returns current version of API.',
             auth: false,
             plugins: {

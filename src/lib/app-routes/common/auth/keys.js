@@ -19,8 +19,8 @@ internals.credentialSchema = joi.object().keys({
     algorithm: joi.string().required(),
     issueTime: joi.number().required(),
     expireTime: joi.number().required(),
-    studyRoles: joi.object().required()
-});
+    studyRoles: joi.object().required(),
+}).label('Credential');
 
 internals.logOutSuccessObj = {
     message:'You are logged out.'
@@ -93,10 +93,10 @@ exports.register = function(server, options, next) {
             auth: false,
             validate: {
                 headers: true, //TODO: validate x-forwaded https header
-                payload: {
+                payload: joi.object().keys({
                     username: joi.binary().encoding('base64').required(),
                     password: joi.binary().encoding('base64').required()
-                }
+                }).label('Logon')
             },
             response: {
                 schema: internals.credentialSchema
@@ -167,9 +167,9 @@ exports.register = function(server, options, next) {
                 'hapi-swagger': { nickname: 'remove' }
             },
             validate: {
-                params: {
+                params: joi.object().keys({
                     id: joi.string().required()
-                }
+                }).label('CredentialId')
             },
             notes: [
                 'Auth signature required. Must match key provided in url.',

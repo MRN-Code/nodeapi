@@ -27,7 +27,9 @@ exports.register = (server, options, next) =>  {
             description: 'Validate cookie, returs value with new `expires at`',
             auth: false,
             validate: {
-                params: { id: joi.string('base64').required() }
+                params: joi.object().keys({
+                  id: joi.string('base64').required()
+                }).label('CredentialId')
             },
             handler: (request, reply) => {
                 /**

@@ -67,7 +67,7 @@
     "json-loader": "0.5.4",
     "memdown": "1.0.0",
     "mocha": "2.4.5",
-    "node-localstorage": "1.1.2",
+    "node-localstorage": "1.2.0",
     "pg": "4.4.2",
     "pouchdb": "4.0.3",
     "rename-keys": "1.1.2",

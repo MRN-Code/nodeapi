@@ -1,5 +1,5 @@
 {
-  "name": "nodeapi",
+  "name": "coins-api",
   "version": "4.0.0",
   "description": "node api for COINS",
   "main": "src/index.js",

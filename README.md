@@ -1,3 +1,6 @@
+#### deprecation notice
+nodeapi source has migrated to [quarterback](https://github.com/MRN-Code/quarterback) under the `steelpenny` package.
+
 # nodeapi
 [nodejs](https://nodejs.org/) based API for COINS
 

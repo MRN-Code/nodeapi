@@ -69,7 +69,6 @@ describe('Cookies', () => {
                 return cookieUtils.verifyAndParse(cookie,
                     server.plugins['hapi-redis'].client);
             }).then((parsed) => {
-
                 parsedCookie = parsed;
             });
     });

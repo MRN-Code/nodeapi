@@ -9,7 +9,7 @@ The client should be auto-generated after installation via a postinstall build s
 ## modifying the client
 
 - swagger-codegen uses moustache templates to create the generated source code. These templates can be found in _nodapi/swagger-codegen/lib/javascript-template_.
-  - swagger-codegen is a java executable that lives in _nodeapi/swagger-codegen/bin/swagger-codegen-cli.jar_. To update this executable, run `npm run-script update-codegen`
+  - swagger-codegen is a java executable that lives in _steelpenny/swagger-codegen/bin/swagger-codegen-cli.jar_. To update this executable, run `npm run-script update-codegen`
 
 ## understanding the client API integration
 - see `./client-route` to see how the client javascript is made available on the API

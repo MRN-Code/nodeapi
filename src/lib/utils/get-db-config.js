@@ -6,7 +6,7 @@ const globalDbMap = require(config.get('dbMapPath'));
 const fs = require('fs');
 const localDbMapPath = config.get('dbMapPath').replace('.json', '.local.json');
 
-const appName = 'nodeApi';
+const appName = 'steelpenny';
 const env = process.env.COINS_ENV || process.env.NODE_ENV;
 
 /**

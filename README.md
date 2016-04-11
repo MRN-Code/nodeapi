@@ -1,4 +1,4 @@
-# nodeapi
+# steelpenny
 [nodejs](https://nodejs.org/) based API for COINS
 
 # install
@@ -25,9 +25,9 @@ Use `node src/index.js --help` to see all available options.
 - @flag `without-new-relic` start the server without including the New Relic agent. Shorthand -w. Defaults to false.
 
 ## coins internal usage
-To start the server as a daemon, ansible-provisioned servers should have an upstart script: `sudo start coinsnodeapi`.
+To start the server as a daemon, ansible-provisioned servers should have an upstart script: `sudo start steelpenny`.
 
-To start the server with auto-restart, try using monit: `monit [re]start coinsnodeapi`.
+To start the server with auto-restart, try using monit: `monit [re]start steelpenny`.
 
 
 Logs are written to the `logs/` directory in this repo.
@@ -97,7 +97,7 @@ To retrieve the client remotely, simply send a `get` request to `/api/client/cli
 
 The client exposes a function which takes a config object, and returns a SDK. Please refer to _src/test/utils/init-api-client.js_ for an example of setting up the client.
 
-## Troubleshooting
+## troubleshooting
 
 If things aren't working, go down this quick checklist.
 

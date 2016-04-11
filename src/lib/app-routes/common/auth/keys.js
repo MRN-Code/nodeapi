@@ -135,25 +135,22 @@ exports.register = function(server, options, next) {
                  */
                 const serveHawkCredentials = (credentials) => {
                     const casCookie = casCookieUtils.generate(credentials);
-                    const credentialsSaved = Promise.all([
+                    return Promise.all([
                         redisClient.saddAsync(username, credentials.id),
                         redisClient.hmsetAsync(credentials.id, credentials)
-                    ]);
-
-                    return credentialsSaved
-                        .then(() => {
-                            reply(credentials)
-                                .state(casCookieUtils.cookieName, casCookie);
-                            return credentials;
-                        });
+                    ])
+                    .then(() => {
+                        reply(credentials)
+                            .state(casCookieUtils.cookieName, casCookie);
+                        return credentials;
+                    });
                 };
 
                 return authUtils.validateUser(username, password)
                     .then(authUtils.generateHawkCredentials)
                     .then(serveHawkCredentials)
-                    .then(_.noop)
-                    .then(_.partial(saveRecordObj, recordObj))
-                    .catch(handleError);
+                    .then(() => saveRecordObj(recordObj))
+                    .catch((err) =>  handleError(err));
             }
         }
     });

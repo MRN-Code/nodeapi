@@ -1,5 +1,5 @@
 {
-  "name": "coins-api",
+  "name": "steelpenny",
   "version": "4.0.0",
   "description": "node api for COINS",
   "main": "src/index.js",

@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 'use strict';
 require('./lib/utils/cli-options');
 const connectionConfig = require('./lib/utils/get-connection-options')();

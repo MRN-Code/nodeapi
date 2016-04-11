@@ -18,6 +18,7 @@ module.exports = function initApiClient(server) {
     return new Promise((res, rej) => {
         const client  = hp.factory(apiClientOptions, (err, client) => {
             if (err) { return rej(err); }
+
             client.ApiClient.default.agent.interceptors.request.use((reqConfig) => {
                 //simulate proxy service, since hawk expects to find the hostname
                 //in the x-forwaded-host header field

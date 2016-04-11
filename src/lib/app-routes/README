@@ -1,4 +1,3 @@
 ####
     All JS files inside this folder should be the route plugins.
-    This folder will be searched for js file and treat them as server plugins in /coins/nodeapi/index.js
-####
+    This folder will be searched for js files and treat them as server plugins

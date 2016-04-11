@@ -28,7 +28,7 @@ exports.register = (server, options, next) =>  {
             auth: false,
             validate: {
                 params: joi.object().keys({
-                  id: joi.string('base64').required()
+                    id: joi.string('base64').required()
                 }).label('CredentialId')
             },
             handler: (request, reply) => {

@@ -7,15 +7,15 @@ const moment = require('moment');
 const internals = {};
 
 internals.userSchema = joi.object().keys({
-  username: joi.string().min(3).max(20).required(),
-  email: joi.string().email().required(),
-  label: joi.string().required(),
-  siteId: joi.string().required(),
-  activeFlag: joi.string().required(),
-  passwordExpDate: joi.date().required(),
-  acctExpDate: joi.date().required(),
-  isSiteAdmin: joi.any(),
-  emailUnsubscribed: joi.boolean().required(),
+    username: joi.string().min(3).max(20).required(),
+    email: joi.string().email().required(),
+    label: joi.string().required(),
+    siteId: joi.string().required(),
+    activeFlag: joi.string().required(),
+    passwordExpDate: joi.date().required(),
+    acctExpDate: joi.date().required(),
+    isSiteAdmin: joi.any(),
+    emailUnsubscribed: joi.boolean().required(),
 }).label('User');
 
 /**

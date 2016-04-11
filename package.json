@@ -1,6 +1,6 @@
 {
   "name": "nodeapi",
-  "version": "1.3.0",
+  "version": "4.0.0",
   "description": "node api for COINS",
   "main": "src/index.js",
   "directories": {
@@ -57,7 +57,7 @@
     "fs-extra": "0.26.5",
     "getport": "0.1.0",
     "gh-pages": "0.9.0",
-    "halfpenny": "3.0.2",
+    "halfpenny": "^4.0.0",
     "hawk": "3.1.0",
     "inject-then": "2.0.5",
     "istanbul": "0.4.3",
@@ -98,17 +98,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/MRN-Code/nodeapi.git"
+    "url": "https://github.com/MRN-Code/quarterback.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/MRN-Code/nodeapi/issues"
+    "url": "https://github.com/MRN-Code/quarterback/issues"
   },
-  "homepage": "https://github.com/MRN-Code/nodeapi",
+  "homepage": "https://github.com/MRN-Code/quarterback",
   "pre-commit": [
     "lint",
     "validate",
+    "pretest",
     "test"
   ]
 }

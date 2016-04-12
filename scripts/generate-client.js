@@ -25,22 +25,29 @@ const clientDestPath = path.join(
     config.get('build.codeGenCompileDest')
 );
 
+const clientDocsDestPath = path.join(
+    pkgRoot,
+    config.get('build.codeGenDocsDest')
+);
+
 const codegenTemplatePath = path.join(
     pkgRoot,
     config.get('build.codegenTemplatePath')
 );
 
-const codegenCmd = [
-    'java -jar',
-    codegenExecPath,
-    'generate',
-    '-i',
-    swaggerSpecPath,
-    '-l javascript',
-    '-t',
-    codegenTemplatePath,
-    '-o',
-    clientDestPath
+const buildClientCmd = [
+    `java -jar ${codegenExecPath} generate`,
+    `-i ${swaggerSpecPath}`,
+    `--lang javascript`,
+    `-t ${codegenTemplatePath}`,
+    `--output ${clientDestPath}`
+].join(' ');
+
+const buildClientDocsCmd = [
+    `java -jar ${codegenExecPath} generate`,
+    `-i ${swaggerSpecPath}`,
+    '--lang html',
+    `--output ${clientDocsDestPath}`
 ].join(' ');
 
 const swaggerSpecUrl = '/swagger/swagger.json';
@@ -66,7 +73,12 @@ const writeSwaggerSpec = (specObj) => {
 
 const generateClient = () => {
     logInfo('Generating client');
-    return exec(codegenCmd).then(logSuccess);
+    return exec(buildClientCmd).then(logSuccess);
+};
+
+const generateClientDocs = () => {
+    logInfo('Generating client docs');
+    return exec(buildClientDocsCmd).then(logSuccess);
 };
 
 const exit = () => process.exit(0);
@@ -77,4 +89,5 @@ server.app.pluginsRegistered
     .then(getSwaggerSpec)
     .then(writeSwaggerSpec)
     .then(generateClient)
+    .then(generateClientDocs)
     .then(exit);

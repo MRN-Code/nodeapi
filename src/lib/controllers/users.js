@@ -15,8 +15,8 @@ internals.userSchema = joi.object().keys({
     passwordExpDate: joi.date().required(),
     acctExpDate: joi.date().required(),
     isSiteAdmin: joi.any(),
-    emailUnsubscribed: joi.boolean().required()
-});
+    emailUnsubscribed: joi.boolean().required(),
+}).label('User');
 
 /**
  * Test whether a user with at least one of the properties exists
@@ -121,13 +121,14 @@ module.exports.post = {
     description: 'Creates a new user with the properties in the payload.',
     auth: false,
     validate: {
+        // @TODO coins-models. share User model with COINSTAC
         payload: joi.object().keys({
             username: joi.string().min(3).max(20).required(),
             email: joi.string().email().required(),
             label: joi.string().required(),
             password: joi.string().required().min(8).max(71),
             siteId: joi.string().required().max(3)
-        })
+        }).label('newUser'),
     },
     response: {
         schema: internals.userSchema

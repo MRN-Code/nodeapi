@@ -46,4 +46,4 @@ module.exports.scansSchema = joi.object().keys({
     fundingSource: joi.any().required(),
     projectNumber: joi.any().required(),
     chargeCode: joi.any().required()
-});
+}).label('Scan');

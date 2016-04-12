@@ -11,11 +11,6 @@ exports.register = function(server, options, next) {
     const path = '/scans/{id}/';
     const Scan = server.plugins.bookshelf.model('Scan');
 
-    const getSchema = joi.object().keys({
-        studyId: joi.number(),
-        ursi: joi.string().min(9).max(9)
-    });
-
     server.route({
         method: 'GET',
         path: path,
@@ -28,7 +23,7 @@ exports.register = function(server, options, next) {
             validate: {
                 params:joi.object().keys({
                     id: joi.number().required()
-                })
+                }).label('ScanId')
             },
             plugins: {
                 'hapi-swagger': { nickname: 'get' }

@@ -1,6 +1,7 @@
 'use strict';
 
 var config = require('config');
+const path = require('path');
 
 var goodConfig = {
     reporters: [{
@@ -10,7 +11,7 @@ var goodConfig = {
         reporter: require('good-file'),
         events:{ log: '*', request: '*', response: '*' },
         config: {
-            path: config.get('logPath'),
+            path: path.resolve(__dirname, '../../../', config.get('logPath')),
             prefix: 'node',
             rotate: 'daily'
         }

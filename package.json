@@ -54,7 +54,7 @@
     "coins-validate": "1.1.13",
     "dom-storage": "2.0.2",
     "fakeredis": "0.3.2",
-    "fs-extra": "0.26.5",
+    "fs-extra": "0.28.0",
     "getport": "0.1.0",
     "gh-pages": "0.9.0",
     "halfpenny": "3.0.2",

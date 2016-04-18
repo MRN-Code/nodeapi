@@ -35,7 +35,7 @@
     "knex": "0.8.6",
     "lodash": "4.9.0",
     "mcrypt": "0.1.9",
-    "moment": "2.10.6",
+    "moment": "2.13.0",
     "newrelic": "1.26.2",
     "nomnom": "1.8.1",
     "pouchy": "2.0.0",
